@@ -1,0 +1,96 @@
+#names.vns
+
+!captain
+
+; First gather enough resources to fire a quick mortar
+gvl
+gvl
+ask
+
+; Now run to the corner
+to_corner: dir r1, r0, r0
+wlk r1, r2, r3
+bnz r2, to_corner
+bnz r3, to_corner
+
+; Once in corner just grovel hard
+gvl
+jiz r0, .-1
+
+!mortar
+; Upgrade CPU 3 times
+ucs r1
+jiz r1, .-1
+set
+ucs r1
+jiz r1, .-1
+ucs r1
+jiz r1, .-1
+
+; Fire at enemy core repeatedly
+add r1, r0, 7
+sht r0, 30, r1
+jiz r0, .-1
+
+!sniper
+; Right away fire a shot at enemy mortar then lie down
+add r1, r0, 7
+sht r0, 30, r1
+lie
+
+; Get the first predictor upgrade for significant main loop speedup
+ubp r1
+jiz r1, .-1
+
+main_loop:; Clock, step forward, fire at nearest, repeat
+wlk east, r2, r3
+cmp r1, r2, 9; check if we're at water
+biz r1, traverse_water
+sht r1, r12, r13
+jiz r0, main_loop
+
+traverse_water:
+swm 2, r2, r3
+swm 2, r2, r3
+jiz r0, main_loop
+
+!engineer_ss
+to_beach:; Get to the beach
+add r1, r0, 17
+dir r2, r1, 15
+wlk r2, r3, r4
+cmp r5, r3, r1
+bnz to_beach
+cmp r5, r4, 15
+bnz to_beach
+
+; Start laying wire
+wir east
+wir north
+wlk west
+wir east
+wlk north
+wir north
+jiz r0, .-4
+
+!engineer_fs
+; TODO
+
+!mg_ss
+; TODO
+
+!mg_fs
+; TODO
+
+!scout_ss
+; TODO
+
+!scout_fs
+; TODO
+
+!rifleman_ss
+; TODO
+
+!rifleman_fs
+; TODO
+

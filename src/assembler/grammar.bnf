@@ -1,0 +1,14 @@
+program={line};
+line=[section],{label},data;
+label=identifier,":";
+data=directive,[args];
+args=register,[",",immediate]
+    |immediate,[",",immediate|",",register,",",register]
+    |register,",",register,",",register;
+immediate=identifier,[modifier]
+modifier="+",literal|"-",literal
+section="S";
+directive="D";
+register="R"|literal;
+literal="L"|"I";
+identifier="I"|".";

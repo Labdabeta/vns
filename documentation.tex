@@ -3,8 +3,15 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{graphicx}
 \usepackage{enumitem}
+\usepackage{parskip}
+
+\title{Von Neumann Standing -- Official documentation}
+\date{\today}
+\author{Louis A. Burke}
 
 \begin{document}
+\maketitle \clearpage
+
 \section*{Motivation}
 
 The goal of this game is to write the most efficient code to defeat your
@@ -36,26 +43,17 @@ Additionally each unit has the following stats:
     \item[$\bullet$] Clock
 \end{itemize}
 
-Each unit runs its own code. The code runs \textit{on} the structures. For
-example if your branch predictor is damaged then your unit's branch predictors
-will not work as well.
+Each unit runs its own code. Units can communicate via shared pools of memory.
+This represents their communication link. For example the captain has
+communication with all units, but not all other unit pairs have direct
+communication.
 
-Units can communicate via shared pools of memory. This represents their
-communication link. For example the captain has communication with all units,
-but not all other unit pairs have direct communication.
-
-Every frame each team gains one resource point. In this document:
-
-\begin{itemize}[noitemsep]
-    \item[$\bullet$] Is 32 resource points
-    \item[$\circ$] Is 64 resource points
-    \item[$\odot$] Is 256 resource points
-    \item[$\bigcirc$] is 1024 resource points
-\end{itemize}
+Every frame each team gains one resource point. These points can be spent on
+upgrades and munitions for your units.
 
 \section*{Rules}
 
-Each player must write 11 programs (1 for each of their units). They are then
+Each player must write 11 programs (one for each of their units). They are then
 run until one team loses its base. Units have only one health each, any damage
 and they die. Luckily cover can give them more time before an enemy can hit
 them.
@@ -65,8 +63,8 @@ of memory (addressed by 20 bits), this cannot be modified.
 
 \subsection*{Bases}
 
-Each team has a base. When the base is destroyed, so are all of that team's
-units. To destroy a base, a unit must capture it, making themselves visible and
+Each team has a base. When the base is destroyed, the game is over and that team
+loses. To destroy a base, a unit must capture it, making themselves visible and
 vulnerable for a considerable time.
 
 \subsection*{Stats}
@@ -81,10 +79,10 @@ At first each unit has no cache.
 The upgraded cache sizes, along with their upgrade costs are as follows:
 
 \begin{itemize}[noitemsep]
-    \item[$\bullet$] 64 entries
-    \item[$\circ$] 1024 entries
-    \item[$\odot$] 4096 entries
-    \item[$\bigcirc$] 65536 entries
+    \item[$\bullet$] 64 entries (32 RP)
+    \item[$\bullet$] 1024 entries (64 RP)
+    \item[$\bullet$] 4096 entries (256 RP)
+    \item[$\bullet$] 65536 entries (1024 RP)
 \end{itemize}
 
 \subsubsection*{Cache Type}
@@ -94,10 +92,10 @@ At first each unit's cache will be a direct-mapped cache.
 The upgraded cache levels, along with their upgrade costs are as follows:
 
 \begin{itemize}[noitemsep]
-    \item[$\bullet$] Two-way set associative
-    \item[$\circ$] Four-way set associative
-    \item[$\odot$] Eight-way set associative
-    \item[$\bigcirc$] Fully associative
+    \item[$\bullet$] Two-way set associative (32 RP)
+    \item[$\bullet$] Four-way set associative (64 RP)
+    \item[$\bullet$] Eight-way set associative (256 RP)
+    \item[$\bullet$] Fully associative (1024 RP)
 \end{itemize}
 
 \subsubsection*{Branch Predictors}
@@ -107,10 +105,10 @@ At first each unit has no branch predictor. All branches will fail every time.
 The upgraded predictors, along with their upgrade costs are as follows:
 
 \begin{itemize}[noitemsep]
-    \item[$\bullet$] 1-bit saturation counter
-    \item[$\circ$] 2-bit saturation counter
-    \item[$\odot$] Two-level 2-bit saturation counter
-    \item[$\bigcirc$] Perfect branch predictor (always guesses right)
+    \item[$\bullet$] 1-bit saturation counter (32 RP)
+    \item[$\bullet$] 2-bit saturation counter (64 RP)
+    \item[$\bullet$] Two-level 2-bit saturation counter (256 RP)
+    \item[$\bullet$] Perfect branch predictor (always guesses right) (1024 RP)
 \end{itemize}
 
 Note: The predictors are applied to every branch.
@@ -122,10 +120,10 @@ At first each unit's CPU executes one cycle every 8 frames.
 The upgraded rates, along with their upgrade costs are as follows:
 
 \begin{itemize}[noitemsep]
-    \item[$\bullet$] Every 6 frames
-    \item[$\circ$] Every 4 frames
-    \item[$\odot$] Every 2 frames
-    \item[$\bigcirc$] Every frame
+    \item[$\bullet$] Every 6 frames (64 RP)
+    \item[$\bullet$] Every 4 frames (128 RP)
+    \item[$\bullet$] Every 2 frames (512 RP)
+    \item[$\bullet$] Every frame (2048 RP)
 \end{itemize}
 
 \subsection*{Units}
@@ -138,7 +136,7 @@ The following sections specify the unique qualities of each unit type.
 \subsubsection*{Captain}
 
 The captain is an ideal support unit. He can communicate seamlessly with any
-other unit. Additionally he can requisition additional resources.
+other unit. Additionally he can requisition resources.
 
 The captain uses a pistol and thus takes a long time to hit a target when they
 are far away or in cover.
@@ -147,7 +145,9 @@ are far away or in cover.
 
 The mortar has to spend time setting up and tearing down its weapon, and thus is
 not as mobile. However, once setup, the mortar can drop area of effect bombs on
-units from a distance. The mortar has no direct combat munitions.
+units from a distance. In particular, a mortar shell will damage any unit on the
+square it hits, or the squares around it. However it will not damage any units
+on its route to its destination.
 
 \subsubsection*{Sniper}
 
@@ -177,18 +177,14 @@ However, it does have trouble with enemies in cover.
 \subsubsection*{Scout}
 
 The scout can see snipers without a problem. He moves fast and has special
-vision instructions. Unfortunately he is extremely easy to hit, taking half as
-much time as normal. He uses a shotgun, which is useful at close range, but has
+vision instructions. He uses a shotgun, which is useful at close range, but has
 trouble at distance.
 
 \subsection*{Cover}
 
-Whenever a weapon is fired (other then the mortar) it takes time to accurately
-aim. Each weapon has its own constants that effect this, as does cover. In
-general the equation is:
-
-$t=b+rd+ac$
-
+Whenever a weapon is fired it takes time to accurately aim. Each weapon has its
+own constants that effect this, as does cover. In general the equation is:
+$t=b+rd+ac$.
 Where $t$ is the number of ticks it takes, $b$ is the base fire-rate of the
 weapon, $r$ is the rate of fire of the weapon, $d$ is the distance to the
 target, $a$ is the accuracy of the weapon and $c$ is the cover between the
@@ -201,73 +197,93 @@ distance.
 
 Most units can lie prone, halving their movement speed but making them immune to
 passing bullets. They will only be hit if they are precisely the target of an
-attack, or if they are hit by a mortar.
+attack, or if they are hit by a mortar. Once a unit is hit, the bullet does NOT
+continue on its path.
 
 The key values for each weapon are as follows:
 
 \begin{tabular}{l | c | c | c | c}
     Unit (Weapon) & $b$ & $r$ & $a$ & Firing Cost \\ \hline
-    Captain (Pistol) & 0 & 16 & 64 & $\bullet$ \\ \hline
-    Sniper (Sniper Rifle) & 64 & 2 & 0 & $\circ$ \\ \hline
-    Engineer (Light Machinegun) & 8 & 8 & 32 & $\bullet$ \\ \hline
-    Machinegunner (Machinegun) & 0 & 8 & 64 & $\bullet\bullet$ \\ \hline
-    Scout (Shotgun) & 8 & 16 & 4 & $\bullet\bullet$ \\ \hline
-    Rifleman (Rifle) & 4 & 4 & 16 & $\bullet$ \\ \hline
-    Mortar & 512 & 0 & 0 & $\odot$ \\ \hline
+    Captain (Pistol) & 1 & 16 & 64 & 32 RP \\ \hline
+    Sniper (Sniper Rifle) & 64 & 2 & 0 & 64 RP \\ \hline
+    Engineer (Sub-Machinegun) & 8 & 8 & 32 & 32 RP \\ \hline
+    Machinegunner (Machinegun) & 1 & 8 & 64 & 64 RP \\ \hline
+    Scout (Shotgun) & 8 & 16 & 4 & 64 RP \\ \hline
+    Rifleman (Rifle) & 4 & 4 & 16 & 32 RP \\ \hline
+    Mortar & 512 & 0 & 0 & 256 RP \\ \hline
 \end{tabular}
-
-Special note for the mortar: The mortar takes a very long time to fire, but once
-it lands it deals damage to the target square and all adjacent squares.
 
 \subsection*{Map}
 
-The map is a 32x16 grid with an inverted y-axis. Each player views the
-coordinate system as if they are on the left-hand side. The starting
-configuration, from the player's perspective is thus:
+The map is a 32x16 grid with an inverted y-axis (a coordinate system familiar to
+most UI/UX programmers). Each player views the coordinate system as if they are
+on the left-hand side. The starting configuration, from the player's perspective
+is thus:
 
 \includegraphics[width=\textwidth]{res/map.png}
 
-Note the prominent river in the middle. It halves movement speed. Additionally
+Note the prominent river in the middle. It slows movement speed. Additionally
 mortars and machineguns cannot setup on it or its banks, nor can snipers remain
 camouflaged or engineers build defenses.
 
-All units have a field of view of 5 squares. Scouts are no exception.
+Both the beach and the river provide -1 cover, so they are very dangerous for
+units to be near.
 
-\section*{Assembly Languages}
+\section*{Machine Specification}
 
-These tables specify the assembly languages of each unit. Note that execution
+The virtual environment each team runs on can be defined as follows.
+
+\begin{itemize}[noitemsep]
+    \item 11x 1MB main memory (one for each unit)
+    \item 11x 1MB direct communications buffer with captain
+    \item 1x 1MB direct shared communications buffer
+    \item 3x 2KB shared grids (tactical, support, and flag)
+    \item 32x registers (some possibly shared)
+\end{itemize}
+
+The tables below specify the instructions of each unit. Note that execution
 times are in CPU cycles. When two times are listed the shorter is when
 successful (cache/branch predictor hit) and the longer is when unsuccessful
 (cache/branch predictor miss).
 
-Note that the order of execution within a frame is determined randomly. If not
-stated the immediate value will be added to the result after computation
-finishes.
+Note that the order of execution within a frame is determined randomly. Whenever
+an instruction returns the nearest something, it follows the following route
+around the target to find it.
+
+{\centering\includegraphics[width=0.5\textwidth]{res/nearest.png}\par}
 
 \subsection*{Registers}
 
-Each unit has 32 32-bit registers. Of these 4 are special purpose, 12 are
+Each unit has 32 32-bit registers. Of these 5 are special purpose, 11 are
 general purpose, and 16 are game purpose. They are:
 
 \begin{enumerate}[noitemsep]
     \item R0, this is a read-only register that is always 0. Writing to this
         register has no effect.
-    \item R1-R12, these are the general purpose registers.
-    \item R13 (SP), this is the stack pointer
-    \item R14 (LR), this is the link register
-    \item R15 (PC), this is the program counter
+    \item R1-R11, these are the general purpose registers.
+    \item R12 (IM), this is the immediate register.
+    \item R13 (SP), this is the stack pointer.
+    \item R14 (LR), this is the link register.
+    \item R15 (PC), this is the program counter.
 \end{enumerate}
 
 Each unit has 128 assembly instructions. Assembly instructions can take one of 2
 forms. Either they will take 3 registers and a 10-bit 2's compliment immediate
-or they will take 1 register and a 20-bit 2's compliment immediate. The register
+or they will take 1 register and a 20-bit unsigned immediate. The register
 names in order are A, B, and C.
+
+Register 12 is unique, it is the immediate register. It is a read-only register
+that contains the 10-bit signed immediate value.
 
 \subsection*{Floating Point}
 
 Most units have a floating point processor. These operate on IEEE single
 precision floating point numbers. The instructions make no distinction between
 whether a register is storing an integer or a floating point number.
+
+Note: Depending on hardware, these may be compiled to different 32-bit floating
+point standards. A `fully conformant' implementation would use the IEEE
+standard. However, do not rely on IEEE representations in your code.
 
 \subsection*{Common}
 
@@ -282,10 +298,10 @@ The first set is the basic operation set:
     \item DIV(8): \texttt{A = B / C}
     \item AND(1): \texttt{A = B \& C}
     \item ORR(1): \texttt{A = B | C}
-    \item XOR(1): \texttt{A = B \^ C}
+    \item XOR(1): \texttt{A = B \^{} C}
     \item NAN(1): \texttt{A = ~(B \& C)}
     \item CLZ(1): \texttt{B = clz(A); C = clo(A)}
-    \item CNT(1): \texttt{B = popcnt1(A); C = popcnt0(A)}
+    \item CNT(1): \texttt{B = popcnt0(A); C = popcnt1(A)}
     \item LSR(1): \texttt{A = B >> C}
     \item LSL(1): \texttt{A = B << C}
     \item ABS(1): \texttt{B = abs(A), C = -abs(A)}
@@ -304,9 +320,9 @@ The first set is the basic operation set:
     \item BGE(1/8): \texttt{if A >= 0 goto I}
     \item BLE(1/8): \texttt{if A <= 0 goto I}
     \item BLX(1): \texttt{LR = next PC; goto A + I}
-    \item LDR(1/8): \texttt{A = mem[I]}
-    \item STR(1/8): \texttt{mem[I] = A}
-    \item POP(1/8): \texttt{A = mem[SP++]}
+    \item LDR(1/8): \texttt{A = mem[B+C+I]}
+    \item STR(1/8): \texttt{mem[B+C+I] = A}
+    \item POP(1/8): \texttt{A = mem[++SP]}
     \item PSH(1/8): \texttt{mem[SP--] = A}
 \end{enumerate}
 
@@ -328,7 +344,7 @@ coordinates. The unit ID's are (SS = sniper-side, FS = far-side):
     Rifleman (FS) & 11 & -11 \\ \hline
 \end{tabular}
 
-As for directios, they are:
+As for directions, they are:
 
 \begin{enumerate}[noitemsep]
     \item North
@@ -341,10 +357,21 @@ As for directios, they are:
     \item North-West
 \end{enumerate}
 
+And terrain types are:
+
+\begin{enumerate}[noitemsep]
+    \item Ground
+    \item Wire
+    \item Cover
+    \item Beach
+    \item Water
+    \item Base
+\end{enumerate}
+
 The combat instructions are:
 
 \begin{enumerate}[noitemsep]
-    \item WHO(1): \texttt{A = friendly(B,C) ? 1 : -1} (note: -1 if no unit)
+    \item WHO(1): \texttt{A = friendly(B,C) ? 1 : -1} (note: 0 if no unit)
     \item WHT(1): \texttt{A = what(B,C)}
     \item QCS(8): \texttt{A = cache size level (B,C)} (note: -1 if no unit)
     \item QCT(8): \texttt{A = cache type level (B,C)} (note: -1 if no unit)
@@ -362,11 +389,11 @@ The combat instructions are:
         crawling is slower but you can crawl through barbed wire)
     \item SWM(64): \texttt{swim in A direction; (B,C) = where(us)}
     \item CAP(256): \texttt{try to capture base (NOP if not on it)}
-    \item LIN(8): \texttt{mem[A...] = (X1,Y1),(X2,Y2)... path to (B,C)}
+    \item RTT(?): \texttt{Retreat to base}
     \item HID(A+I): \texttt{hide for A+I frames} (note: hidden units can only be
         seen by scouts)
-    \item SAY(4): \texttt{captain msg[I] = A}
-    \item RAD(4): \texttt{A = captain msg[I]}
+    \item SAY(8): \texttt{captain msg[I] = A}
+    \item RAD(8): \texttt{A = captain msg[I]}
     \item YEL(16): \texttt{team msg[I] = A}
     \item EAR(16): \texttt{A = team msg[I]}
     \item DIE(0): \texttt{kill this unit}
@@ -387,15 +414,15 @@ The combat instructions are:
 The third set are the upgrade commands. They are:
 
 \begin{enumerate}[noitemsep]
-    \item MCS(1): \texttt{A = my cache size level}
-    \item MCT(1): \texttt{A = my cache type level}
-    \item MBP(1): \texttt{A = my branch predictor level}
-    \item MCL(1): \texttt{A = my clock level}
+    \item WCS(1): \texttt{A = my cache size level}
+    \item WCT(1): \texttt{A = my cache type level}
+    \item WBP(1): \texttt{A = my branch predictor level}
+    \item WCL(1): \texttt{A = my clock level}
     \item TCS(1): \texttt{A = cache size level of teammate I}
     \item TCT(1): \texttt{A = cache type level of teammate I}
     \item TBP(1): \texttt{A = branch predictor level of teammate I}
     \item TCL(1): \texttt{A = clock level of teammate I}
-    \item RES(1): \texttt{A = team resources}
+    \item PNT(1): \texttt{A = team resources}
     \item CCS(1): \texttt{A = next cache size level cost}
     \item CCT(1): \texttt{A = next cache type level cost}
     \item CBP(1): \texttt{A = next branch predictor level cost}
@@ -431,8 +458,6 @@ The captain's special registers are:
     \item Enemy resources
     \item Nearest Ally X
     \item Nearest Ally Y
-    \item Nearest Ally ID
-    \item Nearest Enemy Distance
     \item Mortar alive? (1 = ours, 2 = theirs, 3 = both, 0 = neither)
     \item Sniper alive?
     \item Engineer (SS) alive?
@@ -440,6 +465,8 @@ The captain's special registers are:
     \item Machinegunner (SS) alive?
     \item Machinegunner (FS) alive?
     \item Scout (SS) alive?
+    \item Scout (FS) alive?
+    \item Rifleman (SS) alive?
     \item Rifleman (FS) alive?
     \item Bomb requests
     \item Air requests
@@ -454,13 +481,13 @@ The captain's special abilities are:
     \item GVL(32): \texttt{Gain 64 resources}
     \item KMK(1): \texttt{Die and gain 1024 resources}
     \item SAC(1): \texttt{Kill friendly A and gain 1024 resources}
-    \item BOM(256): \texttt{Kill any unit in the water} (costs $\circ\circ$)
-    \item AIR(128): \texttt{Kill any unit on the beach} (costs $\circ$)
+    \item BOM(256): \texttt{Kill any unit in the water} (costs 128 RP)
+    \item AIR(128): \texttt{Kill any unit on the nearest beach} (costs 64 RP)
     \item SUM(?): \texttt{Summon friendly A} (note: summoned units pause
         execution and move towards captain as fast as possible until they
         are adjacent)
     \item HAK(16): \texttt{enemy team msg[I] = A}
-    \item FUK(256): \texttt{enemy team msg[all] = 0}
+    \item EMP(256): \texttt{enemy team msg[all] = 0}
     \item ALL(1): \texttt{all msg[I] = A}
     \item RMT(1): \texttt{A = mortar msg[I]}
     \item RSN(1): \texttt{A = sniper msg[I]}
@@ -505,10 +532,6 @@ The mortar's special registers are:
     \item Allied Scout (FS) X
     \item Allied Rifleman (SS) X
     \item Allied Rifleman (FS) X
-    \item Min Allied Y
-    \item Max Allied Y
-    \item Min Enemy Y
-    \item Max Enemy Y
 \end{enumerate}
 
 The mortar's special abilities are:
@@ -530,21 +553,21 @@ The mortar's special abilities are:
     \item SIN(64): \texttt{A = sin(A)}
     \item COS(64): \texttt{A = cos(A)}
     \item TAN(64): \texttt{A = tan(A)}
-    \item POW(64): \texttt{A = float(B) \^ float(C)}
+    \item POW(64): \texttt{A = float(B) \^{} float(C)}
     \item ASN(64): \texttt{A = asin(A)}
     \item ACS(64): \texttt{A = acos(A)}
     \item ATN(64): \texttt{A = atan(A)}
     \item LOG(64): \texttt{A = log base float(C) of float(B)}
     \item FCP(8): \texttt{A = floatcmp(B,C)}
-    \item LIE(64): \texttt{lie down}
-    \item GUP(64): \texttt{get up}
+    \item MLE(16): \texttt{melee around current position}
+    \item SET(128): \texttt{setup weapon}
     \item CSS(8): \texttt{ask engineer (SS) for cover at (B,C); A = success?1:0}
     \item CFS(8): \texttt{ask engineer (FS) for cover at (B,C); A = success?1:0}
     \item WSS(8): \texttt{ask engineer (SS) for wire at (B,C); A = success?1:0}
     \item WFS(8): \texttt{ask engineer (FS) for wire at (B,C); A = success?1:0}
     \item BOM(8): \texttt{ask captain to bomb I times; A = success?1:0}
     \item AIR(8): \texttt{ask captain to air I times; A = success?1:0}
-    \item MOR(8): \texttt{ask mortar to bomb (B,C); A = success?1:0}
+    \item GUP(128): \texttt{unsetup weapon}
     \item SUP(8): \texttt{ask riflemen for support}
 \end{enumerate}
 
@@ -576,8 +599,9 @@ The sniper's special abilities are:
 \begin{enumerate}[noitemsep]
     \item CAM(64): \texttt{enter camouflage}
     \item UNC(1): \texttt{exit camouflage}
-    \item HIP(4+4r+16c): \texttt{hip shot(B,C); A = hit?} (costs $\bullet$)
-    \item MOR(1): \texttt{(B,C) = next mortar hit, A = universal ticks until}
+    \item HIP(4+4r+16c): \texttt{hip shot(B,C); A = hit?} (costs 64 RP)
+    \item NMR(1): \texttt{(B,C) = next mortar hit, A = universal ticks until}
+        (note: all -1 if none in progress)
     \item IST(8): \texttt{A = targeter of (B,C)}
     \item TGT(16): \texttt{(B,C) = target of unit A} (note: (-1,-1) if none)
     \item ITF(8): \texttt{A = float(I)}
@@ -590,7 +614,7 @@ The sniper's special abilities are:
     \item SIN(64): \texttt{A = sin(A)}
     \item COS(64): \texttt{A = cos(A)}
     \item TAN(64): \texttt{A = tan(A)}
-    \item POW(64): \texttt{A = float(B) \^ float(C)}
+    \item POW(64): \texttt{A = float(B) \^{} float(C)}
     \item ASN(64): \texttt{A = asin(A)}
     \item ACS(64): \texttt{A = acos(A)}
     \item ATN(64): \texttt{A = atan(A)}
@@ -650,7 +674,7 @@ The engineer's special abilities are:
     \item SIN(64): \texttt{A = sin(A)}
     \item COS(64): \texttt{A = cos(A)}
     \item TAN(64): \texttt{A = tan(A)}
-    \item POW(64): \texttt{A = float(B) \^ float(C)}
+    \item POW(64): \texttt{A = float(B) \^{} float(C)}
     \item ASN(64): \texttt{A = asin(A)}
     \item ACS(64): \texttt{A = acos(A)}
     \item ATN(64): \texttt{A = atan(A)}
@@ -677,18 +701,18 @@ The machinegunner's special registers are:
     \item Nearest enemy X
     \item Nearest enemy Y
     \item Fire time to nearest enemy
-    \item Shared register with associated rifleman
-    \item Shared register with associated rifleman
-    \item Shared register with associated rifleman
-    \item Shared register with associated rifleman
-    \item Shared register with associated rifleman
-    \item Shared register with associated rifleman
-    \item Shared register with associated rifleman
-    \item Shared register with associated rifleman
-    \item Shared register with associated rifleman
-    \item Shared register with associated rifleman
-    \item Shared register with associated rifleman
-    \item Shared register with associated rifleman
+    \item Number of enemy units adjacent to self
+    \item Number of enemy units within 2 squares of self
+    \item Number of enemy units within 3 squares of self
+    \item Number of enemy units within 4 squares of self
+    \item Number of enemy units within 5 squares of self
+    \item Number of enemy units within 6 squares of self
+    \item Number of allied units adjacent to self
+    \item Number of allied units within 2 squares of self
+    \item Number of allied units within 3 squares of self
+    \item Number of allied units within 4 squares of self
+    \item Number of allied units within 5 squares of self
+    \item Number of allied units within 6 squares of self
 \end{enumerate}
 
 The machinegunner's special abilities are:
@@ -710,7 +734,7 @@ The machinegunner's special abilities are:
     \item SIN(64): \texttt{A = sin(A)}
     \item COS(64): \texttt{A = cos(A)}
     \item TAN(64): \texttt{A = tan(A)}
-    \item POW(64): \texttt{A = float(B) \^ float(C)}
+    \item POW(64): \texttt{A = float(B) \^{} float(C)}
     \item ASN(64): \texttt{A = asin(A)}
     \item ACS(64): \texttt{A = acos(A)}
     \item ATN(64): \texttt{A = atan(A)}
@@ -771,7 +795,7 @@ The scout's special abilities are:
     \item SIN(64): \texttt{A = sin(A)}
     \item COS(64): \texttt{A = cos(A)}
     \item TAN(64): \texttt{A = tan(A)}
-    \item POW(64): \texttt{A = float(B) \^ float(C)}
+    \item POW(64): \texttt{A = float(B) \^{} float(C)}
     \item ASN(64): \texttt{A = asin(A)}
     \item ACS(64): \texttt{A = acos(A)}
     \item ATN(64): \texttt{A = atan(A)}
@@ -798,18 +822,18 @@ The rifleman's special registers are:
     \item Last support Y
     \item Last enemy support X
     \item Last enemy support Y
-    \item Shared register with associated machinegunner
-    \item Shared register with associated machinegunner
-    \item Shared register with associated machinegunner
-    \item Shared register with associated machinegunner
-    \item Shared register with associated machinegunner
-    \item Shared register with associated machinegunner
-    \item Shared register with associated machinegunner
-    \item Shared register with associated machinegunner
-    \item Shared register with associated machinegunner
-    \item Shared register with associated machinegunner
-    \item Shared register with associated machinegunner
-    \item Shared register with associated machinegunner
+    \item Number of enemy units adjacent to self
+    \item Number of enemy units within 2 squares of self
+    \item Number of enemy units within 3 squares of self
+    \item Number of enemy units within 4 squares of self
+    \item Number of enemy units within 5 squares of self
+    \item Number of enemy units within 6 squares of self
+    \item Number of allied units adjacent to self
+    \item Number of allied units within 2 squares of self
+    \item Number of allied units within 3 squares of self
+    \item Number of allied units within 4 squares of self
+    \item Number of allied units within 5 squares of self
+    \item Number of allied units within 6 squares of self
 \end{enumerate}
 
 The rifleman's special abilities are:
@@ -831,7 +855,7 @@ The rifleman's special abilities are:
     \item SIN(64): \texttt{A = sin(A)}
     \item COS(64): \texttt{A = cos(A)}
     \item TAN(64): \texttt{A = tan(A)}
-    \item POW(64): \texttt{A = float(B) \^ float(C)}
+    \item POW(64): \texttt{A = float(B) \^{} float(C)}
     \item ASN(64): \texttt{A = asin(A)}
     \item ACS(64): \texttt{A = acos(A)}
     \item ATN(64): \texttt{A = atan(A)}
@@ -859,5 +883,61 @@ encoded as:
 or
 
 \texttt{NNNNNNNA AAAAIIII IIIIIIII IIIIIIII}
+
+\subsection*{Debug Mode}
+
+\textit{Coming soon!}
+
+In debug mode the DIE command, while still taking no time, will not kill the
+unit, but rather print the null-terminated ASCII string of its immediate value
+to standard output. In order to facilitate this, the bits of the A register are
+used for extended memory access.
+
+\section*{Assembly Language}
+
+In order to facilitate development, this game comes with an assembler. All
+directives are 3-letter case-insensitive strings. Every command compiles to its
+binary representation. Arguments are separated by commas, immediates can be
+written directly as C-style integers.  The comment character is the semi-colon.
+
+Absolute labels are created by postfixing an identifier with a colon. The
+identifier of any label is a valid large immediate value. Additionally any
+number of words can be added to or subtracted from a label. The special label
+`.' represents the current address.
+
+Any line beginning with \verb|#| marks the raw inclusion of another file. The
+rest of the line is treated as a path to the file whose contents to dump.
+
+The special directives: \texttt{!captain}, \texttt{!mortar}, \texttt{!sniper},
+\texttt{!engineer\_ss}, \texttt{!engineer\_fs}, \texttt{!mg\_ss},
+\texttt{!mg\_fs}, \texttt{!scout\_ss}, \texttt{!scout\_fs},
+\texttt{!rifleman\_ss}, and \texttt{!rifleman\_fs} indicate a switch to the
+associated unit's code. In order to successfully assemble, a source file must
+include all of these sections (though possibly via includes).
+
+Raw code substitution aliases may be defined using the equal sign. For example
+it is useful to define \texttt{PC = r15}. These definitions must be the only
+content on their lines other than an optional comment. The left hand side must
+be exactly an identifier, the right hand side can be anything -- any comment
+will be stripped and the identifier replaced with the right hand side verbatim.
+
+Finally the special directive \texttt{RAW} embeds the following 32-bit signed
+integer directly into memory.
+
+An EBNF description of the assembly language is thus:
+
+\begin{verbatim}program = line*
+line = (memory_word | assignment)? comment?
+assignment = identifier "=" any-symbol+
+memory_word = section? label* data | include
+section = "!" section-name whitespace
+label = identifier ":"
+data = directive whitespace register "," register "," register |
+       directive whitespace register "," immediate |
+       directive whitespace immediate
+register = register-name | immediate
+immediate = c-style-literal | identifier
+register-name = "r0" | "r1" | ... | "r31"
+\end{verbatim}
 
 \end{document}

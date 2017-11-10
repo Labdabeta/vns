@@ -1,0 +1,23 @@
+with "sdl.gpr";
+
+project Runner is
+    for Source_Dirs use ("runner", "ui");
+    for Object_Dir use "../build";
+    for Exec_Dir use "..";
+
+    for Main use ("runner.adb");
+
+    package Compiler is
+        for Default_Switches ("Ada") use
+            ("-F",
+             "-gnatU",
+             "-gnatVa",
+             "-gnatef",
+             "-gnatwe",
+             "-gnaty4aAbCdefhiklL12mM80nprStux");
+    end Compiler;
+
+    package Builder is
+        for Executable ("runner.adb") use "run";
+    end Builder;
+end Runner;

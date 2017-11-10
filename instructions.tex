@@ -1,0 +1,166 @@
+\documentclass{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage[usenames]{xcolor}
+\usepackage{listings}
+
+\lstdefinelanguage{vns}
+{keywords={add,sub,mul,div,and,orr,xor,nan,clz,cnt,lsr,lsl,abs,rnd,cmp,jiz,jnz,jgz,jlz,jge,jle,biz,bnz,bgz,blz,bge,ble,blx,ldr,str,pop,psh,
+           who,wht,qcs,qct,qbp,qck,gnd,whr,dst,cvr,ded,sht,dir,wlk,crl,swm,cap,rtt,hid,say,rad,yel,ear,die,nrt,nre,est,soe,sot,sow,wst,nrw,
+           wcs,wct,wbp,wcl,tcs,tct,tbp,tcl,pnt,ccs,cct,cbp,ccl,ucs,uct,ubp,ucl,dcs,dct,dbp,dcl,mcs,mct,mbp,mcl,rcs,rct,rbp,rcl,tim,dly,adv,
+           ask,plz,beg,gvl,kmk,sac,bom,air,sum,hak,emp,all,rmt,rsn,res,ref,rms,rmf,rss,rsf,rrs,rrf,wmt,wsn,wes,wef,wms,wmf,wss,wsf,wrs,wrf,
+           wtg,rtg,wsg,rsg,wfg,rfg,itf,fad,fsu,fmu,fdv,cel,flr,sin,cos,tan,pow,asn,acs,atn,log,fcp,mle,set,css,cfs,wss,wfs,gup,sup,
+           cam,unc,hip,nmr,ist,tgt,lie,mor,
+           wir,cut,snd,dig,
+           mlf,
+           run,hit},
+ sensitive=false,
+ comment=[l]{;},
+}
+
+\newcommand{\vnscode}[1]{\colorbox{lightgray}{\lstinline[language=vns]{#1}}}
+
+\title{Von Neumann Standing -- Instructions}
+\date{\today}
+\author{Louis A. Burke}
+
+\begin{document}
+\maketitle \clearpage
+
+\section*{Introduction}
+
+A game of Von Neumann Standing is played between two sets of programs. It
+simulates a wartime battle over a river. The winner is whichever team captures
+the enemy base.
+
+\subsection*{Units}
+
+Each team consists of 11 units. Each unit runs its own program to determine its
+actions. The team with the smartest programs will win the game.
+
+The first unit is the captain. The captain isn't as effective in combat as the
+rest of the team, but can defend itself. Its primary role is to requisition
+additional resources and coordinate the movements of its team.
+
+The second unit is the mortar. The mortar has to spend time setting up and
+tearing down its weapon in order to fire it or move. While largely incapable of
+defending itself, the mortar can drop area of effect shells on units from any
+distance, ignoring cover.
+
+The third unit is the sniper. The sniper can camouflage itself to make it
+difficult for other units to see it. It can fire accurate bullets from afar and
+through cover to dislodge the hardiest of units. You can be sure the sniper will
+be a prime target for the enemy if spotted.
+
+The fourth and fifth units are the engineers. They can construct defenses such
+as cover and barbed wire. They are not the best in combat, but can tear through
+enemy defenses with ease.
+
+The sixth and seventh units are the machine gunners. Like the mortar they have
+to setup and tear down their weapons in order to fire and move. Once setup
+however, they can protect themselves well with the most powerful short-range
+weapon in the game. It is unwise for any unit to approach a setup machine gun,
+but mortars and snipers can sometimes take them on.
+
+The eighth and ninth units are the scouts. They can move faster than any other
+unit. While not very effective from afar, their shotgun will make short work of
+nearby enemies. Additionally they can spot camouflaged snipers and have extra
+visibility. The scouts can maintain constant communication with their sniper to
+call in prospective targets.
+
+The tenth and eleventh units are the riflemen. They are the primary soldiers of
+the squad. Their relative expandability makes them the main offensive unit. They
+can respond to support requests and offer tactical information to the rest of
+the squad.
+
+\subsection*{Upgrades}
+
+Each unit can upgrade its processor in order to execute its code faster. There
+are four systems to be upgraded. The cache can be upgraded in both size and
+algorithm. The branch predictor can be upgraded to make branches faster. Finally
+the clock rate of the processor itself can be upgraded.
+
+\subsection*{Map}
+
+The game is played on a 32 by 16 grid, with a team at either end. Separating the
+teams is a large river. The river provides no cover, and nothing can be built on
+it, nor setup on it. Both captains have the river marked for air strikes, so it
+is unwise to leave any unit in it for long.
+
+\clearpage
+
+\section*{Environment}
+
+Each team's code runs it its own environment, with each unit running on their
+own virtual machine. Each unit has 32 registers. The first 16 are the same for
+each unit, while the second 16 are unit-specific. Additionally each unit has 1
+megabyte of memory to run their code on.
+
+\subsection*{Command Layout}
+
+The assembly language commands all take one of two forms.
+
+The first form is the three-register command. For example \vnscode{add r1, r2,
+r3} adds the values of registers 2 and 3 and stores the result in register 1.
+These instructions leave 10 bits for a signed immediate value. This value is
+accessible from register 12.  The assembler thus allows you to replace one
+register with a 10-bit signed integer. This makes a common way to load a
+register with a value to use \vnscode{add r1, r0, 10; Load 10 into r1}.
+
+The second form is the single-register command. For example \vnscode{bnz r1,
+123} will jump to address 123 if r1 is non-zero. These immediate values
+typically refer to addresses, therefore it is common to use labels to refer to
+them. These are any identifiers followed by a colon.
+
+\subsection*{Timing}
+
+Different instructions take a different number of CPU cycles to complete. Using
+efficient instructions can get your units to react faster.
+
+\section*{Arithmetic Operations}
+
+The assembly language used in this game contains many of the typical
+arithmetic instructions one might see in a traditional assembly language. These
+instructions are summarized below.
+
+\begin{tabular}{|c|c|l|l|}
+    \hline \vnscode{CODE} & Instruction Name & Description & Time \\ \hline
+    \vnscode{ADD a, b, c} & Add & Adds b and c, storing the result in a. & 1 \\ \hline
+    \vnscode{SUB a, b, c} & Subtract & Subtracts c from b, storing the result in a. & 1 \\ \hline
+    \vnscode{MUL a, b, c} & Multiply & Multiplies b and c, storing the result in a. & 4 \\ \hline
+    \vnscode{DIV a, b, c} & Divide & Divides b by c, storing the result in a. & 8 \\ \hline
+    \vnscode{AND a, b, c} & Bitwise AND & Performs bitwise AND on b and c, storing the result in a. & 1 \\ \hline
+    \vnscode{ORR a, b, c} & Bitwise OR & Performs bitwise OR on b and c, storing the result in a. & 1 \\ \hline
+    \vnscode{XOR a, b, c} & Bitwise XOR & Performs bitwise XOR on b and c, storing the result in a. & 1 \\ \hline
+    \vnscode{NAN a, b, c} & Bitwise NAND & Performs bitwise NAND on b and c, storing the result in a. & 1 \\ \hline
+\end{tabular}
+
+\section*{Branch Operations}
+
+There are two kinds of branch instructions. They differ in how the branch
+predictor works on them. Jump instructions are always assumed to be taken,
+meanwhile branches make full use of the branch predictor. Nonetheless, an
+unupgraded branch predictor will fail all branches, including jumps. The
+exception is the special unconditional branch and link instruction, which never
+fails. That instruction saves the next address to be executed in register 14,
+the link register -- this can be used to make subroutine calls. All branches
+take 1 cycle to complete when they are correctly predicted, otherwise they take
+8 cycles. The branch instructions are summarized below.
+
+
+\begin{tabular}{|c|c|l|}
+    \hline \vnscode{CODE} & Instruction Names & Descriptions \\ \hline
+    \vnscode{JIZ/BIZ a, i} & Jump/Branch zero. & If a is zero, go to i. \\ \hline
+    \vnscode{JNZ/BNZ a, i} & Jump/Branch non-zero. & If a is not zero, go to i. \\ \hline
+    \vnscode{JGZ/BGZ a, i} & Jump/Branch greater zero. & If a is greater than zero, go to i. \\ \hline
+    \vnscode{JLZ/BLZ a, i} & Jump/Branch less zero. & If a is less than zero, go to i. \\ \hline
+    \vnscode{JGE/BGE a, i} & Jump/Branch greater equal zero. & If a is not less than zero, go to i. \\ \hline
+    \vnscode{JLE/BLE a, i} & Jump/Branch less equal zero. & If a is not greater than zero, go to i. \\ \hline
+    \vnscode{BLX a, i} & Branch and Link. & Jump to a+i, set lr to next pc. \\ \hline
+\end{tabular}
+
+
+\end{document}
