@@ -6,6 +6,8 @@
 \usepackage{parskip}
 \usepackage[usenames]{xcolor}
 \usepackage{listings}
+\usepackage{hyperref}
+\usepackage{caption}
 
 \lstdefinelanguage{vns}
 {keywords={add,sub,mul,div,and,orr,xor,nan,clz,cnt,lsr,lsl,abs,rnd,cmp,jiz,jnz,jgz,jlz,jge,jle,biz,bnz,bgz,blz,bge,ble,blx,ldr,str,pop,psh,
@@ -23,20 +25,29 @@
 
 \newcommand{\vnscode}[1]{\colorbox{lightgray}{\lstinline[language=vns]{#1}}}
 
+\newcommand{\UT}{\lower-0.5ex\hbox{u}\kern-1.1ex T}
+\newcommand{\RT}{\lower-0.5ex\hbox{r}\kern-0.65ex T}
+\newcommand{\RP}{R\kern-0.85ex P}
+
 \title{Von Neumann Standing -- Instructions}
 \date{\today}
 \author{Louis A. Burke}
 
 \begin{document}
-\maketitle \clearpage
+\maketitle
+\clearpage
+\tableofcontents
+\clearpage
+\listoftables
+\clearpage
 
-\section*{Introduction}
+\section{Introduction}
 
 A game of Von Neumann Standing is played between two sets of programs. It
 simulates a wartime battle over a river. The winner is whichever team captures
 the enemy base.
 
-\subsection*{Units}
+\subsection{Units}
 
 Each team consists of 11 units. Each unit runs its own program to determine its
 actions. The team with the smartest programs will win the game.
@@ -76,14 +87,14 @@ the squad. Their relative expandability makes them the main offensive unit. They
 can respond to support requests and offer tactical information to the rest of
 the squad.
 
-\subsection*{Upgrades}
+\subsection{Upgrades}
 
 Each unit can upgrade its processor in order to execute its code faster. There
 are four systems to be upgraded. The cache can be upgraded in both size and
 algorithm. The branch predictor can be upgraded to make branches faster. Finally
 the clock rate of the processor itself can be upgraded.
 
-\subsection*{Map}
+\subsection{Map}
 
 The game is played on a 32 by 16 grid, with a team at either end. Separating the
 teams is a large river. The river provides no cover, and nothing can be built on
@@ -92,14 +103,76 @@ is unwise to leave any unit in it for long.
 
 \clearpage
 
-\section*{Environment}
+\section{Rules}
+
+\subsection{Resources}
+
+The game has only two resources. The first is the implicit resource of time. The
+game operates on a universal clock cycle. One iteration of this cycle is
+referred to as a \textit{Universal Tick} or \UT. However, each unit does not
+execute an instruction every universal tick. Instead each of their
+\textit{Relative Ticks} or \RT\ happen only on some of the universal ticks
+(depending on CPU speed).
+
+On top of time there is an explicit resource shared by each member of a team.
+These are the team's \textit{Resource Points} or \RP. On each \UT\ each team
+gains one \RP. \RP\ can be spent on upgrades and munitions.
+
+\subsection{Shooting}
+
+Each unit uses a different weapon. Different weapons take a different amount of
+time to fire. The fire rate depends on the distance to the target, the cover the
+target is behind, and the weapon being fired.
+
+Each weapon has a base fire rate, a precision, and an accuracy.
+
+The precision of a weapon applies to the distance of the shot, while the
+accuracy applies to the cover that must be shot through. Cover directly in front
+of the shooter does not count.
+% Thought: maybe make units have to stand IN cover?
+
+The exact formula for a weapon's firetime is:
+
+$$t=b+pd+ac$$
+
+Where $t$ is the time the shot takes in \RT, $p$ is the weapon's precision, $d$
+is the distance to target, $a$ is the accuracy of the weapon, $c$ is the cover
+between the shooter and the target.
+
+The parameters of the weapons are:
+
+\begin{minipage}{\textwidth}
+\captionof{table}{Weapon Parameters}
+\centering
+\begin{tabular}{|l|l|c|c|c|r|}
+    \hline
+        Unit Name &
+        Weapon Name &
+        Base Rate ($b$) &
+        Precision ($p$) &
+        Accuracy ($a$) &
+        Cost \\ \hline
+    Captain & Pistol & 1 & 16 & 64 & 32 \RP \\ \hline
+    Sniper & Sniper Rifle & 64 & 2 & 0 & 64 \RP \\ \hline
+    Sniper & Hip Shot & 4 & 4 & 16 & 64 \RP \\ \hline
+    Rifleman & Rifle & 4 & 4 & 16 & 64 \RP \\ \hline
+    Engineer & Light Machinegun & 8 & 8 & 32 & 32 \RP \\ \hline
+    Machinegunner & Machinegun & 1 & 8 & 64 & 64 \RP \\ \hline
+    Scout & Shotgun & 8 & 16 & 4 & 64 \RP \\ \hline
+    Mortar & Shell & 512 & 0 & 0 & 256 \RP \\ \hline
+\end{tabular}
+\end{minipage}
+
+% TODO: In-depth rules
+
+\section{Environment}
 
 Each team's code runs it its own environment, with each unit running on their
 own virtual machine. Each unit has 32 registers. The first 16 are the same for
 each unit, while the second 16 are unit-specific. Additionally each unit has 1
 megabyte of memory to run their code on.
 
-\subsection*{Command Layout}
+\subsection{Command Layout}
 
 The assembly language commands all take one of two forms.
 
@@ -115,17 +188,24 @@ The second form is the single-register command. For example \vnscode{bnz r1,
 typically refer to addresses, therefore it is common to use labels to refer to
 them. These are any identifiers followed by a colon.
 
-\subsection*{Timing}
+\subsection{Timing}
 
 Different instructions take a different number of CPU cycles to complete. Using
 efficient instructions can get your units to react faster.
 
-\section*{Arithmetic Operations}
+\subsection{Specifics}
+
+% TODO: Direction specs, terrain ids, 'nearest', 'distance', etc
+
+\section{Arithmetic Operations}
 
 The assembly language used in this game contains many of the typical
 arithmetic instructions one might see in a traditional assembly language. These
 instructions are summarized below.
 
+\begin{minipage}{\textwidth}
+\captionof{table}{Arithmetic Operations}
+\centering
 \begin{tabular}{|c|c|l|l|}
     \hline \vnscode{CODE} & Instruction Name & Description & Time \\ \hline
     \vnscode{ADD a, b, c} & Add & Adds b and c, storing the result in a. & 1 \\ \hline
@@ -137,8 +217,9 @@ instructions are summarized below.
     \vnscode{XOR a, b, c} & Bitwise XOR & Performs bitwise XOR on b and c, storing the result in a. & 1 \\ \hline
     \vnscode{NAN a, b, c} & Bitwise NAND & Performs bitwise NAND on b and c, storing the result in a. & 1 \\ \hline
 \end{tabular}
+\end{minipage}
 
-\section*{Branch Operations}
+\section{Branch Operations}
 
 There are two kinds of branch instructions. They differ in how the branch
 predictor works on them. Jump instructions are always assumed to be taken,
@@ -150,7 +231,9 @@ the link register -- this can be used to make subroutine calls. All branches
 take 1 cycle to complete when they are correctly predicted, otherwise they take
 8 cycles. The branch instructions are summarized below.
 
-
+\begin{minipage}{\textwidth}
+\captionof{table}{Branch Operations}
+\centering
 \begin{tabular}{|c|c|l|}
     \hline \vnscode{CODE} & Instruction Names & Descriptions \\ \hline
     \vnscode{JIZ/BIZ a, i} & Jump/Branch zero. & If a is zero, go to i. \\ \hline
@@ -161,6 +244,7 @@ take 1 cycle to complete when they are correctly predicted, otherwise they take
     \vnscode{JLE/BLE a, i} & Jump/Branch less equal zero. & If a is not greater than zero, go to i. \\ \hline
     \vnscode{BLX a, i} & Branch and Link. & Jump to a+i, set lr to next pc. \\ \hline
 \end{tabular}
+\end{minipage}
 
 
 \end{document}

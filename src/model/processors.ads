@@ -3,9 +3,12 @@ with Coordinates;
 with Ada.Numerics.Discrete_Random;
 limited with Games;
 
+-- TODO: Better 'Image for Register_Index/Instruction_ID
 package Processors is
     type Register_Index is range 0 .. 31;
     type Register_Type is range -(2 ** 31) .. (2 ** 31 - 1);
+    type Register_Array is array (Register_Index) of Register_Type;
+
     type Address_Type is range 0 .. (2 ** 20 - 1);
     type Small_Immediate_Type is range -(2 ** 9) .. (2 ** 9 - 1);
     type Instruction_ID is range 0 .. 2 ** 7;
@@ -22,6 +25,8 @@ package Processors is
     type Processor_Array is array (Boards.Player_ID, Boards.Unit_Type) of
         Unit_Processor;
 
+    -- NOTE: Passing these as value is fine, it should be reference under the
+    -- hood.
     procedure Initialize (This : out Unit_Processor);
     procedure Load_Code (This : in out Unit_Processor; Code : in Memory_Array);
     procedure Set_Registers (
@@ -35,8 +40,6 @@ private
     package Random_Registers is new
         Ada.Numerics.Discrete_Random (Register_Type);
     Register_Generator : Random_Registers.Generator;
-
-    type Register_Array is array (Register_Index) of Register_Type;
 
     type Cache_Entry is record
         Address : Address_Type;

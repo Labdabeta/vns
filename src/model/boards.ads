@@ -1,5 +1,6 @@
 with Coordinates;
 
+-- TODO: Improve 'Image for enums
 package Boards is
     type Cache_Size is (CS_NONE, CS_64, CS_1024, CS_4096, CS_65536);
     type Cache_Type is (
@@ -234,6 +235,8 @@ package Boards is
     procedure Win_Game (
         This : in out Board;
         Winner : in Player_ID);
+
+    function Winner (This : in Board) return Team_ID;
 
     procedure Set_Unit_Visibility (
         This : in out Board;

@@ -1,3 +1,4 @@
+
 package body Coordinates is
     function Get_Direction_Towards (
         Source, Destination : Coordinate)
@@ -79,7 +80,7 @@ package body Coordinates is
             return X >= 0 and Y >= 0 and X <= 31 and Y <= 15;
         end Is_Valid;
     begin
-        for Iteration in Positive range 1 .. 31 loop
+        for Iteration in Positive range 1 .. 33 loop
             Search_X := Integer (From.X) - Iteration;
             Search_Y := Integer (From.Y) - Iteration;
 
@@ -102,7 +103,7 @@ package body Coordinates is
             end loop;
 
             -- Scan the bottom line
-            for I in reverse Positive range 1 .. Iteration * 2 loop
+            for I in reverse Natural range 0 .. Iteration * 2 - 1 loop
                 if Is_Valid (Search_X + I, Search_Y + 2 * Iteration) then
                     Result (Next).X := X_Coordinate (Search_X + I);
                     Result (Next).Y := Y_Coordinate (Search_Y + 2 * Iteration);
@@ -111,7 +112,7 @@ package body Coordinates is
             end loop;
 
             -- Scan the left line
-            for I in reverse Positive range 1 .. Iteration * 2 loop
+            for I in reverse Positive range 1 .. Iteration * 2 - 1 loop
                 if Is_Valid (Search_X, Search_Y + I) then
                     Result (Next).X := X_Coordinate (Search_X);
                     Result (Next).Y := Y_Coordinate (Search_Y + I);
@@ -126,13 +127,13 @@ package body Coordinates is
     function Get_Path_To (
         Source, Destination : Coordinate)
         return Coordinate_Path is
-        Delta_X : Integer := Integer (Destination.X - Source.X);
-        Delta_Y : Integer := Integer (Destination.Y - Source.Y);
+        Delta_X : Integer := Integer (Destination.X) - Integer (Source.X);
+        Delta_Y : Integer := Integer (Destination.Y) - Integer (Source.Y);
         type Integer_Coord is record
             X, Y : Integer;
         end record;
         type Integer_Path is array (Positive range <>) of Integer_Coord;
-        function Octant_Zero (X0, Y0, X1, Y1 : Natural)
+        function Octant_Zero (X0, Y0, X1, Y1 : Integer)
             return Integer_Path is
             DX : Integer := X1 - X0;
             DY : Integer := Y1 - Y0;

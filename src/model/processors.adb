@@ -6,6 +6,8 @@ with Interfaces;
 with Ada.Numerics.Generic_Elementary_Functions;
 with Ada.Unchecked_Conversion;
 
+with Logger;
+
 package body Processors is
     function BTR (Val : in Boolean) return Register_Type is
     begin
@@ -577,7 +579,7 @@ package body Processors is
                     when 118 => return 16;
                     when 105 => return 32;
                     when 106 | 109 .. 116 => return 64;
-                    when 119 | 126 => return 128
+                    when 119 | 126 => return 128;
                     when others => return 0;
                 end case;
             end Mortar_Time;
@@ -661,6 +663,8 @@ package body Processors is
             end if;
 
             Me.Registers (12) := Register_Type (Small);
+
+            Logger.Log_Prep (Unit, Team, Instruction);
 
             case Instruction is
                 when 49 | 55 => return 0;
@@ -1380,6 +1384,7 @@ package body Processors is
                     when others => null;
                 end case;
             end Rifleman_Instruction;
+            New_Log : Logger.Log_Entry;
         begin
             if Us.Summoned then
                 Do_Move (State, Team, Unit, Get_Direction_Towards (
@@ -1406,6 +1411,17 @@ package body Processors is
 
             Me.Registers (12) := Register_Type (Small);
             Me.Registers (15) := Me.Registers (15) + 1;
+
+            New_Log.Pre.Registers := Me.Registers;
+            New_Log.Pre.State := Get_Unit (State, Unit, Team);
+            New_Log.Unit := Unit;
+            New_Log.Team := Team;
+            New_Log.Operation := Instruction;
+            New_Log.A := A;
+            New_Log.B := B;
+            New_Log.C := C;
+            New_Log.Small := Small;
+            New_Log.Immediate := Immediate;
 
             case Instruction is
                 when 0 =>
@@ -1493,7 +1509,8 @@ package body Processors is
                     end if;
                 when 27 =>
                     Me.Registers (14) := Me.Registers (15);
-                    Me.Registers (15) := Register_Type (Immediate);
+                    Me.Registers (15) :=
+                        Me.Registers (A) + Register_Type (Immediate);
                 when 28 =>
                     Me.Registers (A) := Me.Memory (Address_Type (
                         Me.Registers (B) + Me.Registers (C)));
@@ -1846,6 +1863,9 @@ package body Processors is
                             Rifleman_Instruction;
                     end case;
             end case;
+            New_Log.Post.Registers := Me.Registers;
+            New_Log.Post.State := Get_Unit (State, Unit, Team);
+            Logger.Log (New_Log);
         exception
             when others =>
                 Kill_Unit (State, Team, Unit);
@@ -1866,6 +1886,7 @@ package body Processors is
             else
                 Machines (Team, Unit).ICounter :=
                     Machines (Team, Unit).ICounter - 1;
+                Logger.Log_IWait (Unit, Team, Machines (Team, Unit).ICounter);
             end if;
         end Execute_Step;
     begin
@@ -1887,6 +1908,7 @@ package body Processors is
             else
                 Machines (Team, Unit).CCounter :=
                     Machines (Team, Unit).CCounter - 1;
+                Logger.Log_CWait (Unit, Team, Machines (Team, Unit).CCounter);
             end if;
         end if;
     end Step_Processor;

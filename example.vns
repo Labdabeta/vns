@@ -19,12 +19,12 @@ jiz r0, .-1
 
 !mortar
 ; Upgrade CPU 3 times
-ucs r1
+ucl r1
 jiz r1, .-1
 set
-ucs r1
+ucl r1
 jiz r1, .-1
-ucs r1
+ucl r1
 jiz r1, .-1
 
 ; Fire at enemy core repeatedly

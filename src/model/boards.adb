@@ -43,6 +43,8 @@ package body Boards is
             (18, 7), (18, 8), (19, 8), (19, 9), (20, 9), (20, 10), (21, 10),
             (21, 11), (22, 11), (22, 12), (23, 12), (23, 13), (24, 13),
             (24, 14), (25, 14), (25, 15)));
+    Base_Coords : array (Player_ID) of Coordinate := (
+        T_WHITE => (0, 7), T_BLACK => (31, 8));
 
     function To_Location (
         Where : in Coordinates.Coordinate;
@@ -126,6 +128,10 @@ package body Boards is
                     Beach_Coords (P, Index).X,
                     Beach_Coords (P, Index).Y) := TT_BEACH;
             end loop;
+        end loop;
+
+        for P in Base_Coords'Range loop
+            This.Terrain (Base_Coords (P).X, Base_Coords (P).Y) := TT_BASE;
         end loop;
 
         This.Winner := T_NONE;
@@ -213,20 +219,20 @@ package body Boards is
         Unit : in Unit_Type;
         Source : in Location;
         Destination : in Location) return Natural is
-        B, R, D, A : Natural; -- The constants
+        B, P, D, A : Natural; -- The constants
         C : Integer;
         Path : Coordinate_Path := Get_Path_To (
             Source (T_WHITE), Destination (T_WHITE));
     begin
         case Unit is
-            when UT_CAPTAIN => B := 1; R := 16; A := 64;
-            when UT_MORTAR => B := 512; R := 0; A := 0;
-            when UT_SNIPER => B := 64; R := 2; A := 0;
-            when UT_ENGINEER_SS | UT_ENGINEER_FS => B := 8; R := 8; A := 32;
+            when UT_CAPTAIN => B := 1; P := 16; A := 64;
+            when UT_MORTAR => B := 512; P := 0; A := 0;
+            when UT_SNIPER => B := 64; P := 2; A := 0;
+            when UT_ENGINEER_SS | UT_ENGINEER_FS => B := 8; P := 8; A := 32;
             when UT_MACHINEGUNNER_SS | UT_MACHINEGUNNER_FS =>
-                B := 1; R := 8; A := 64;
-            when UT_SCOUT_SS | UT_SCOUT_FS => B := 8; R := 16; A := 4;
-            when UT_RIFLEMAN_SS | UT_RIFLEMAN_FS => B := 4; R := 4; A := 16;
+                B := 1; P := 8; A := 64;
+            when UT_SCOUT_SS | UT_SCOUT_FS => B := 8; P := 16; A := 4;
+            when UT_RIFLEMAN_SS | UT_RIFLEMAN_FS => B := 4; P := 4; A := 16;
         end case;
 
         D := Path'Length;
@@ -235,13 +241,13 @@ package body Boards is
         -- Don't count cover on first tile
         for Index in Positive range Path'First + 1 .. Path'Last loop
             case State.Terrain (Path (Index).X, Path (Index).Y) is
-                when TT_WATER | TT_BEACH => C := C - 1;
+                when TT_WATER | TT_BEACH => D := D - 1;
                 when TT_SAND => C := C + 1;
                 when others => null;
             end case;
         end loop;
 
-        return B + R * D + A * C;
+        return B + P * D + A * C;
     end Compute_Fire_Time;
 
     function Is_On_Target (
@@ -501,7 +507,8 @@ package body Boards is
         end if;
 
         if (Unit = UT_MORTAR or Unit = UT_MACHINEGUNNER_SS or Unit =
-            UT_MACHINEGUNNER_FS) and not This.Units (Team, Unit).Setup then
+            UT_MACHINEGUNNER_FS) and not This.Units (Team, Unit).Setup
+        then
             return False;
         end if;
 
@@ -585,6 +592,7 @@ package body Boards is
         Setup : in Boolean) is
     begin
         This.Units (Team, Unit).Setup := Setup;
+        This.Units (Team, Unit).Prone := False;
     end Set_Setup;
 
     procedure Set_Prone (
@@ -906,4 +914,9 @@ package body Boards is
             end loop;
         end if;
     end Bomb_Beach;
+
+    function Winner (This : in Board) return Team_ID is
+    begin
+        return This.Winner;
+    end Winner;
 end Boards;

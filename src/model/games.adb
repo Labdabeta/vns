@@ -1,7 +1,15 @@
 with Boards; use Boards;
 with Processors; use Processors;
 
+with Ada.Unchecked_Deallocation;
+with Logger;
+
 package body Games is
+    procedure Free_Game (This : in out Game_Access) is
+        procedure Free is new Ada.Unchecked_Deallocation (Game, Game_Access);
+    begin
+        Free (This);
+    end Free_Game;
 
     procedure Initialize (This : out Game) is begin
         for P in This.Machines'Range (1) loop
@@ -70,5 +78,13 @@ package body Games is
         end loop;
 
         This.Clock := This.Clock + 1;
+        Logger.Log_UT (This.Clock,
+            Boards.Get_Points (This.State, T_WHITE),
+            Boards.Get_Points (This.State, T_BLACK));
     end Step_Game;
+
+    function Winner (This : in Game) return Boards.Team_ID is
+    begin
+        return Boards.Winner (This.State);
+    end Winner;
 end Games;

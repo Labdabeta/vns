@@ -12,6 +12,9 @@ package Games is
         State : Boards.Board;
         Clock : Natural;
     end record;
+    type Game_Access is access Game;
+    subtype Not_Null_Game_Access is not null Game_Access;
+    procedure Free_Game (This : in out Game_Access);
 
     procedure Initialize (This : out Game);
     procedure Load_Code (
@@ -20,6 +23,7 @@ package Games is
         Team : in Boards.Player_ID;
         Code : in Processors.Memory_Array);
     procedure Step_Game (This : in out Game);
+    function Winner (This : in Game) return Boards.Team_ID;
 private
     package Random_Units is new Ada.Numerics.Discrete_Random (Boards.Unit_Type);
     Unit_Generator : Random_Units.Generator;

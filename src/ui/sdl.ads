@@ -118,7 +118,8 @@ package SDL is
 
     procedure Finalize;
 
-    procedure Begin_Draw; --  Actually render clear
+    --  Actually render clear
+    procedure Begin_Draw (On : Colour := (255, 0, 0, 0));
     procedure End_Draw; --  Actually render present
 
     function Within (

@@ -36,7 +36,6 @@ def main():
             commaed = True
             print("")
         needspipe = False
-        print("    ", end="")
         for x in rs[k]:
             if needspipe:
                 print("|")
@@ -44,7 +43,31 @@ def main():
                 needspipe = True
             (s,e) = x
             print(str(s+1) + ".." + str(e+1), end="")
-        print("=>" + str(k), end="")
+        # (r,g,b,a) = k
+        # (g,r,b,a) = k
+        # (b,r,g,a) = k
+        # (r,b,g,a) = k
+        # (g,b,r,a) = k
+        # (b,g,r,a) = k
+        # (b,g,a,r) = k
+        # (g,b,a,r) = k
+        # (a,b,g,r) = k
+        # (b,a,g,r) = k
+        # (g,a,b,r) = k
+        # (a,g,b,r) = k
+        # (a,r,b,g) = k
+        # (r,a,b,g) = k
+        # (b,a,r,g) = k
+        # (a,b,r,g) = k
+        # (r,b,a,g) = k
+        # (b,r,a,g) = k
+        (g,r,a,b) = k # Why this is correct will always be a mystery to me!
+        # (r,g,a,b) = k
+        # (a,g,r,b) = k
+        # (g,a,r,b) = k
+        # (r,a,g,b) = k
+        # (a,r,g,b) = k
+        print("=>(" + str(a) + ", " + str(r) + ", " + str(g) + ", " + str(b) + ")", end="")
     print(");")
     print("end " + sys.argv[2] + ";")
 

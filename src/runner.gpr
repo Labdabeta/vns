@@ -1,7 +1,7 @@
 with "sdl.gpr";
 
 project Runner is
-    for Source_Dirs use ("runner", "ui");
+    for Source_Dirs use ("runner", "model", "ui", "util");
     for Object_Dir use "../build";
     for Exec_Dir use "..";
 

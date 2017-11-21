@@ -85,6 +85,14 @@ package body SDL is
     function C_SDL_PollEvent (Event : access SDL_Event.SDL_Event) return int;
     pragma Import (C, C_SDL_PollEvent, "SDL_PollEvent");
 
+    function C_SDL_SetRenderDrawColor (
+        Renderer : in SDL_Renderer_ptr;
+        R : in Unsigned_8;
+        G : in Unsigned_8;
+        B : in Unsigned_8;
+        A : in Unsigned_8) return int;
+    pragma Import (C, C_SDL_SetRenderDrawColor, "SDL_SetRenderDrawColor");
+
     function C_SDL_RenderClear (Renderer : in SDL_Renderer_ptr) return int;
     pragma Import (C, C_SDL_RenderClear, "SDL_RenderClear");
 
@@ -150,7 +158,15 @@ package body SDL is
 --------------------------------------------------------------------------------
     --  Implementations
 --------------------------------------------------------------------------------
-    procedure Begin_Draw is begin
+    procedure Begin_Draw (On : Colour := (255, 0, 0, 0)) is begin
+        if C_SDL_SetRenderDrawColor (
+            The_Renderer, Unsigned_8 (On.R),
+            Unsigned_8 (On.G), Unsigned_8 (On.B), Unsigned_8 (On.A)) /= 0
+        then
+            Ada.Text_IO.Put_Line ("SDL_SetRenderDrawColor: " &
+                Value (C_SDL_GetError));
+        end if;
+
         if C_SDL_RenderClear (The_Renderer) /= 0 then
             Ada.Text_IO.Put_Line ("SDL_RenderClear: " & Value (C_SDL_GetError));
         end if;
