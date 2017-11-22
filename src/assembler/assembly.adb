@@ -522,7 +522,7 @@ package body Assembly is
                 if Current.Kind = COMMA then
                     Set_Immediate (Value,
                         String_To_Immediate (To_String (Current_Data)));
-                    Value.C := 12;
+                    Value.A := 12;
                     Current := Next_Terminal;
                     Extra_Args (Value, True);
                 else
@@ -536,7 +536,7 @@ package body Assembly is
                 if Current.Kind = COMMA then
                     Set_Immediate (Value,
                         -String_To_Immediate (To_String (Current_Data)));
-                    Value.C := 12;
+                    Value.A := 12;
                     Current := Next_Terminal;
                     Extra_Args (Value, True);
                 else
@@ -586,8 +586,8 @@ package body Assembly is
                     end if;
                 end if;
 
-                Result.Lengths (Unit) := Result.Lengths (Unit) + 1;
                 Result.Data (Unit) (Result.Lengths (Unit)) := Value;
+                Result.Lengths (Unit) := Result.Lengths (Unit) + 1;
             end if;
         end Data;
 

@@ -5,6 +5,7 @@ with FS_Utils;
 with Ada.Command_Line;
 with Ada.Text_IO;
 with Ada.Text_IO.Text_Streams;
+with Interfaces;
 
 procedure Assembler is begin
     if Ada.Command_Line.Argument_Count /= 2 then
@@ -25,7 +26,8 @@ procedure Assembler is begin
             FS_Utils.Open_File_Stream (Ada.Command_Line.Argument (2), File);
     begin
         for Index in Unit_Type'Range loop
-            Address_Value'Write (Stream, Code.Lengths (Index));
+            Interfaces.Unsigned_32'Write (Stream,
+                Interfaces.Unsigned_32 (Code.Lengths (Index)));
             for A in Address_Value range 0 .. Code.Lengths (Index) loop
                 Cell'Write (Stream, Code.Data (Index) (A));
             end loop;

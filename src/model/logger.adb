@@ -146,6 +146,16 @@ package body Logger is
             Natural'Image (Wait) & "RT.");
     end Log_IWait;
 
+    procedure Log_Error (
+        Unit : in Boards.Unit_Type;
+        Team : in Boards.Player_ID;
+        Text : in String) is
+    begin
+        Put_Line (
+            Boards.Player_ID'Image (Team) & " " &
+            Boards.Unit_Type'Image (Unit) & " died due to " & Text);
+    end Log_Error;
+
     procedure Log_UT (
         Tick : in Natural;
         White : in Boards.Resource_Points;

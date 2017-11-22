@@ -5,6 +5,7 @@ with Interfaces;
 
 with Ada.Numerics.Generic_Elementary_Functions;
 with Ada.Unchecked_Conversion;
+with Ada.Exceptions;
 
 with Logger;
 
@@ -1867,7 +1868,9 @@ package body Processors is
             New_Log.Post.State := Get_Unit (State, Unit, Team);
             Logger.Log (New_Log);
         exception
-            when others =>
+            when E : others =>
+                Logger.Log_Error (Unit, Team,
+                    Ada.Exceptions.Exception_Information (E));
                 Kill_Unit (State, Team, Unit);
         end Do_Instruction;
 

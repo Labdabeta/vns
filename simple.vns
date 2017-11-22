@@ -1,43 +1,54 @@
 !captain
-sht r0, 10, r12
+;sht r0, 10, r12
+wlk 3, r0, r0
 jiz r1, .-1
 
 !mortar
-sht r0, 10, r12
+;sht r0, 10, r12
+wlk 3, r0, r0
 jiz r1, .-1
 
 !sniper
-sht r0, 10, r12
+;sht r0, 10, r12
+wlk 3, r0, r0
 jiz r1, .-1
 
 !engineer_ss
-sht r0, 10, r12
+;sht r0, 10, r12
+wlk 3, r0, r0
 jiz r1, .-1
 
 !engineer_fs
-sht r0, 10, r12
+;sht r0, 10, r12
+wlk 3, r0, r0
 jiz r1, .-1
 
 !mg_ss
-sht r0, 10, r12
+;sht r0, 10, r12
+wlk 3, r0, r0
 jiz r1, .-1
 
 !mg_fs
-sht r0, 10, r12
+;sht r0, 10, r12
+wlk 3, r0, r0
 jiz r1, .-1
 
 !scout_ss
-sht r0, 10, r12
+;sht r0, 10, r12
+wlk 3, r0, r0
 jiz r1, .-1
 
 !scout_fs
-sht r0, 10, r12
+;sht r0, 10, r12
+wlk 3, r0, r0
 jiz r1, .-1
 
 !rifleman_ss
-sht r0, 10, r12
+;sht r0, 10, r12
+wlk 3, r0, r0
 jiz r1, .-1
 
 !rifleman_fs
-sht r0, 10, r12
+;sht r0, 10, r12
+wlk 3, r0, r0
 jiz r1, .-1

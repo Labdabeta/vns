@@ -440,7 +440,7 @@ package body Boards is
         Team : in Player_ID;
         Unit : in Unit_Type;
         Which_Way : in Coordinates.Direction) is
-        Target : Coordinate := This.Units (Team, Unit).Position (T_WHITE);
+        Target : Coordinate := This.Units (Team, Unit).Destination (T_WHITE);
     begin
         if (This.Terrain (Target.X, Target.Y) = TT_OPEN or
             This.Terrain (Target.X, Target.Y) = TT_BEACH or

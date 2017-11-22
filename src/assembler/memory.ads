@@ -14,7 +14,7 @@ package Memory is
     end record;
 
     -- NOTE: Temporarily limited to 100000 cells per unit of code, otherwise
-    -- stack is too big
+    -- stack is too big - should be moved to heap to increase size
     type Memory_Array is array (Address_Value range 0 .. 100000) of Cell;
 
     type Unit_Type is (UT_CAPTAIN, UT_MORTAR, UT_SNIPER, UT_ENGINEER_SS,

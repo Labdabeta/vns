@@ -31,6 +31,10 @@ package Logger is
         Unit : in Boards.Unit_Type;
         Team : in Boards.Player_ID;
         Wait : in Natural);
+    procedure Log_Error (
+        Unit : in Boards.Unit_Type;
+        Team : in Boards.Player_ID;
+        Text : in String);
     procedure Log_UT (
         Tick : in Natural;
         White : in Boards.Resource_Points;
