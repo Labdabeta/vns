@@ -214,12 +214,16 @@ package Boards is
 
     procedure Plant_Wire (
         This : in out Board;
-        Where : in Location;
+        Team : in Player_ID;
+        Unit : in Unit_Type;
+        Way : in Coordinates.Direction;
         Cut : in Boolean := False);
 
     procedure Plant_Cover (
         This : in out Board;
-        Where : in Location;
+        Team : in Player_ID;
+        Unit : in Unit_Type;
+        Way : in Coordinates.Direction;
         Cut : in Boolean := False);
 
     procedure Increment_Points (

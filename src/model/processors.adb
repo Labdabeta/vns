@@ -1257,10 +1257,14 @@ package body Processors is
 
             procedure Engineer_Instruction is begin
                 case Instruction is
-                    when 96 => Plant_Wire (State, BC);
-                    when 97 => Plant_Wire (State, BC, True);
-                    when 98 => Plant_Cover (State, BC);
-                    when 99 => Plant_Cover (State, BC, True);
+                    when 96 => Plant_Wire (State, Team, Unit,
+                        To_Direction (Me.Registers (A)));
+                    when 97 => Plant_Wire (State, Team, Unit,
+                        To_Direction (Me.Registers (A)), True);
+                    when 98 => Plant_Cover (State, Team, Unit,
+                        To_Direction (Me.Registers (A)));
+                    when 99 => Plant_Cover (State, Team, Unit,
+                        To_Direction (Me.Registers (A)), True);
                     when 100 =>
                         Flag (Team,
                             X_Coordinate (Me.Registers (B)),
@@ -1886,6 +1890,8 @@ package body Processors is
                     Do_Instruction;
                     Machines (Team, Unit).ICounter := Compute_Time;
                 end loop;
+                Machines (Team, Unit).ICounter :=
+                    Machines (Team, Unit).ICounter - 1;
             else
                 Machines (Team, Unit).ICounter :=
                     Machines (Team, Unit).ICounter - 1;

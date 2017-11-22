@@ -65,12 +65,12 @@ cmp r5, r4, 15
 bnz to_beach
 
 ; Start laying wire
-wir east
-wir north
-wlk west
-wir east
-wlk north
-wir north
+wir east, r0, r0
+wir north, r0, r0
+wlk west, r0, r0
+wir east, r0, r0
+wlk north, r0, r0
+wir north, r0, r0
 jiz r0, .-4
 
 !engineer_fs

@@ -440,13 +440,14 @@ package body Boards is
         Team : in Player_ID;
         Unit : in Unit_Type;
         Which_Way : in Coordinates.Direction) is
-        Target : Coordinate := This.Units (Team, Unit).Destination (T_WHITE);
+        Target : Coordinate := This.Units (Team, Unit).Position (T_WHITE);
     begin
         if (This.Terrain (Target.X, Target.Y) = TT_OPEN or
             This.Terrain (Target.X, Target.Y) = TT_BEACH or
             This.Terrain (Target.X, Target.Y) = TT_BASE) and
             Team_Of (This, To_Location (Target, T_WHITE)) = T_NONE
         then
+            Apply_Direction (Target, To_Team (Which_Way, Team));
             This.Units (Team, Unit).Position := To_Location (Target, T_WHITE);
         end if;
     end Do_Move;
@@ -464,6 +465,7 @@ package body Boards is
             This.Terrain (Target.X, Target.Y) = TT_BASE) and
             Team_Of (This, To_Location (Target, T_WHITE)) = T_NONE
         then
+            Apply_Direction (Target, To_Team (Which_Way, Team));
             This.Units (Team, Unit).Position := To_Location (Target, T_WHITE);
         end if;
     end Do_Crawl;
@@ -478,6 +480,7 @@ package body Boards is
         if This.Terrain (Target.X, Target.Y) = TT_WATER and
             Team_Of (This, To_Location (Target, T_WHITE)) = T_NONE
         then
+            Apply_Direction (Target, To_Team (Which_Way, Team));
             This.Units (Team, Unit).Position := To_Location (Target, T_WHITE);
         end if;
     end Do_Swim;
@@ -606,36 +609,44 @@ package body Boards is
 
     procedure Plant_Wire (
         This : in out Board;
-        Where : in Location;
+        Team : in Player_ID;
+        Unit : in Unit_Type;
+        Way : in Coordinates.Direction;
         Cut : in Boolean := False) is
+        Where : Coordinate := This.Units (Team, Unit).Position (T_WHITE);
     begin
+        Apply_Direction (Where, To_Team (Way, Team));
         if Cut then
-            if This.Terrain (Where (T_WHITE).X, Where (T_WHITE).Y) = TT_WIRE
+            if This.Terrain (Where.X, Where.Y) = TT_WIRE
             then
-                This.Terrain (Where (T_WHITE).X, Where (T_WHITE).Y) := TT_OPEN;
+                This.Terrain (Where.X, Where.Y) := TT_OPEN;
             end if;
         else
-            if This.Terrain (Where (T_WHITE).X, Where (T_WHITE).Y) = TT_OPEN
+            if This.Terrain (Where.X, Where.Y) = TT_OPEN
             then
-                This.Terrain (Where (T_WHITE).X, Where (T_WHITE).Y) := TT_WIRE;
+                This.Terrain (Where.X, Where.Y) := TT_WIRE;
             end if;
         end if;
     end Plant_Wire;
 
     procedure Plant_Cover (
         This : in out Board;
-        Where : in Location;
+        Team : in Player_ID;
+        Unit : in Unit_Type;
+        Way : in Coordinates.Direction;
         Cut : in Boolean := False) is
+        Where : Coordinate := This.Units (Team, Unit).Position (T_WHITE);
     begin
+        Apply_Direction (Where, To_Team (Way, Team));
         if Cut then
-            if This.Terrain (Where (T_WHITE).X, Where (T_WHITE).Y) = TT_SAND
+            if This.Terrain (Where.X, Where.Y) = TT_SAND
             then
-                This.Terrain (Where (T_WHITE).X, Where (T_WHITE).Y) := TT_OPEN;
+                This.Terrain (Where.X, Where.Y) := TT_OPEN;
             end if;
         else
-            if This.Terrain (Where (T_WHITE).X, Where (T_WHITE).Y) = TT_OPEN
+            if This.Terrain (Where.X, Where.Y) = TT_OPEN
             then
-                This.Terrain (Where (T_WHITE).X, Where (T_WHITE).Y) := TT_SAND;
+                This.Terrain (Where.X, Where.Y) := TT_SAND;
             end if;
         end if;
     end Plant_Cover;
