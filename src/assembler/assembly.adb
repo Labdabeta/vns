@@ -472,6 +472,17 @@ package body Assembly is
                         To_String (Current.Data)));
                     Value.C := 12;
                     Current := Next_Terminal;
+                elsif Current.Kind = MINUS then
+                    if Already_Immediated then
+                        Error ("only one literal allowed per instruction");
+                        Current := Next_Terminal;
+                        return;
+                    end if;
+                    Current := Next_Terminal;
+                    Set_Immediate (Value,
+                        -String_To_Immediate (To_String (Current.Data)));
+                    Value.C := 12;
+                    Current := Next_Terminal;
                 elsif Current.Kind = REGISTER_NAME then
                     Value.C := String_To_Register (To_String (Current.Data));
                     Current := Next_Terminal;
@@ -502,17 +513,34 @@ package body Assembly is
         end Register_Args;
 
         procedure Args (Value : in out Cell) is
+            Current_Data : Unbounded_String := Current.Data;
         begin
             if Current.Kind = REGISTER_NAME then
                 Register_Args (Value);
             elsif Current.Kind = LITERAL then
-                Set_Address (
-                    Value,
-                    String_To_Address (To_String (Current.Data)));
                 Current := Next_Terminal;
                 if Current.Kind = COMMA then
+                    Set_Immediate (Value,
+                        String_To_Immediate (To_String (Current_Data)));
+                    Value.C := 12;
                     Current := Next_Terminal;
                     Extra_Args (Value, True);
+                else
+                    Set_Address (Value,
+                        String_To_Address (To_String (Current_Data)));
+                end if;
+            elsif Current.Kind = MINUS then
+                Current := Next_Terminal;
+                Current_Data := Current.Data;
+                Current := Next_Terminal;
+                if Current.Kind = COMMA then
+                    Set_Immediate (Value,
+                        -String_To_Immediate (To_String (Current_Data)));
+                    Value.C := 12;
+                    Current := Next_Terminal;
+                    Extra_Args (Value, True);
+                else
+                    Error ("can't have a negative address immediate");
                 end if;
             elsif Current.Kind = IDENTIFIER then
                 Set_Label (Current.Data);
@@ -542,7 +570,11 @@ package body Assembly is
                 Value.Instruction := String_To_Instruction (
                     To_String (Current.Data), Unit);
                 Current := Next_Terminal;
-                if Current.Kind = REGISTER_NAME or Current.Kind = LITERAL then
+                if
+                    Current.Kind = REGISTER_NAME or
+                    Current.Kind = LITERAL or
+                    Current.Kind = MINUS
+                then
                     Args (Value);
                 end if;
 
