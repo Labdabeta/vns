@@ -1,4 +1,6 @@
 with Memory; use Memory;
+with Boards; use Boards;
+with Processors; use Processors;
 with Assembly;
 with FS_Utils;
 
@@ -28,7 +30,7 @@ procedure Assembler is begin
         for Index in Unit_Type'Range loop
             Interfaces.Unsigned_32'Write (Stream,
                 Interfaces.Unsigned_32 (Code.Lengths (Index)));
-            for A in Address_Value range 0 .. Code.Lengths (Index) loop
+            for A in Address_Type range 0 .. Code.Lengths (Index) loop
                 Cell'Write (Stream, Code.Data (Index) (A));
             end loop;
         end loop;

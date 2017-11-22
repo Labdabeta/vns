@@ -1,4 +1,6 @@
 with Memory; use Memory;
+with Processors; use Processors;
+with Boards; use Boards;
 with FS_Utils;
 
 with Ada.Containers;
@@ -16,13 +18,13 @@ package body Assembly is
 
         package String_Int_Maps is new Ada.Containers.Hashed_Maps (
             Key_Type => Unbounded_String,
-            Element_Type => Address_Value,
+            Element_Type => Address_Type,
             Hash => Ada.Strings.Unbounded.Hash,
             Equivalent_Keys => "=");
         Labels : String_Int_Maps.Map := String_Int_Maps.Empty_Map;
 
         type Missing_Label is record
-            Address : Address_Value;
+            Address : Address_Type;
             Offset : Integer;
         end record;
         package Int_Vectors is new Ada.Containers.Vectors (
@@ -390,7 +392,7 @@ package body Assembly is
                 Current := Next_Terminal;
                 Set_Address (
                     Result.Data (Unit) (Result.Lengths (Unit)),
-                    Address_Value (
+                    Address_Type (
                         Integer (String_Int_Maps.Element (
                             Labels, To_Unbounded_String (Loc))) + Modifier));
             else
@@ -494,7 +496,7 @@ package body Assembly is
             elsif Current.Kind = DOT then
                 Current := Next_Terminal;
                 Set_Address (Value,
-                    Address_Value (
+                    Address_Type (
                         Integer (Result.Lengths (Unit)) + Modifier));
             else
                 Error ("expected extra argument.");
@@ -547,7 +549,7 @@ package body Assembly is
             elsif Current.Kind = DOT then
                 Current := Next_Terminal;
                 Set_Address (Value,
-                    Address_Value (
+                    Address_Type (
                         Integer (Result.Lengths (Unit)) + Modifier));
             else
                 Error ("expected argument.");

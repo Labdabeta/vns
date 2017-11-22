@@ -3,15 +3,14 @@ with Coordinates;
 with Ada.Numerics.Discrete_Random;
 limited with Games;
 
--- TODO: Better 'Image for Register_Index/Instruction_ID
 package Processors is
-    type Register_Index is range 0 .. 31;
+    type Register_Index is mod 2 ** 5;
     type Register_Type is range -(2 ** 31) .. (2 ** 31 - 1);
     type Register_Array is array (Register_Index) of Register_Type;
 
-    type Address_Type is range 0 .. (2 ** 20 - 1);
+    type Address_Type is mod 2 ** 20;
     type Small_Immediate_Type is range -(2 ** 9) .. (2 ** 9 - 1);
-    type Instruction_ID is range 0 .. 2 ** 7;
+    type Instruction_ID is mod 2 ** 7;
     type Memory_Array is array (Address_Type range <>) of Register_Type;
 
     type Communications is array (

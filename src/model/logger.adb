@@ -2,6 +2,7 @@ with Ada.Text_IO; use Ada.Text_IO;
 with Processors; use Processors;
 with Boards; use Boards;
 with Coordinates; use Coordinates;
+with Memory;
 
 package body Logger is
     procedure Log (What : in Log_Entry) is
@@ -57,7 +58,7 @@ package body Logger is
             " Shooting|" & Boolean'Image (What.Pre.State.Shooting) &
             " Prone|" & Boolean'Image (What.Pre.State.Prone));
         Put_Line (
-            "Operation: " & Instruction_ID'Image (What.Operation) &
+            "Operation: " & Memory.To_String (What.Operation, What.Unit) &
             " A: " & Register_Index'Image (What.A) &
             " B: " & Register_Index'Image (What.B) &
             " C: " & Register_Index'Image (What.C) &
@@ -121,7 +122,7 @@ package body Logger is
         Put_Line (
             Boards.Player_ID'Image (Team) & " " &
             Boards.Unit_Type'Image (Unit) & ": Working on " &
-            Instruction_ID'Image (What) & ".");
+            Memory.To_String (What, Unit) & ".");
     end Log_Prep;
 
     procedure Log_CWait (

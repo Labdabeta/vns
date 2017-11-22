@@ -1,5 +1,7 @@
 with Ada.Streams;
 with Interfaces; use Interfaces;
+with Processors; use Processors;
+with Boards; use Boards;
 
 with Ada.Unchecked_Deallocation;
 
@@ -11,37 +13,40 @@ package body Memory is
         Free (What);
     end Free_Memory;
 
-    procedure Set_Address (Which : in out Cell; Value : in Address_Value) is
+    procedure Set_Address (Which : in out Cell; Value : in Address_Type) is
     begin
-        Which.B := Register_Name (Value / (2 ** 15));
-        Which.C := Register_Name ((Value / (2 ** 10)) and 16#1F#);
+        Which.B := Register_Index (Value / (2 ** 15));
+        Which.C := Register_Index ((Value / (2 ** 10)) and 16#1F#);
         Which.Small := Small_Immediate (Value and 2#1111111111#);
     end Set_Address;
 
-    function Get_Address (Which : in Cell) return Address_Value is
+    function Get_Address (Which : in Cell) return Address_Type is
     begin
-        return Address_Value (Which.B) * (2 ** 15) or
-            Address_Value (Which.C) * (2 ** 10) or
-            Address_Value (Which.Small);
+        return Address_Type (Which.B) * (2 ** 15) or
+            Address_Type (Which.C) * (2 ** 10) or
+            Address_Type (Which.Small);
     end Get_Address;
 
-    procedure Set_Immediate (Which : in out Cell; Value : in Immediate_Value) is
+    procedure Set_Immediate (
+        Which : in out Cell;
+        Value : in Small_Immediate_Type) is
     begin
         if Value < 0 then
-            Which.Small := 2#1000000000# or (not Small_Immediate (-Value + 1));
+            Which.Small := 2#1000000000# or (
+                not Small_Immediate (-Value + 1));
         else
             Which.Small := Small_Immediate (Value);
         end if;
     end Set_Immediate;
 
-    function Get_Immediate (Which : in Cell) return Immediate_Value is
-        Result : Immediate_Value := 0;
+    function Get_Immediate (Which : in Cell) return Small_Immediate_Type is
+        Result : Small_Immediate_Type := 0;
     begin
         if (Which.Small and 2#1000000000#) /= 0 then
-            Result := Immediate_Value'First;
+            Result := Small_Immediate_Type'First;
         end if;
 
-        Result := Result + Immediate_Value (Which.Small and 2#111111111#);
+        Result := Result + Small_Immediate_Type (Which.Small and 2#111111111#);
         return Result;
     end Get_Immediate;
 
@@ -65,10 +70,10 @@ package body Memory is
         Value : Unsigned_32;
     begin
         Unsigned_32'Read (Stream, Value);
-        Item.Instruction := Instruction_Code (Value / (2 ** 25));
-        Item.A := Register_Name ((Value / (2 ** 20)) and Unsigned_32 (16#1F#));
-        Item.B := Register_Name ((Value / (2 ** 15)) and Unsigned_32 (16#1F#));
-        Item.C := Register_Name ((Value / (2 ** 10)) and Unsigned_32 (16#1F#));
+        Item.Instruction := Instruction_ID (Value / (2 ** 25));
+        Item.A := Register_Index ((Value / (2 ** 20)) and Unsigned_32 (16#1F#));
+        Item.B := Register_Index ((Value / (2 ** 15)) and Unsigned_32 (16#1F#));
+        Item.C := Register_Index ((Value / (2 ** 10)) and Unsigned_32 (16#1F#));
         Item.Small := Small_Immediate (Value and Unsigned_32 (2#1111111111#));
     end Read;
 
@@ -92,7 +97,7 @@ package body Memory is
     -- String conversions
     ----------------------------------------------------------------------------
 
-    type Directive_Listing is array (Instruction_Code) of String (1 .. 3);
+    type Directive_Listing is array (Instruction_ID) of String (1 .. 3);
     Directive_Names : constant array (Unit_Type) of Directive_Listing := (
         UT_CAPTAIN => (
             -- Common
@@ -242,33 +247,41 @@ package body Memory is
             "pow", "asn", "acs", "atn", "log", "fcp", "lie", "gup",
             "css", "cfs", "wss", "wfs", "bom", "air", "mor", "sup"));
 
+    function To_String (
+        Code : in Processors.Instruction_ID;
+        Unit : in Boards.Unit_Type) return String is
+    begin
+        return Directive_Names (Unit) (Code);
+    end To_String;
+
     function String_To_Cell (Which : in String) return Cell is
         Value : Unsigned_32;
         Item : Cell;
     begin
         Value := Unsigned_32'Value (Which);
 
-        Item.Instruction := Instruction_Code (Value / (2 ** 25));
-        Item.A := Register_Name ((Value / (2 ** 20)) and Unsigned_32 (16#1F#));
-        Item.B := Register_Name ((Value / (2 ** 15)) and Unsigned_32 (16#1F#));
-        Item.C := Register_Name ((Value / (2 ** 10)) and Unsigned_32 (16#1F#));
+        Item.Instruction := Instruction_ID (Value / (2 ** 25));
+        Item.A := Register_Index ((Value / (2 ** 20)) and Unsigned_32 (16#1F#));
+        Item.B := Register_Index ((Value / (2 ** 15)) and Unsigned_32 (16#1F#));
+        Item.C := Register_Index ((Value / (2 ** 10)) and Unsigned_32 (16#1F#));
         Item.Small := Small_Immediate (Value and Unsigned_32 (2#1111111111#));
 
         return Item;
     end String_To_Cell;
 
-    function String_To_Address (Which : in String) return Address_Value is
+    function String_To_Address (Which : in String) return Address_Type is
     begin
-        return Address_Value'Value (Which);
+        return Address_Type'Value (Which);
     end String_To_Address;
 
-    function String_To_Immediate (Which : in String) return Immediate_Value is
+    function String_To_Immediate (Which : in String)
+        return Small_Immediate_Type is
     begin
-        return Immediate_Value'Value (Which);
+        return Small_Immediate_Type'Value (Which);
     end String_To_Immediate;
 
     function String_To_Instruction (Which : in String; Unit : in Unit_Type)
-        return Instruction_Code is
+        return Instruction_ID is
     begin
         for Index in Directive_Names (Unit)'Range loop
             if Which = Directive_Names (Unit) (Index) then
@@ -279,9 +292,9 @@ package body Memory is
         return 0;
     end String_To_Instruction;
 
-    function String_To_Register (Which : in String) return Register_Name is
+    function String_To_Register (Which : in String) return Register_Index is
     begin -- Just chop off the r
-        return Register_Name'Value (Which (Which'First + 1 .. Which'Last));
+        return Register_Index'Value (Which (Which'First + 1 .. Which'Last));
     end String_To_Register;
 
     function String_To_Unit (Which : in String) return Unit_Type is
@@ -333,8 +346,8 @@ package body Memory is
         end if;
 
         Val := Integer'Value (Id_Part);
-        return Val >= Integer (Register_Name'First) and
-               Val <= Integer (Register_Name'Last);
+        return Val >= Integer (Register_Index'First) and
+               Val <= Integer (Register_Index'Last);
     end Is_Register;
 
 end Memory;
