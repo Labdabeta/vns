@@ -8,6 +8,7 @@ The prerequisites for this game are:
 
  - LaTeX for compiling of documentation and instructions.
  - GNAT for compiling Ada sources
+ - SDL2 for the GUI
 
 ## Installation
 
@@ -19,6 +20,10 @@ unfamiliar with the use of gnatmake and gprbuild they take project files after
 the `-P` flag. Thus to build the runner you would execute `gprbuild -P
 src/runner.gpr` and to build the assembler you would execute `gprbuild -P
 src/assembler.gpr`.
+
+NOTE: On windows it will be necessary when building the runner to specify
+`gprbuild -XSDL2_LIB_DIR=C:/Path/To/SDL2/lib` so that it can locate the SDL2
+library directory. Similarly for linux installs that don't put it in `/usr/lib`.
 
 ## Running
 
