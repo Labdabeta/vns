@@ -163,7 +163,21 @@ The parameters of the weapons are:
 \end{tabular}
 \end{minipage}
 
-% TODO: In-depth rules
+\subsection{Terrain}
+
+There are six types of terrain in the game. The most common kind is open grass.
+Open grass provides no cover but can be built upon by engineers. Wire is one of
+the structures that can be built by engineers. It does not provide cover but
+does impede unit movement. Cover can also be built by engineers. It doesn't
+obstruct movement but does provide cover.
+
+In the middle of the map is the river. Water tiles severely obstruct movement
+and provide a sense of negative cover. Beach tiles similarly don't provide
+cover, but movement is easy on them. Both water and beach tiles share a couple
+properties. First nothing can be built on them, nor can units set up on them.
+Additionally they do not count as increased distance for weapon shots, so a unit
+on the shore can see all other units in or on the river as if they were right
+next to them.
 
 \section{Environment}
 
@@ -195,7 +209,74 @@ efficient instructions can get your units to react faster.
 
 \subsection{Specifics}
 
-% TODO: Direction specs, terrain ids, 'nearest', 'distance', etc
+This section indicates some of the specifics of the game. Things such as integer
+representations of concepts and formal definitions of terms are described.
+
+\subsubsection{Directions}
+
+This table indicates the codes for each direction. North is always towards
+decreasing Y values and East is always towards increasing X values (relative to
+your team's coordinate system).
+
+\begin{minipage}{\textwidth}
+\captionof{table}{Direction Codes}
+\centering
+\begin{tabular}{|c|c|c|}
+    \hline North-West (8) & North (1) & North-East (2) \\ \hline
+    West (7) & & East (3) \\ \hline
+    South-West (6) & South (5) & South-East (4) \\ \hline
+\end{tabular}
+\end{minipage}
+
+\subsubsection{Terrains}
+
+This table indicates the codes for each terrain type.
+
+\begin{minipage}{\textwidth}
+\captionof{table}{Terrain Codes}
+\centering
+\begin{tabular}{c|c|c|c|c|c}
+    Grass & Wire & Cover & Beach & Water & Base \\ \hline
+    1 & 2 & 3 & 4 & 5 & 6
+\end{tabular}
+\end{minipage}
+
+\subsubsection{Units}
+
+This table indicates the codes for each unit type. Different codes refer to
+different team's units.
+
+\begin{minipage}{\textwidth}
+\captionof{table}{Unit Codes}
+\centering
+\begin{tabular}{|c|c|c|}
+    \hline Unit & Friendly ID & Enemy ID \\ \hline
+    Captain & 1 & -1 \\ \hline
+    Mortar & 2 & -2 \\ \hline
+    Sniper & 3 & -3 \\ \hline
+    Engineer (SS) & 4 & -4 \\ \hline
+    Engineer (FS) & 5 & -5 \\ \hline
+    Machinegunner (SS) & 6 & -6 \\ \hline
+    Machinegunner (FS) & 7 & -7 \\ \hline
+    Scout (SS) & 8 & -8 \\ \hline
+    Scout (FS) & 9 & -9 \\ \hline
+    Rifleman (SS) & 10 & -10 \\ \hline
+    Rifleman (FS) & 11 & -11 \\ \hline
+\end{tabular}
+\end{minipage}
+
+\subsubsection{Nearest}
+
+The term nearest is used often in the game. Given the nature of the coordinate
+system it is not clear what exactly the term implies.
+
+In the game whenever a nearest computation is made a spiraling search pattern is
+performed around the target square. This pattern can be visualized as:
+
+{\centering\includegraphics[width=0.5\textwidth]{res/nearest.png}\par}
+
+This pattern is extended outwards indefinitely to cover the entire map aside
+from the search square itself.
 
 \section{Arithmetic Operations}
 

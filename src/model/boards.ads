@@ -34,13 +34,13 @@ package Boards is
     end record;
 
     Enemy_Of : constant array (Player_ID) of Player_ID := (T_BLACK, T_WHITE);
-    Engineers : constant array (Board_Side) of Unit_Type := (
+    Engineer_IDs : constant array (Board_Side) of Unit_Type := (
         UT_ENGINEER_SS, UT_ENGINEER_FS);
-    Machinegunners : constant array (Board_Side) of Unit_Type := (
+    Machinegunner_IDs : constant array (Board_Side) of Unit_Type := (
         UT_MACHINEGUNNER_SS, UT_MACHINEGUNNER_FS);
-    Scouts : constant array (Board_Side) of Unit_Type := (
+    Scout_IDs : constant array (Board_Side) of Unit_Type := (
         UT_SCOUT_SS, UT_SCOUT_FS);
-    Riflemen : constant array (Board_Side) of Unit_Type := (
+    Rifleman_IDs : constant array (Board_Side) of Unit_Type := (
         UT_RIFLEMAN_SS, UT_RIFLEMAN_FS);
     UID_OF : constant array (Unit_Type) of Integer := (
         1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);

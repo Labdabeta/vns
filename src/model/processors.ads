@@ -11,6 +11,7 @@ package Processors is
     type Address_Type is mod 2 ** 20;
     type Small_Immediate_Type is range -(2 ** 9) .. (2 ** 9 - 1);
     type Instruction_ID is mod 2 ** 7;
+
     type Memory_Array is array (Address_Type range <>) of Register_Type;
 
     type Communications is array (

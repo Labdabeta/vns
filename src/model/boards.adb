@@ -442,12 +442,13 @@ package body Boards is
         Which_Way : in Coordinates.Direction) is
         Target : Coordinate := This.Units (Team, Unit).Position (T_WHITE);
     begin
+        Apply_Direction (Target, To_Team (Which_Way, Team));
         if (This.Terrain (Target.X, Target.Y) = TT_OPEN or
             This.Terrain (Target.X, Target.Y) = TT_BEACH or
-            This.Terrain (Target.X, Target.Y) = TT_BASE) and
+            This.Terrain (Target.X, Target.Y) = TT_BASE or
+            This.Terrain (Target.X, Target.Y) = TT_SAND) and
             Team_Of (This, To_Location (Target, T_WHITE)) = T_NONE
         then
-            Apply_Direction (Target, To_Team (Which_Way, Team));
             This.Units (Team, Unit).Position := To_Location (Target, T_WHITE);
         end if;
     end Do_Move;
@@ -459,13 +460,13 @@ package body Boards is
         Which_Way : in Coordinates.Direction) is
         Target : Coordinate := This.Units (Team, Unit).Position (T_WHITE);
     begin
+        Apply_Direction (Target, To_Team (Which_Way, Team));
         if (This.Terrain (Target.X, Target.Y) = TT_OPEN or
             This.Terrain (Target.X, Target.Y) = TT_BEACH or
             This.Terrain (Target.X, Target.Y) = TT_WIRE or
             This.Terrain (Target.X, Target.Y) = TT_BASE) and
             Team_Of (This, To_Location (Target, T_WHITE)) = T_NONE
         then
-            Apply_Direction (Target, To_Team (Which_Way, Team));
             This.Units (Team, Unit).Position := To_Location (Target, T_WHITE);
         end if;
     end Do_Crawl;
@@ -477,10 +478,10 @@ package body Boards is
         Which_Way : in Coordinates.Direction) is
         Target : Coordinate := This.Units (Team, Unit).Position (T_WHITE);
     begin
+        Apply_Direction (Target, To_Team (Which_Way, Team));
         if This.Terrain (Target.X, Target.Y) = TT_WATER and
             Team_Of (This, To_Location (Target, T_WHITE)) = T_NONE
         then
-            Apply_Direction (Target, To_Team (Which_Way, Team));
             This.Units (Team, Unit).Position := To_Location (Target, T_WHITE);
         end if;
     end Do_Swim;

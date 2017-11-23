@@ -3,6 +3,18 @@ with Boards; use Boards;
 with Coordinates; use Coordinates;
 with Interfaces;
 
+with Processors.Registers; use Processors.Registers;
+with Processors.Instructions; use Processors.Instructions;
+with Processors.Caches; use Processors.Caches;
+with Processors.Branches; use Processors.Branches;
+with Processors.Captains; use Processors.Captains;
+with Processors.Mortars; use Processors.Mortars;
+with Processors.Snipers; use Processors.Snipers;
+with Processors.Engineers; use Processors.Engineers;
+with Processors.Machinegunners; use Processors.Machinegunners;
+with Processors.Scouts; use Processors.Scouts;
+with Processors.Riflemen; use Processors.Riflemen;
+
 with Ada.Numerics.Generic_Elementary_Functions;
 with Ada.Unchecked_Conversion;
 with Ada.Exceptions;
@@ -10,199 +22,6 @@ with Ada.Exceptions;
 with Logger;
 
 package body Processors is
-    function BTR (Val : in Boolean) return Register_Type is
-    begin
-        if Val then
-            return 1;
-        else
-            return 0;
-        end if;
-    end BTR;
-
-    function To_U32 is new Ada.Unchecked_Conversion (
-        Register_Type, Interfaces.Unsigned_32);
-    function From_U32 is new Ada.Unchecked_Conversion (
-        Interfaces.Unsigned_32, Register_Type);
-
-    function Is_Taken (
-        Which : in Instruction_ID;
-        Value : in Register_Type) return Boolean is
-    begin
-        case Which is
-            when 15 | 21 => return Value = 0;
-            when 16 | 22 => return Value /= 0;
-            when 17 | 23 => return Value > 0;
-            when 18 | 24 => return Value < 0;
-            when 19 | 25 => return Value >= 0;
-            when 20 | 26 => return Value <= 0;
-            when others => return False;
-        end case;
-    end Is_Taken;
-
-    -- Returns true if the address is in the cache.
-    function Check_Cache (
-        Which : in Cache_Contents;
-        Address : in Address_Type) return Boolean is
-    begin
-        if Which.Size = CS_NONE then
-            return False;
-        end if;
-
-        for Index in Which.Data'Range loop
-            if Which.Data (Index).Address = Address and
-                Which.Data (Index).Is_Loaded
-            then
-                return True;
-            end if;
-        end loop;
-        return False;
-    end Check_Cache;
-
-    -- Adds the Address:Value pair to the cache, possibly flushing it
-    procedure Add_To_Cache (
-        Kind : in Cache_Type;
-        Which : in out Cache_Contents;
-        Address : in Address_Type;
-        Memory : in Memory_Array) is
-        New_Entry : Cache_Entry := (
-            Address => Address,
-            Value => Memory (Address),
-            Is_Loaded => True,
-            Age => 0);
-
-        type Address_Options_Array is array (Address_Type range <>) of
-            Address_Type;
-        procedure Replace_Oldest_Entry (Spots : in Address_Options_Array) is
-            Oldest_Entry : Address_Type;
-            Age : Natural := Natural'Last; -- -1 is an empty slot
-        begin
-            for Index in Spots'Range loop
-                if not Which.Data (Spots (Index)).Is_Loaded then
-                    Which.Data (Spots (Index)) := New_Entry;
-                    return;
-                end if;
-
-                if Which.Data (Spots (Index)).Age < Age then
-                    Oldest_Entry := Spots (Index);
-                    Age := Which.Data (Spots (Index)).Age;
-                end if;
-            end loop;
-
-            Which.Data (Oldest_Entry) := New_Entry;
-        end Replace_Oldest_Entry;
-
-        -- Number of spots a given address could occupy
-        function Cache_Size_Index return Address_Type is
-        begin
-            case Kind is
-                when CT_NONE => return 1;
-                when CT_TWO_WAY => return 2;
-                when CT_FOUR_WAY => return 4;
-                when CT_EIGHT_WAY => return 8;
-                when CT_FULLY => return Which.Length;
-            end case;
-        end Cache_Size_Index;
-    begin
-        if Which.Size = CS_NONE then
-            return;
-        end if;
-
-        for Index in Address_Type range 0 .. Which.Length loop
-            if Which.Data (Index).Address = Address then
-                Which.Data (Index) := New_Entry;
-                return;
-            end if;
-        end loop;
-
-        for Index in Address_Type range 0 .. Which.Length loop
-            if Which.Data (Index).Is_Loaded then
-                Which.Data (Index).Age := Which.Data (Index).Age + 1;
-            end if;
-        end loop;
-
-        declare
-            Spots : Address_Options_Array (1 .. Cache_Size_Index);
-        begin
-            for Index in Spots'Range loop
-                Spots (Index) := (Address + Index) mod Which.Length;
-            end loop;
-
-            Replace_Oldest_Entry (Spots);
-        end;
-    end Add_To_Cache;
-
-    -- Returns true if the branch should probably be taken, false otherwise
-    function Predict_Branch (
-        Kind : in Branch_Type;
-        Which : in Branch_State) return Boolean is
-    begin
-        case Kind is
-            when BT_NONE | BT_PERFECT => return False;
-            when BT_ONE_BIT => return Which.Last_Direction = DIR_TAKEN;
-            when BT_TWO_BIT => return Which.Prediction.Direction = DIR_TAKEN;
-            when BT_TWO_LEVEL_TWO_BIT =>
-                return Which.Prediction_History (
-                    Which.Even_Earlier_Direction,
-                    Which.Last_Direction).Direction = DIR_TAKEN;
-        end case;
-    end Predict_Branch;
-
-    -- Register a 'TAKEN' with a 2-state predictor
-    procedure Advance_Prediction (Which : in out Two_State_Branch) is begin
-        if Which.Strength = WEAKLY then
-            if Which.Direction = DIR_TAKEN then
-                Which.Strength := STRONGLY;
-            else
-                Which.Direction := DIR_TAKEN;
-            end if;
-        else
-            if Which.Direction /= DIR_TAKEN then
-                Which.Strength := WEAKLY;
-            end if;
-        end if;
-    end Advance_Prediction;
-
-    -- Register a 'NOT TAKEN' with a 2-state predictor
-    procedure Retreat_Prediction (Which : in out Two_State_Branch) is begin
-        if Which.Strength = WEAKLY then
-            if Which.Direction = DIR_TAKEN then
-                Which.Direction := DIR_NOT_TAKEN;
-            else
-                Which.Strength := STRONGLY;
-            end if;
-        else
-            if Which.Direction = DIR_TAKEN then
-                Which.Strength := WEAKLY;
-            end if;
-        end if;
-    end Retreat_Prediction;
-
-    -- Updates all predictors, even though at any point only one updates
-    procedure Update_Prediction (
-        Which : in out Branch_State;
-        Taken : in Boolean) is
-    begin
-        if Taken then
-            Advance_Prediction (Which.Prediction);
-            Advance_Prediction (Which.Prediction_History (
-                Which.Even_Earlier_Direction, Which.Last_Direction));
-        else
-            Retreat_Prediction (Which.Prediction);
-            Retreat_Prediction (Which.Prediction_History (
-                Which.Even_Earlier_Direction, Which.Last_Direction));
-        end if;
-        Which.Even_Earlier_Direction := Which.Last_Direction;
-        if Taken then
-            Which.Last_Direction := DIR_TAKEN;
-        else
-            Which.Last_Direction := DIR_NOT_TAKEN;
-        end if;
-    end Update_Prediction;
-
-    function To_Direction (X : in Register_Type) return Direction is begin
-        return Direction'Val (X - 1);
-    end To_Direction;
-
     procedure Initialize (This : out Unit_Processor) is begin
         This.Memory := (others => 0);
         This.Registers := (others => 0);
@@ -221,257 +40,25 @@ package body Processors is
     procedure Set_Registers (
         Machines : in out Processor_Array;
         State : in Board) is
-
-        procedure Set_Captain_Registers (Team : in Player_ID) is
-            Nearest_Ally : Unit_State := Get_Nearest_Ally (
-                State, Get_Unit (State, UT_CAPTAIN, Team).Position, Team);
-            function Compute_Life_Value (Unit : in Unit_Type)
-                return Register_Type is
-                Result : Register_Type := 0;
-            begin
-                if Get_Unit (State, Unit, Team).Alive then
-                    Result := Result + 1;
-                end if;
-                if Get_Unit (State, Unit, Enemy_Of (Team)).Alive then
-                    Result := Result + 2;
-                end if;
-                return Result;
-            end Compute_Life_Value;
-        begin
-            Machines (Team, UT_CAPTAIN).Registers (16 .. 29) := (
-                16 => Register_Type (Get_Points (State, Team)),
-                17 => Register_Type (Get_Points (State, Enemy_Of (Team))),
-                18 => Register_Type (Nearest_Ally.Position (Team).X),
-                19 => Register_Type (Nearest_Ally.Position (Team).Y),
-                20 => Compute_Life_Value (UT_MORTAR),
-                21 => Compute_Life_Value (UT_SNIPER),
-                22 => Compute_Life_Value (UT_ENGINEER_SS),
-                23 => Compute_Life_Value (UT_ENGINEER_FS),
-                24 => Compute_Life_Value (UT_MACHINEGUNNER_SS),
-                25 => Compute_Life_Value (UT_MACHINEGUNNER_FS),
-                26 => Compute_Life_Value (UT_SCOUT_SS),
-                27 => Compute_Life_Value (UT_SCOUT_FS),
-                28 => Compute_Life_Value (UT_RIFLEMAN_SS),
-                29 => Compute_Life_Value (UT_RIFLEMAN_FS));
-        end Set_Captain_Registers;
-
-        procedure Set_Mortar_Registers (Team : in Player_ID) is begin
-            Machines (Team, UT_MORTAR).Registers (18 .. 31) := (
-                18 => Register_Type (Get_Unit (
-                    State, UT_SCOUT_SS, Enemy_Of (Team)).Position (Team).X),
-                19 => Register_Type (Get_Unit (
-                    State, UT_SCOUT_SS, Enemy_Of (Team)).Position (Team).Y),
-                20 => Register_Type (Get_Unit (
-                    State, UT_SCOUT_FS, Enemy_Of (Team)).Position (Team).X),
-                21 => Register_Type (Get_Unit (
-                    State, UT_SCOUT_FS, Enemy_Of (Team)).Position (Team).Y),
-                22 => Register_Type (Get_Unit (
-                    State, UT_CAPTAIN, Team).Position (Team).X),
-                23 => Register_Type (Get_Unit (
-                    State, UT_SNIPER, Team).Position (Team).X),
-                24 => Register_Type (Get_Unit (
-                    State, UT_ENGINEER_SS, Team).Position (Team).X),
-                25 => Register_Type (Get_Unit (
-                    State, UT_ENGINEER_FS, Team).Position (Team).X),
-                26 => Register_Type (Get_Unit (
-                    State, UT_MACHINEGUNNER_SS, Team).Position (Team).X),
-                27 => Register_Type (Get_Unit (
-                    State, UT_MACHINEGUNNER_FS, Team).Position (Team).X),
-                28 => Register_Type (Get_Unit (
-                    State, UT_SCOUT_SS, Team).Position (Team).X),
-                29 => Register_Type (Get_Unit (
-                    State, UT_SCOUT_FS, Team).Position (Team).X),
-                30 => Register_Type (Get_Unit (
-                    State, UT_RIFLEMAN_SS, Team).Position (Team).X),
-                31 => Register_Type (Get_Unit (
-                    State, UT_RIFLEMAN_FS, Team).Position (Team).X));
-        end Set_Mortar_Registers;
-
-        procedure Set_Sniper_Registers (Team : in Player_ID) is
-            My_Pos : Location := Get_Unit (State, UT_SNIPER, Team).Position;
-            Nearest_Enemy : Unit_State := Get_Nearest_Ally (
-                State, My_Pos, Enemy_Of (Team));
-            Enemy_Captain : Unit_State := Get_Unit (
-                State, UT_CAPTAIN, Enemy_Of (Team));
-        begin
-            Machines (Team, UT_SNIPER).Registers (17 .. 23) := (
-                17 => Register_Type (
-                    Count_Nearby_Enemies (State, My_Pos, Team, 1)),
-                18 => Register_Type (
-                    Count_Nearby_Enemies (State, My_Pos, Team, 2)),
-                19 => Register_Type (
-                    Count_Nearby_Enemies (State, My_Pos, Team, 3)),
-                20 => Machines (Team, UT_SCOUT_SS).Registers (18),
-                21 => Machines (Team, UT_SCOUT_SS).Registers (19),
-                22 => Machines (Team, UT_SCOUT_FS).Registers (18),
-                23 => Machines (Team, UT_SCOUT_FS).Registers (19));
-            Machines (Team, UT_SNIPER).Registers (28 .. 31) := (
-                28 => Register_Type (Nearest_Enemy.Position (Team).X),
-                29 => Register_Type (Nearest_Enemy.Position (Team).Y),
-                30 => Register_Type (Enemy_Captain.Position (Team).X),
-                31 => Register_Type (Enemy_Captain.Position (Team).Y));
-        end Set_Sniper_Registers;
-
-        procedure Set_Engineer_Registers (
-            Team : in Player_ID;
-            Side : in Board_Side) is
-            Pos : Coordinate :=
-                Get_Unit (State, Engineers (Side), Team).Position (Team);
-            Them : Player_ID := Enemy_Of (Team);
-        begin
-            Machines (Team, Engineers (Side)).Registers (20 .. 31) := (
-                20 => Register_Type (Get_Nearest_Terrain (
-                    State, To_Location (Pos, Team), Team, TT_SAND).X),
-                21 => Register_Type (Get_Nearest_Terrain (
-                    State, To_Location (Pos, Team), Team, TT_SAND).Y),
-                22 => Register_Type (Get_Nearest_Terrain (
-                    State, To_Location (Pos, Team), Team, TT_WIRE).X),
-                23 => Register_Type (Get_Nearest_Terrain (
-                    State, To_Location (Pos, Team), Team, TT_WIRE).Y),
-                24 => Register_Type (Get_Nearest_Ally (
-                    State, To_Location (Pos, Team), Team).Position (Team).X),
-                25 => Register_Type (Get_Nearest_Ally (
-                    State, To_Location (Pos, Team), Team).Position (Team).Y),
-                26 => Register_Type (Get_Nearest_Ally (
-                    State, To_Location (Pos, Team), Them).Position (Team).X),
-                27 => Register_Type (Get_Nearest_Ally (
-                    State, To_Location (Pos, Team), Them).Position (Team).Y),
-                28 => Register_Type (Get_Nearest_Terrain (
-                    State, To_Location (Pos, Team), Team, TT_WATER).X),
-                29 => Register_Type (Get_Nearest_Terrain (
-                    State, To_Location (Pos, Team), Team, TT_WATER).Y),
-                30 => Register_Type (Distance_To_Base (
-                    State, To_Location (Pos, Team), Team)),
-                31 => Register_Type (Distance_To_Base (
-                    State, To_Location (Pos, Team), Them)));
-        end Set_Engineer_Registers;
-
-        procedure Set_Machinegunner_Registers (
-            Team : in Player_ID;
-            Side : in Board_Side) is
-            Pos : Location :=
-                Get_Unit (State, Machinegunners (Side), Team).Position;
-            Them : Player_ID := Enemy_Of (Team);
-            Nearest_Ally_Pos : Location :=
-                Get_Nearest_Ally (State, Pos, Them).Position;
-        begin
-            Machines (Team, Machinegunners (Side)).Registers (16 .. 31) := (
-                16 => BTR (Get_Unit (State, Machinegunners (Side), Team).Setup),
-                17 => Register_Type (Nearest_Ally_Pos (Team).X),
-                18 => Register_Type (Nearest_Ally_Pos (Team).Y),
-                19 => Register_Type (Compute_Fire_Time (
-                    State, Machinegunners (Side), Pos, Nearest_Ally_Pos)),
-                20 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Team, 1)),
-                21 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Team, 2)),
-                22 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Team, 3)),
-                23 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Team, 4)),
-                24 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Team, 5)),
-                25 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Team, 6)),
-                26 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Them, 1)),
-                27 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Them, 2)),
-                28 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Them, 3)),
-                29 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Them, 4)),
-                30 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Them, 5)),
-                31 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Them, 6)));
-        end Set_Machinegunner_Registers;
-
-        procedure Set_Scout_Registers (
-            Team : in Player_ID;
-            Side : in Board_Side) is
-            Pos : Location := Get_Unit (State, Scouts (Side), Team).Position;
-            Them : Player_ID := Enemy_Of (Team);
-            Nearest_Enemies : array (1 .. 5) of Coordinate := (
-                1 => Get_Nearest_Ally (State, Pos, Them, 0).Position (Team),
-                2 => Get_Nearest_Ally (State, Pos, Them, 1).Position (Team),
-                3 => Get_Nearest_Ally (State, Pos, Them, 2).Position (Team),
-                4 => Get_Nearest_Ally (State, Pos, Them, 3).Position (Team),
-                5 => Get_Nearest_Ally (State, Pos, Them, 4).Position (Team));
-            Sniper_Idx : Register_Index;
-        begin
-            if Side = SNIPER_SIDE then
-                Sniper_Idx := 24;
-            else
-                Sniper_Idx := 26;
-            end if;
-            Machines (Team, Scouts (Side)).Registers (16 .. 17) := (
-                16 => BTR (Get_Unit (State, UT_SNIPER, Team).Setup),
-                17 => BTR (Get_Unit (State, UT_SNIPER, Enemy_Of (Team)).Setup));
-            Machines (Team, Scouts (Side)).Registers (20 .. 31) := (
-                20 => Machines (Team, UT_SNIPER).Registers (Sniper_Idx),
-                21 => Machines (Team, UT_SNIPER).Registers (Sniper_Idx + 1),
-                22 => Register_Type (Nearest_Enemies (1).X),
-                23 => Register_Type (Nearest_Enemies (1).Y),
-                24 => Register_Type (Nearest_Enemies (2).X),
-                25 => Register_Type (Nearest_Enemies (2).Y),
-                26 => Register_Type (Nearest_Enemies (3).X),
-                27 => Register_Type (Nearest_Enemies (3).Y),
-                28 => Register_Type (Nearest_Enemies (4).X),
-                29 => Register_Type (Nearest_Enemies (4).Y),
-                30 => Register_Type (Nearest_Enemies (5).X),
-                31 => Register_Type (Nearest_Enemies (5).Y));
-        end Set_Scout_Registers;
-
-        procedure Set_Rifleman_Registers (
-            Team : in Player_ID;
-            Side : in Board_Side) is
-            Pos : Location :=
-                Get_Unit (State, Riflemen (Side), Team).Position;
-        begin
-            Machines (Team, Riflemen (Side)).Registers (20 .. 31) := (
-                20 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Team, 1)),
-                21 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Team, 2)),
-                22 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Team, 3)),
-                23 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Team, 4)),
-                24 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Team, 5)),
-                25 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Team, 6)),
-                26 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Enemy_Of (Team), 1)),
-                27 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Enemy_Of (Team), 2)),
-                28 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Enemy_Of (Team), 3)),
-                29 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Enemy_Of (Team), 4)),
-                30 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Enemy_Of (Team), 5)),
-                31 => Register_Type (
-                    Count_Nearby_Enemies (State, Pos, Enemy_Of (Team), 6)));
-        end Set_Rifleman_Registers;
     begin
+        Set_Captain_Registers (Machines, State);
+        Set_Mortar_Registers (Machines, State);
+        Set_Sniper_Registers (Machines, State);
+        Set_Engineer_Registers (Machines, State);
+        Set_Machinegunner_Registers (Machines, State);
+        Set_Scout_Registers (Machines, State);
+        Set_Rifleman_Registers (Machines, State);
+
+        -- Zero-off all the r0s
         for T in Player_ID'Range loop
-            Set_Captain_Registers (T);
             Machines (T, UT_CAPTAIN).Registers (0) := 0;
-            Set_Mortar_Registers (T);
             Machines (T, UT_MORTAR).Registers (0) := 0;
-            Set_Sniper_Registers (T);
             Machines (T, UT_SNIPER).Registers (0) := 0;
             for S in Board_Side'Range loop
-                Set_Engineer_Registers (T, S);
-                Machines (T, Engineers (S)).Registers (0) := 0;
-                Set_Machinegunner_Registers (T, S);
-                Machines (T, Machinegunners (S)).Registers (0) := 0;
-                Set_Scout_Registers (T, S);
-                Machines (T, Scouts (S)).Registers (0) := 0;
-                Set_Rifleman_Registers (T, S);
-                Machines (T, Riflemen (S)).Registers (0) := 0;
+                Machines (T, Engineer_IDs (S)).Registers (0) := 0;
+                Machines (T, Machinegunner_IDs (S)).Registers (0) := 0;
+                Machines (T, Scout_IDs (S)).Registers (0) := 0;
+                Machines (T, Rifleman_IDs (S)).Registers (0) := 0;
             end loop;
         end loop;
     end Set_Registers;
