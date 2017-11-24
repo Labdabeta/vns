@@ -114,6 +114,14 @@ package body Logger is
             " Prone|" & Boolean'Image (What.Post.State.Prone));
     end Log;
 
+    procedure Log (A, B, C : in Processors.Register_Type) is
+    begin
+        Put_Line ("LOG: " &
+            Register_Type'Image (A) & " " &
+            Register_Type'Image (B) & " " &
+            Register_Type'Image (C));
+    end Log;
+
     procedure Log_Prep (
         Unit : in Boards.Unit_Type;
         Team : in Boards.Player_ID;

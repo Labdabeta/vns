@@ -19,6 +19,7 @@ package Logger is
     end record;
 
     procedure Log (What : in Log_Entry);
+    procedure Log (A, B, C : in Processors.Register_Type);
     procedure Log_Prep (
         Unit : in Boards.Unit_Type;
         Team : in Boards.Player_ID;
