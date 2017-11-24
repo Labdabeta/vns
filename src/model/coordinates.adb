@@ -3,8 +3,8 @@ package body Coordinates is
     function Get_Direction_Towards (
         Source, Destination : Coordinate)
         return Direction is
-        DX : Integer := Integer (Source.X) - Integer (Destination.X);
-        DY : Integer := Integer (Source.Y) - Integer (Destination.Y);
+        DX : Integer := Integer (Destination.X) - Integer (Source.X);
+        DY : Integer := Integer (Destination.Y) - Integer (Source.Y);
     begin
         if DX > 0 then
             if DY > 0 then
@@ -38,25 +38,49 @@ package body Coordinates is
     is begin
         case Dir is
             when DIR_NORTH =>
-                Source.Y := Source.Y - 1;
+                if Source.Y /= Y_Coordinate'First then
+                    Source.Y := Source.Y - 1;
+                end if;
             when DIR_NORTH_EAST =>
-                Source.Y := Source.Y - 1;
-                Source.X := Source.X + 1;
+                if Source.Y /= Y_Coordinate'First then
+                    Source.Y := Source.Y - 1;
+                end if;
+                if Source.X /= X_Coordinate'Last then
+                    Source.X := Source.X + 1;
+                end if;
             when DIR_EAST =>
-                Source.X := Source.X + 1;
+                if Source.X /= X_Coordinate'Last then
+                    Source.X := Source.X + 1;
+                end if;
             when DIR_SOUTH_EAST =>
-                Source.Y := Source.Y + 1;
-                Source.X := Source.X + 1;
+                if Source.Y /= Y_Coordinate'Last then
+                    Source.Y := Source.Y + 1;
+                end if;
+                if Source.X /= X_Coordinate'Last then
+                    Source.X := Source.X + 1;
+                end if;
             when DIR_SOUTH =>
-                Source.Y := Source.Y + 1;
+                if Source.Y /= Y_Coordinate'Last then
+                    Source.Y := Source.Y + 1;
+                end if;
             when DIR_SOUTH_WEST =>
-                Source.Y := Source.Y + 1;
-                Source.X := Source.X - 1;
+                if Source.Y /= Y_Coordinate'Last then
+                    Source.Y := Source.Y + 1;
+                end if;
+                if Source.X /= X_Coordinate'First then
+                    Source.X := Source.X - 1;
+                end if;
             when DIR_WEST =>
-                Source.X := Source.X - 1;
+                if Source.X /= X_Coordinate'First then
+                    Source.X := Source.X - 1;
+                end if;
             when DIR_NORTH_WEST =>
-                Source.Y := Source.Y - 1;
-                Source.X := Source.X - 1;
+                if Source.Y /= Y_Coordinate'First then
+                    Source.Y := Source.Y - 1;
+                end if;
+                if Source.X /= X_Coordinate'First then
+                    Source.X := Source.X - 1;
+                end if;
         end case;
     end Apply_Direction;
 
