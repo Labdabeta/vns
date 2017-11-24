@@ -60,9 +60,9 @@ add r1, r0, 17
 dir r2, r1, 15
 wlk r2, r3, r4
 cmp r5, r3, r1
-bnz to_beach
+bnz r5, to_beach
 cmp r5, r4, 15
-bnz to_beach
+bnz r5, to_beach
 
 ; Start laying wire
 wir east, r0, r0

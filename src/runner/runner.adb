@@ -1,5 +1,5 @@
--- TODO: Create a logger to print each frame
 with Traceback;
+with Logger;
 
 with SDL; use SDL;
 
@@ -294,6 +294,17 @@ begin
                                 Frame_Rate := 10;
                             when others => null;
                         end case;
+                    elsif E.Kind = MOUSE_DOWN_EVENT then
+                        for U in Boards.Unit_Type'Range loop
+                            for P in Boards.Player_ID'Range loop
+                                if Within (
+                                    Icon_Placement (U, P),
+                                    State.Mouse.Where)
+                                then
+                                    Logger.Toggle_Logging (U, P);
+                                end if;
+                            end loop;
+                        end loop;
                     end if;
                 end;
             end loop;

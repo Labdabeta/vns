@@ -40,4 +40,7 @@ package Logger is
         Tick : in Natural;
         White : in Boards.Resource_Points;
         Black : in Boards.Resource_Points);
+    procedure Toggle_Logging (
+        Unit : in Boards.Unit_Type;
+        Team : in Boards.Player_ID);
 end Logger;

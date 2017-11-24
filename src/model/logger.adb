@@ -5,8 +5,15 @@ with Coordinates; use Coordinates;
 with Memory;
 
 package body Logger is
+    Is_Logged : array (Unit_Type, Player_ID) of Boolean :=
+        (others => (others => False));
+
     procedure Log (What : in Log_Entry) is
     begin
+        if not Is_Logged (What.Unit, What.Team) then
+            return;
+        end if;
+
         Put_Line (
             Boards.Player_ID'Image (What.Team) & " " &
             Boards.Unit_Type'Image (What.Unit));
@@ -127,10 +134,12 @@ package body Logger is
         Team : in Boards.Player_ID;
         What : in Processors.Instruction_ID) is
     begin
-        Put_Line (
-            Boards.Player_ID'Image (Team) & " " &
-            Boards.Unit_Type'Image (Unit) & ": Working on " &
-            Memory.To_String (What, Unit) & ".");
+        if Is_Logged (Unit, Team) then
+            Put_Line (
+                Boards.Player_ID'Image (Team) & " " &
+                Boards.Unit_Type'Image (Unit) & ": Working on " &
+                Memory.To_String (What, Unit) & ".");
+        end if;
     end Log_Prep;
 
     procedure Log_CWait (
@@ -138,10 +147,12 @@ package body Logger is
         Team : in Boards.Player_ID;
         Wait : in Natural) is
     begin
-        Put_Line (
-            Boards.Player_ID'Image (Team) & " " &
-            Boards.Unit_Type'Image (Unit) & " CPU ready in " &
-            Natural'Image (Wait) & "UT.");
+        if Is_Logged (Unit, Team) then
+            Put_Line (
+                Boards.Player_ID'Image (Team) & " " &
+                Boards.Unit_Type'Image (Unit) & " CPU ready in " &
+                Natural'Image (Wait) & "UT.");
+        end if;
     end Log_CWait;
 
     procedure Log_IWait (
@@ -149,10 +160,12 @@ package body Logger is
         Team : in Boards.Player_ID;
         Wait : in Natural) is
     begin
-        Put_Line (
-            Boards.Player_ID'Image (Team) & " " &
-            Boards.Unit_Type'Image (Unit) & " Operation ready in " &
-            Natural'Image (Wait) & "RT.");
+        if Is_Logged (Unit, Team) then
+            Put_Line (
+                Boards.Player_ID'Image (Team) & " " &
+                Boards.Unit_Type'Image (Unit) & " Operation ready in " &
+                Natural'Image (Wait) & "RT.");
+        end if;
     end Log_IWait;
 
     procedure Log_Error (
@@ -160,9 +173,11 @@ package body Logger is
         Team : in Boards.Player_ID;
         Text : in String) is
     begin
-        Put_Line (
-            Boards.Player_ID'Image (Team) & " " &
-            Boards.Unit_Type'Image (Unit) & " died due to " & Text);
+        if Is_Logged (Unit, Team) then
+            Put_Line (
+                Boards.Player_ID'Image (Team) & " " &
+                Boards.Unit_Type'Image (Unit) & " died due to " & Text);
+        end if;
     end Log_Error;
 
     procedure Log_UT (
@@ -174,4 +189,11 @@ package body Logger is
             " W|" & Resource_Points'Image (White) &
             " B|" & Resource_Points'Image (Black));
     end Log_UT;
+
+    procedure Toggle_Logging (
+        Unit : in Boards.Unit_Type;
+        Team : in Boards.Player_ID) is
+    begin
+        Is_Logged (Unit, Team) := not Is_Logged (Unit, Team);
+    end Toggle_Logging;
 end Logger;
