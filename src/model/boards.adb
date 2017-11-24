@@ -442,6 +442,15 @@ package body Boards is
         Which_Way : in Coordinates.Direction) is
         Target : Coordinate := This.Units (Team, Unit).Position (T_WHITE);
     begin
+        if
+            (Unit = UT_MORTAR or
+             Unit = UT_MACHINEGUNNER_SS or
+             Unit = UT_MACHINEGUNNER_FS) and
+            This.Units (Team, Unit).Setup
+        then
+            return; -- Can't move if setup
+        end if;
+
         Apply_Direction (Target, To_Team (Which_Way, Team));
         if (This.Terrain (Target.X, Target.Y) = TT_OPEN or
             This.Terrain (Target.X, Target.Y) = TT_BEACH or
