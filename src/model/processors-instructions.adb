@@ -192,14 +192,14 @@ package body Processors.Instructions is
                 COMMON_UCL | COMMON_DCS | COMMON_DCT | COMMON_DBP |
                 COMMON_DCL | COMMON_MCS | COMMON_MCT | COMMON_MBP |
                 COMMON_MCL | COMMON_RCS | COMMON_RCT | COMMON_RBP |
-                COMMON_RCL | COMMON_TIM | COMMON_DLY =>
+                COMMON_RCL | COMMON_TIM | COMMON_DLY | COMMON_QCS |
+                COMMON_QCT | COMMON_QBP | COMMON_QCK =>
                 return 1;
             when COMMON_MUL | COMMON_DST | COMMON_NRT | COMMON_NRE |
                 COMMON_EST | COMMON_SOE | COMMON_SOT | COMMON_SOW |
                 COMMON_WST | COMMON_NRW | COMMON_ADV =>
                 return 4;
-            when COMMON_DIV | COMMON_QCS | COMMON_QCT | COMMON_QBP |
-                COMMON_QCK | COMMON_CVR | COMMON_SAY | COMMON_RAD =>
+            when COMMON_DIV | COMMON_CVR | COMMON_SAY | COMMON_RAD =>
                 return 8;
             when COMMON_YEL | COMMON_EAR =>
                 return 16;
@@ -238,7 +238,9 @@ package body Processors.Instructions is
                     return 8;
                 end if;
             when COMMON_POP | COMMON_PSH =>
-                if Check_Cache (Me.Cache, Address_Type (Me.Registers (13))) then
+                if Check_Cache (
+                    Me.Cache, Address_Type (Me.Registers (13)) - Immediate)
+                then
                     return 1;
                 else
                     return 8;
@@ -349,7 +351,6 @@ package body Processors.Instructions is
                 Get_Unit (State, UT_CAPTAIN, Team).Position (Team))
             then
                 Set_Unit_Summon (State, Team, Unit, False);
-                Machines (Team, UT_CAPTAIN).ICounter := 0;
             end if;
             return;
         end if;
@@ -438,9 +439,9 @@ package body Processors.Instructions is
             when COMMON_STR => Me.Memory (Address_Type (B + C)) := A;
             when COMMON_POP =>
                 Me.Registers (13) := Me.Registers (13) + 1;
-                A := Me.Memory (Address_Type (Me.Registers (13)));
+                A := Me.Memory (Address_Type (Me.Registers (13)) + Immediate);
             when COMMON_PSH =>
-                Me.Memory (Address_Type (Me.Registers (13))) := A;
+                Me.Memory (Address_Type (Me.Registers (13)) + Immediate) := A;
                 Me.Registers (13) := Me.Registers (13) - 1;
             when COMMON_WHO =>
                 if Team_Of (State, BC) = Team then

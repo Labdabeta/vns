@@ -508,7 +508,9 @@ package body Boards is
         case Unit is
             when UT_CAPTAIN => Cost := 32;
             when UT_MORTAR => Cost := 256;
-            when UT_SNIPER => Cost := 64;
+            when UT_SNIPER =>
+                Cost := 64;
+                This.Units (Team, Unit).Setup := False; -- Break Camo
             when UT_ENGINEER_SS | UT_ENGINEER_FS => Cost := 32;
             when UT_MACHINEGUNNER_SS | UT_MACHINEGUNNER_FS => Cost := 64;
             when UT_SCOUT_SS | UT_SCOUT_FS => Cost := 64;

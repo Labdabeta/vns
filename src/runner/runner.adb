@@ -197,6 +197,13 @@ procedure Runner is
                 end;
             end if;
 
+            if State.Moving then
+                Draw_Image (Sprite, Get_Render_Rect (
+                    State.Position (T_WHITE)), Clips (MOVE));
+                Draw_Image (Sprite, Get_Render_Rect (
+                    State.Destination (T_WHITE)), Clips (MOVE));
+            end if;
+
             -- Draw upgrade status
             declare
                 Target : SDL.Rectangle := Icon_Placement (Unit, Player);

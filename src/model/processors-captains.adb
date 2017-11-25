@@ -94,15 +94,11 @@ package body Processors.Captains is
                 CAPTAIN_WSF | CAPTAIN_WRS | CAPTAIN_WRF =>
                 return 1;
             when CAPTAIN_ASK => return 4;
-            when CAPTAIN_PLZ => return 8;
+            when CAPTAIN_PLZ | CAPTAIN_SUM => return 8;
             when CAPTAIN_BEG | CAPTAIN_HAK => return 16;
             when CAPTAIN_GVL => return 32;
             when CAPTAIN_BOM | CAPTAIN_EMP => return 256;
             when CAPTAIN_AIR => return 128;
-            -- Unblocked by arrival or death of summoned unit
-            when CAPTAIN_SUM =>
-                Set_Unit_Summon (State, Team, Unit_Type'Val (A - 1), True);
-                return Natural'Last;
             when others => return 0; -- Not a special operation
         end case;
     end Captain_Time;
@@ -138,7 +134,7 @@ package body Processors.Captains is
             when CAPTAIN_AIR =>
                 Bomb_Beach (State, Team);
             when CAPTAIN_SUM =>
-                null; -- Just got re-awakened by a returning unit
+                Set_Unit_Summon (State, Team, Unit_Type'Val (A - 1), True);
             when CAPTAIN_HAK =>
                 Shared (Enemy_Of (Team), Immediate) := A;
             when CAPTAIN_EMP =>
