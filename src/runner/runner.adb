@@ -181,7 +181,8 @@ procedure Runner is
             end if;
             Draw_Image (
                 Sprite, Rect, Unit_Clip (Unit, Player), Rotate,
-                (Rect.Left + Rect.Width / 2, Rect.Top + Rect.Height / 2),
+                (Rect.Width / 2, Rect.Height / 2),
+                -- (Rect.Left + Rect.Width / 2, Rect.Top + Rect.Height / 2),
                 Flip);
 
             -- Draw actions

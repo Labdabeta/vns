@@ -2,6 +2,9 @@
 *.swo
 *.aux
 *.log
+*.lot
+*.out
+*.toc
 *.pdf
 *.xcf
 Console.
