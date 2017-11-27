@@ -20,12 +20,33 @@ package body Processors.Floats is
     FLOAT_LOG : constant Instruction_ID := 116;
     FLOAT_FCP : constant Instruction_ID := 117;
 
+    function Is_Float_Op (Op : in Instruction_ID) return Boolean is
+    begin
+        return Op >= FLOAT_ITF and Op <= FLOAT_FCP;
+    end Is_Float_Op;
+
+    function Float_Time (Op : in Instruction_ID) return Natural is
+    begin
+        case Op is
+            when FLOAT_ITF | FLOAT_FAD | FLOAT_FSU | FLOAT_CEL | FLOAT_RTF |
+                FLOAT_FCP =>
+                return 8;
+            when FLOAT_FMU =>
+                return 32;
+            when FLOAT_FDV | FLOAT_SIN | FLOAT_COS | FLOAT_TAN | FLOAT_POW |
+                FLOAT_ASN | FLOAT_ACS | FLOAT_ATN | FLOAT_LOG =>
+                return 64;
+            when others =>
+                return 0;
+        end case;
+    end Float_Time;
+
     procedure Float_Instruction (
         Op : in Instruction_ID;
+        A : in out Register_Type;
         B : in out Register_Type;
         C : in out Register_Type;
-        Immediate : in Address_Type;
-        A : in out Register_Type) is
+        Immediate : in Address_Type) is
         package Value_Functions is new
             Ada.Numerics.Generic_Elementary_Functions (Float);
         use Value_Functions;

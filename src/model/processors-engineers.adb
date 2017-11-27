@@ -12,22 +12,6 @@ package body Processors.Engineers is
     ENGINEER_DIG : constant Instruction_ID := 99;
     ENGINEER_WFG : constant Instruction_ID := 100;
     ENGINEER_RFG : constant Instruction_ID := 101;
-    ENGINEER_ITF : constant Instruction_ID := 102;
-    ENGINEER_FAD : constant Instruction_ID := 103;
-    ENGINEER_FSU : constant Instruction_ID := 104;
-    ENGINEER_FMU : constant Instruction_ID := 105;
-    ENGINEER_FDV : constant Instruction_ID := 106;
-    ENGINEER_CEL : constant Instruction_ID := 107;
-    ENGINEER_FLR : constant Instruction_ID := 108;
-    ENGINEER_SIN : constant Instruction_ID := 109;
-    ENGINEER_COS : constant Instruction_ID := 110;
-    ENGINEER_TAN : constant Instruction_ID := 111;
-    ENGINEER_POW : constant Instruction_ID := 112;
-    ENGINEER_ASN : constant Instruction_ID := 113;
-    ENGINEER_ACS : constant Instruction_ID := 114;
-    ENGINEER_ATN : constant Instruction_ID := 115;
-    ENGINEER_LOG : constant Instruction_ID := 116;
-    ENGINEER_FCP : constant Instruction_ID := 117;
     ENGINEER_LIE : constant Instruction_ID := 118;
     ENGINEER_GUP : constant Instruction_ID := 119;
     ENGINEER_CSS : constant Instruction_ID := 120;
@@ -85,20 +69,18 @@ package body Processors.Engineers is
 
     function Engineer_Time (Op : in Instruction_ID) return Natural is
     begin
+        if Is_Float_Op (Op) then
+            return Float_Time (Op);
+        end if;
+
         case Op is
             when ENGINEER_WFG | ENGINEER_RFG =>
                 return 4;
             when ENGINEER_WIR | ENGINEER_CUT | ENGINEER_SND | ENGINEER_DIG |
-                ENGINEER_ITF | ENGINEER_FAD | ENGINEER_FSU | ENGINEER_CEL |
-                ENGINEER_FLR | ENGINEER_FCP | ENGINEER_CSS | ENGINEER_CFS |
-                ENGINEER_WSS | ENGINEER_WFS | ENGINEER_BOM | ENGINEER_AIR |
-                ENGINEER_MOR | ENGINEER_SUP =>
+                ENGINEER_CSS | ENGINEER_CFS | ENGINEER_WSS | ENGINEER_WFS |
+                ENGINEER_BOM | ENGINEER_AIR | ENGINEER_MOR | ENGINEER_SUP =>
                 return 8;
-            when ENGINEER_FMU =>
-                return 32;
-            when ENGINEER_FDV | ENGINEER_SIN | ENGINEER_COS | ENGINEER_TAN |
-                ENGINEER_POW | ENGINEER_ASN | ENGINEER_ACS | ENGINEER_ATN |
-                ENGINEER_LOG | ENGINEER_LIE | ENGINEER_GUP =>
+            when ENGINEER_LIE | ENGINEER_GUP =>
                 return 64;
             when others =>
                 return 0;
@@ -109,14 +91,18 @@ package body Processors.Engineers is
         Op : in Instruction_ID;
         Team : in Boards.Player_ID;
         Unit : in Boards.Unit_Type;
-        B : in out Register_Type;
-        C : in out Register_Type;
         Immediate : in Address_Type;
         State : in out Boards.Board;
         A : in out Register_Type;
+        B : in out Register_Type;
+        C : in out Register_Type;
         Flags : in out Shared_Grid;
         Machines : in out Processor_Array) is
     begin
+        if Is_Float_Op (Op) then
+            Float_Instruction (Op, A, B, C, Immediate);
+        end if;
+
         case Op is
             when ENGINEER_WIR =>
                 Plant_Wire (State, Team, Unit, To_Direction (A));
@@ -140,11 +126,6 @@ package body Processors.Engineers is
                 A := Flags (Team, X_Coordinate (B), Y_Coordinate (C));
             when ENGINEER_LIE => Set_Prone (State, Team, Unit, True);
             when ENGINEER_GUP => Set_Prone (State, Team, Unit, False);
-            when ENGINEER_ITF | ENGINEER_FAD | ENGINEER_FSU | ENGINEER_FMU |
-                ENGINEER_FDV | ENGINEER_CEL | ENGINEER_FLR | ENGINEER_SIN |
-                ENGINEER_COS | ENGINEER_TAN | ENGINEER_POW | ENGINEER_ASN |
-                ENGINEER_ACS | ENGINEER_ATN | ENGINEER_LOG | ENGINEER_FCP =>
-                Float_Instruction (Op, B, C, Immediate, A);
             when ENGINEER_CSS | ENGINEER_CFS | ENGINEER_WSS | ENGINEER_WFS |
                 ENGINEER_BOM | ENGINEER_AIR | ENGINEER_MOR | ENGINEER_SUP =>
                 Ask_Instruction (Op, Team, B, C, Immediate, State, A, Machines);

@@ -13,22 +13,6 @@ package body Processors.Snipers is
     SNIPER_NMR : constant Instruction_ID := 99;
     SNIPER_IST : constant Instruction_ID := 100;
     SNIPER_TGT : constant Instruction_ID := 101;
-    SNIPER_ITF : constant Instruction_ID := 102;
-    SNIPER_FAD : constant Instruction_ID := 103;
-    SNIPER_FSU : constant Instruction_ID := 104;
-    SNIPER_FMU : constant Instruction_ID := 105;
-    SNIPER_FDV : constant Instruction_ID := 106;
-    SNIPER_CEL : constant Instruction_ID := 107;
-    SNIPER_FLR : constant Instruction_ID := 108;
-    SNIPER_SIN : constant Instruction_ID := 109;
-    SNIPER_COS : constant Instruction_ID := 110;
-    SNIPER_TAN : constant Instruction_ID := 111;
-    SNIPER_POW : constant Instruction_ID := 112;
-    SNIPER_ASN : constant Instruction_ID := 113;
-    SNIPER_ACS : constant Instruction_ID := 114;
-    SNIPER_ATN : constant Instruction_ID := 115;
-    SNIPER_LOG : constant Instruction_ID := 116;
-    SNIPER_FCP : constant Instruction_ID := 117;
     SNIPER_LIE : constant Instruction_ID := 118;
     SNIPER_GUP : constant Instruction_ID := 119;
     SNIPER_CSS : constant Instruction_ID := 120;
@@ -82,21 +66,20 @@ package body Processors.Snipers is
         State : in out Boards.Board)
         return Natural is
     begin
+        if Is_Float_Op (Op) then
+            return Float_Time (Op);
+        end if;
+
         case Op is
             when SNIPER_UNC | SNIPER_NMR =>
                 return 1;
-            when SNIPER_IST | SNIPER_ITF | SNIPER_FAD | SNIPER_FSU |
-                SNIPER_CEL | SNIPER_FLR | SNIPER_FCP | SNIPER_CSS |
-                SNIPER_CFS | SNIPER_WSS | SNIPER_WFS | SNIPER_BOM |
-                SNIPER_AIR | SNIPER_MOR | SNIPER_SUP =>
+            when SNIPER_IST | SNIPER_CSS | SNIPER_CFS | SNIPER_WSS |
+                SNIPER_WFS | SNIPER_BOM | SNIPER_AIR | SNIPER_MOR |
+                SNIPER_SUP =>
                 return 8;
             when SNIPER_TGT =>
                 return 16;
-            when SNIPER_FMU =>
-                return 32;
-            when SNIPER_CAM | SNIPER_FDV | SNIPER_SIN | SNIPER_COS |
-                SNIPER_TAN | SNIPER_POW | SNIPER_ASN | SNIPER_ACS |
-                SNIPER_ATN | SNIPER_LOG | SNIPER_LIE | SNIPER_GUP =>
+            when SNIPER_CAM | SNIPER_LIE | SNIPER_GUP =>
                 return 64;
             when SNIPER_HIP =>
                 Prepare_Shoot (State, Team, UT_SNIPER,
@@ -118,6 +101,10 @@ package body Processors.Snipers is
         C : in out Register_Type;
         Machines : in out Processor_Array) is
     begin
+        if Is_Float_Op (Op) then
+            Float_Instruction (Op, A, B, C, Immediate);
+        end if;
+
         case Op is
             when SNIPER_CAM => Set_Setup (State, Team, UT_SNIPER, True);
             when SNIPER_UNC => Set_Setup (State, Team, UT_SNIPER, False);
@@ -229,11 +216,6 @@ package body Processors.Snipers is
                 end;
             when SNIPER_LIE => Set_Prone (State, Team, UT_SNIPER, True);
             when SNIPER_GUP => Set_Prone (State, Team, UT_SNIPER, False);
-            when SNIPER_ITF | SNIPER_FAD | SNIPER_FSU | SNIPER_FMU |
-                SNIPER_FDV | SNIPER_CEL | SNIPER_FLR | SNIPER_SIN |
-                SNIPER_COS | SNIPER_TAN | SNIPER_POW | SNIPER_ASN |
-                SNIPER_ACS | SNIPER_ATN | SNIPER_LOG | SNIPER_FCP =>
-                Float_Instruction (Op, B, C, Immediate, A);
             when SNIPER_CSS | SNIPER_CFS | SNIPER_WSS | SNIPER_WFS |
                 SNIPER_BOM | SNIPER_AIR | SNIPER_MOR | SNIPER_SUP =>
                 Ask_Instruction (Op, Team, B, C, Immediate, State, A, Machines);

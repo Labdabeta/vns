@@ -662,22 +662,22 @@ package body Processors.Instructions is
                     when UT_CAPTAIN => Captain_Instruction (
                         Op, Team, Immediate, A, State, Shared, Radios);
                     when UT_MORTAR => Mortar_Instruction (
-                        Op, Team, B, C, Immediate, State, A, Tactical, Support,
+                        Op, Team, Immediate, State, A, B, C, Tactical, Support,
                         Flag, Machines);
                     when UT_SNIPER => Sniper_Instruction (
                         Op, Team, Immediate, State, A, B, C, Machines);
                     when UT_ENGINEER_SS | UT_ENGINEER_FS =>
-                        Engineer_Instruction (Op, Team, Unit, B, C, Immediate,
-                        State, A, Flag, Machines);
+                        Engineer_Instruction (Op, Team, Unit, Immediate,
+                        State, A, B, C, Flag, Machines);
                     when UT_MACHINEGUNNER_SS | UT_MACHINEGUNNER_FS =>
-                        Machinegunner_Instruction (Op, Team, Unit, B, C,
-                        Immediate, State, A, Support, Flag, Machines);
+                        Machinegunner_Instruction (Op, Team, Unit,
+                        Immediate, State, A, B, C, Support, Flag, Machines);
                     when UT_SCOUT_SS | UT_SCOUT_FS => Scout_Instruction (
-                        Op, Team, Unit, B, C, Immediate, State, A, Support,
+                        Op, Team, Unit, Immediate, State, A, B, C, Support,
                         Flag, Machines);
                     when UT_RIFLEMAN_SS | UT_RIFLEMAN_FS =>
-                        Rifleman_Instruction (Op, Team, Unit, B, C, Immediate,
-                        State, A, Tactical, Support, Flag, Machines);
+                        Rifleman_Instruction (Op, Team, Unit, Immediate,
+                        State, A, B, C, Tactical, Support, Flag, Machines);
                 end case;
         end case;
         New_Log.Post.Registers := Me.Registers;

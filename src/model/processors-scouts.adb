@@ -12,22 +12,6 @@ package body Processors.Scouts is
     SCOUT_RSG : constant Instruction_ID := 99;
     SCOUT_WFG : constant Instruction_ID := 100;
     SCOUT_RFG : constant Instruction_ID := 101;
-    SCOUT_ITF : constant Instruction_ID := 102;
-    SCOUT_FAD : constant Instruction_ID := 103;
-    SCOUT_FSU : constant Instruction_ID := 104;
-    SCOUT_FMU : constant Instruction_ID := 105;
-    SCOUT_FDV : constant Instruction_ID := 106;
-    SCOUT_CEL : constant Instruction_ID := 107;
-    SCOUT_FLR : constant Instruction_ID := 108;
-    SCOUT_SIN : constant Instruction_ID := 109;
-    SCOUT_COS : constant Instruction_ID := 110;
-    SCOUT_TAN : constant Instruction_ID := 111;
-    SCOUT_POW : constant Instruction_ID := 112;
-    SCOUT_ASN : constant Instruction_ID := 113;
-    SCOUT_ACS : constant Instruction_ID := 114;
-    SCOUT_ATN : constant Instruction_ID := 115;
-    SCOUT_LOG : constant Instruction_ID := 116;
-    SCOUT_FCP : constant Instruction_ID := 117;
     SCOUT_LIE : constant Instruction_ID := 118;
     SCOUT_GUP : constant Instruction_ID := 119;
     SCOUT_CSS : constant Instruction_ID := 120;
@@ -88,22 +72,21 @@ package body Processors.Scouts is
 
     function Scout_Time (Op : in Instruction_ID) return Natural is
     begin
+        if Is_Float_Op (Op) then
+            return Float_Time (Op);
+        end if;
+
         case Op is
             when SCOUT_RUN =>
                 return 1;
             when SCOUT_WSG | SCOUT_RSG | SCOUT_WFG | SCOUT_RFG =>
                 return 4;
-            when SCOUT_ITF | SCOUT_FAD | SCOUT_FSU | SCOUT_CEL | SCOUT_FLR |
-                SCOUT_FCP | SCOUT_CSS | SCOUT_CFS | SCOUT_WSS | SCOUT_WFS |
+            when SCOUT_CSS | SCOUT_CFS | SCOUT_WSS | SCOUT_WFS |
                 SCOUT_BOM | SCOUT_AIR | SCOUT_MOR | SCOUT_SUP =>
                 return 8;
             when SCOUT_HIT =>
                 return 16;
-            when SCOUT_FMU =>
-                return 32;
-            when SCOUT_FDV | SCOUT_SIN | SCOUT_COS | SCOUT_TAN | SCOUT_POW |
-                SCOUT_ASN | SCOUT_ACS | SCOUT_ATN | SCOUT_LOG | SCOUT_LIE |
-                SCOUT_GUP =>
+            when SCOUT_LIE | SCOUT_GUP =>
                 return 64;
             when others =>
                 return 0;
@@ -114,11 +97,11 @@ package body Processors.Scouts is
         Op : in Instruction_ID;
         Team : in Boards.Player_ID;
         Unit : in Boards.Unit_Type;
-        B : in out Register_Type;
-        C : in out Register_Type;
         Immediate : in Address_Type;
         State : in out Boards.Board;
         A : in out Register_Type;
+        B : in out Register_Type;
+        C : in out Register_Type;
         Support : in out Shared_Grid;
         Flags : in out Shared_Grid;
         Machines : in out Processor_Array) is
@@ -136,11 +119,6 @@ package body Processors.Scouts is
                 A := Flags (Team, X_Coordinate (B), Y_Coordinate (C));
             when SCOUT_LIE => Set_Prone (State, Team, Unit, True);
             when SCOUT_GUP => Set_Prone (State, Team, Unit, False);
-            when SCOUT_ITF | SCOUT_FAD | SCOUT_FSU | SCOUT_FMU |
-                SCOUT_FDV | SCOUT_CEL | SCOUT_FLR | SCOUT_SIN |
-                SCOUT_COS | SCOUT_TAN | SCOUT_POW | SCOUT_ASN |
-                SCOUT_ACS | SCOUT_ATN | SCOUT_LOG | SCOUT_FCP =>
-                Float_Instruction (Op, B, C, Immediate, A);
             when SCOUT_CSS | SCOUT_CFS | SCOUT_WSS | SCOUT_WFS |
                 SCOUT_BOM | SCOUT_AIR | SCOUT_MOR | SCOUT_SUP =>
                 Ask_Instruction (Op, Team, B, C, Immediate, State, A, Machines);

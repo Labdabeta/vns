@@ -11,22 +11,6 @@ package body Processors.Riflemen is
     RIFLEMAN_RSG : constant Instruction_ID := 99;
     RIFLEMAN_WFG : constant Instruction_ID := 100;
     RIFLEMAN_RFG : constant Instruction_ID := 101;
-    RIFLEMAN_ITF : constant Instruction_ID := 102;
-    RIFLEMAN_FAD : constant Instruction_ID := 103;
-    RIFLEMAN_FSU : constant Instruction_ID := 104;
-    RIFLEMAN_FMU : constant Instruction_ID := 105;
-    RIFLEMAN_FDV : constant Instruction_ID := 106;
-    RIFLEMAN_CEL : constant Instruction_ID := 107;
-    RIFLEMAN_FLR : constant Instruction_ID := 108;
-    RIFLEMAN_SIN : constant Instruction_ID := 109;
-    RIFLEMAN_COS : constant Instruction_ID := 110;
-    RIFLEMAN_TAN : constant Instruction_ID := 111;
-    RIFLEMAN_POW : constant Instruction_ID := 112;
-    RIFLEMAN_ASN : constant Instruction_ID := 113;
-    RIFLEMAN_ACS : constant Instruction_ID := 114;
-    RIFLEMAN_ATN : constant Instruction_ID := 115;
-    RIFLEMAN_LOG : constant Instruction_ID := 116;
-    RIFLEMAN_FCP : constant Instruction_ID := 117;
     RIFLEMAN_LIE : constant Instruction_ID := 118;
     RIFLEMAN_GUP : constant Instruction_ID := 119;
     RIFLEMAN_CSS : constant Instruction_ID := 120;
@@ -83,20 +67,18 @@ package body Processors.Riflemen is
 
     function Rifleman_Time (Op : in Instruction_ID) return Natural is
     begin
+        if Is_Float_Op (Op) then
+            return Float_Time (Op);
+        end if;
+
         case Op is
             when RIFLEMAN_WTG | RIFLEMAN_RTG | RIFLEMAN_WSG | RIFLEMAN_RSG |
                 RIFLEMAN_WFG | RIFLEMAN_RFG =>
                 return 4;
-            when RIFLEMAN_ITF | RIFLEMAN_FAD | RIFLEMAN_FSU | RIFLEMAN_CEL |
-                RIFLEMAN_FLR | RIFLEMAN_FCP | RIFLEMAN_CSS | RIFLEMAN_CFS |
-                RIFLEMAN_WSS | RIFLEMAN_WFS | RIFLEMAN_BOM | RIFLEMAN_AIR |
-                RIFLEMAN_MOR | RIFLEMAN_SUP =>
+            when RIFLEMAN_CSS | RIFLEMAN_CFS | RIFLEMAN_WSS | RIFLEMAN_WFS |
+                RIFLEMAN_BOM | RIFLEMAN_AIR | RIFLEMAN_MOR | RIFLEMAN_SUP =>
                 return 8;
-            when RIFLEMAN_FMU =>
-                return 32;
-            when RIFLEMAN_FDV | RIFLEMAN_SIN | RIFLEMAN_COS | RIFLEMAN_TAN |
-                RIFLEMAN_POW | RIFLEMAN_ASN | RIFLEMAN_ACS | RIFLEMAN_ATN |
-                RIFLEMAN_LOG | RIFLEMAN_LIE | RIFLEMAN_GUP =>
+            when RIFLEMAN_GUP =>
                 return 64;
             when others =>
                 return 0;
@@ -107,16 +89,20 @@ package body Processors.Riflemen is
         Op : in Instruction_ID;
         Team : in Boards.Player_ID;
         Unit : in Boards.Unit_Type;
-        B : in out Register_Type;
-        C : in out Register_Type;
         Immediate : in Address_Type;
         State : in out Boards.Board;
         A : in out Register_Type;
+        B : in out Register_Type;
+        C : in out Register_Type;
         Tactical : in out Shared_Grid;
         Support : in out Shared_Grid;
         Flags : in out Shared_Grid;
         Machines : in out Processor_Array) is
     begin
+        if Is_Float_Op (Op) then
+            Float_Instruction (Op, A, B, C, Immediate);
+        end if;
+
         case Op is
             when RIFLEMAN_WTG =>
                 Tactical (Team, X_Coordinate (B), Y_Coordinate (C)) := A;
@@ -132,11 +118,6 @@ package body Processors.Riflemen is
                 A := Support (Team, X_Coordinate (B), Y_Coordinate (C));
             when RIFLEMAN_LIE => Set_Prone (State, Team, Unit, True);
             when RIFLEMAN_GUP => Set_Prone (State, Team, Unit, False);
-            when RIFLEMAN_ITF | RIFLEMAN_FAD | RIFLEMAN_FSU | RIFLEMAN_FMU |
-                RIFLEMAN_FDV | RIFLEMAN_CEL | RIFLEMAN_FLR | RIFLEMAN_SIN |
-                RIFLEMAN_COS | RIFLEMAN_TAN | RIFLEMAN_POW | RIFLEMAN_ASN |
-                RIFLEMAN_ACS | RIFLEMAN_ATN | RIFLEMAN_LOG | RIFLEMAN_FCP =>
-                Float_Instruction (Op, B, C, Immediate, A);
             when RIFLEMAN_CSS | RIFLEMAN_CFS | RIFLEMAN_WSS | RIFLEMAN_WFS |
                 RIFLEMAN_BOM | RIFLEMAN_AIR | RIFLEMAN_MOR | RIFLEMAN_SUP =>
                 Ask_Instruction (Op, Team, B, C, Immediate, State, A, Machines);
