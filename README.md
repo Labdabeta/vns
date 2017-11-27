@@ -12,8 +12,8 @@ The prerequisites for this game are:
 
 ## Installation
 
-To install the game first use LaTeX to compile `documentation.tex` and
-`instructions.tex` to generate the documentation and instructions respectively.
+To install the game first use LaTeX to compile `instructions.tex` to generate
+the instructions.
 
 Next use gnatmake or gprbuild to compile the assembler and the runner. For those
 unfamiliar with the use of gnatmake and gprbuild they take project files after
