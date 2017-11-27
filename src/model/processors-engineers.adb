@@ -109,8 +109,8 @@ package body Processors.Engineers is
         Op : in Instruction_ID;
         Team : in Boards.Player_ID;
         Unit : in Boards.Unit_Type;
-        B : in Register_Type;
-        C : in Register_Type;
+        B : in out Register_Type;
+        C : in out Register_Type;
         Immediate : in Address_Type;
         State : in out Boards.Board;
         A : in out Register_Type;
@@ -120,12 +120,20 @@ package body Processors.Engineers is
         case Op is
             when ENGINEER_WIR =>
                 Plant_Wire (State, Team, Unit, To_Direction (A));
+                B := Register_Type (Count_Wire (State));
+                C := Register_Type (Count_Cover (State));
             when ENGINEER_CUT =>
                 Plant_Wire (State, Team, Unit, To_Direction (A), True);
+                B := Register_Type (Count_Wire (State));
+                C := Register_Type (Count_Cover (State));
             when ENGINEER_SND =>
                 Plant_Cover (State, Team, Unit, To_Direction (A));
+                B := Register_Type (Count_Wire (State));
+                C := Register_Type (Count_Cover (State));
             when ENGINEER_DIG =>
                 Plant_Cover (State, Team, Unit, To_Direction (A), True);
+                B := Register_Type (Count_Wire (State));
+                C := Register_Type (Count_Cover (State));
             when ENGINEER_WFG =>
                 Flags (Team, X_Coordinate (B), Y_Coordinate (C)) := A;
             when ENGINEER_RFG =>

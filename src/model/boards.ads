@@ -119,6 +119,10 @@ package Boards is
         Unit : in Unit_Type;
         Destination : in Location) return Integer;
 
+    function Count_Wire (This : in Board) return Natural;
+
+    function Count_Cover (This : in Board) return Natural;
+
     function Find_Unit (
         This : in out Board;
         Team : in Player_ID;

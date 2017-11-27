@@ -9,8 +9,8 @@ private package Processors.Riflemen is
         Op : in Instruction_ID;
         Team : in Boards.Player_ID;
         Unit : in Boards.Unit_Type;
-        B : in Register_Type;
-        C : in Register_Type;
+        B : in out Register_Type;
+        C : in out Register_Type;
         Immediate : in Address_Type;
         State : in out Boards.Board;
         A : in out Register_Type;

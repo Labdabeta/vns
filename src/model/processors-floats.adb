@@ -9,7 +9,7 @@ package body Processors.Floats is
     FLOAT_FMU : constant Instruction_ID := 105;
     FLOAT_FDV : constant Instruction_ID := 106;
     FLOAT_CEL : constant Instruction_ID := 107;
-    FLOAT_FLR : constant Instruction_ID := 108;
+    FLOAT_RTF : constant Instruction_ID := 108;
     FLOAT_SIN : constant Instruction_ID := 109;
     FLOAT_COS : constant Instruction_ID := 110;
     FLOAT_TAN : constant Instruction_ID := 111;
@@ -22,8 +22,8 @@ package body Processors.Floats is
 
     procedure Float_Instruction (
         Op : in Instruction_ID;
-        B : in Register_Type;
-        C : in Register_Type;
+        B : in out Register_Type;
+        C : in out Register_Type;
         Immediate : in Address_Type;
         A : in out Register_Type) is
         package Value_Functions is new
@@ -40,8 +40,11 @@ package body Processors.Floats is
             when FLOAT_FSU => A := To_R (To_F (B) - To_F (C));
             when FLOAT_FMU => A := To_R (To_F (B) * To_F (C));
             when FLOAT_FDV => A := To_R (To_F (B) / To_F (C));
-            when FLOAT_CEL => A := Register_Type (Float'Ceiling (To_F (A)));
-            when FLOAT_FLR => A := Register_Type (Float'Floor (To_F (A)));
+            when FLOAT_CEL =>
+                B := Register_Type (Float'Ceiling (To_F (A)));
+                C := Register_Type (Float'Floor (To_F (A)));
+            when FLOAT_RTF => A := Register_Type (Float'Floor (
+                To_F (A) / Float (Immediate)));
             when FLOAT_SIN => A := To_R (Sin (To_F (A)));
             when FLOAT_COS => A := To_R (Cos (To_F (A)));
             when FLOAT_TAN => A := To_R (Tan (To_F (A)));

@@ -8,8 +8,8 @@ private package Processors.Mortars is
     procedure Mortar_Instruction (
         Op : in Instruction_ID;
         Team : in Boards.Player_ID;
-        B : in Register_Type;
-        C : in Register_Type;
+        B : in out Register_Type;
+        C : in out Register_Type;
         Immediate : in Address_Type;
         State : in out Boards.Board;
         A : in out Register_Type;

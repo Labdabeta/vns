@@ -315,6 +315,32 @@ package body Boards is
         return Cover;
     end Cover_Between;
 
+    function Count_Wire (This : in Board) return Natural is
+        Result : Natural := 0;
+    begin
+        for Y in Y_Coordinate'Range loop
+            for X in X_Coordinate'Range loop
+                if This.Terrain (X, Y) = TT_WIRE then
+                    Result := Result + 1;
+                end if;
+            end loop;
+        end loop;
+        return Result;
+    end Count_Wire;
+
+    function Count_Cover (This : in Board) return Natural is
+        Result : Natural := 0;
+    begin
+        for Y in Y_Coordinate'Range loop
+            for X in X_Coordinate'Range loop
+                if This.Terrain (X, Y) = TT_SAND then
+                    Result := Result + 1;
+                end if;
+            end loop;
+        end loop;
+        return Result;
+    end Count_Cover;
+
     function Find_Unit (
         This : in out Board;
         Team : in Player_ID;
