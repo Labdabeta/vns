@@ -345,6 +345,10 @@ package body Memory is
             return False;
         end if;
 
+        if Which (Which'First + 1) < '0' or Which (Which'First + 1) > '9' then
+            return False;
+        end if;
+
         Val := Integer'Value (Id_Part);
         return Val >= Integer (Register_Index'First) and
                Val <= Integer (Register_Index'Last);
