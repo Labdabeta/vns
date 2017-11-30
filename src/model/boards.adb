@@ -468,6 +468,7 @@ package body Boards is
         Which_Way : in Coordinates.Direction) is
         Target : Coordinate := This.Units (Team, Unit).Position (T_WHITE);
     begin
+        This.Units (Team, Unit).Moving := False;
         if
             (Unit = UT_MORTAR or
              Unit = UT_MACHINEGUNNER_SS or
@@ -531,6 +532,7 @@ package body Boards is
         Cost : Resource_Points;
         Result : Boolean;
     begin
+        This.Units (Team, Unit).Shooting := True;
         case Unit is
             when UT_CAPTAIN => Cost := 32;
             when UT_MORTAR => Cost := 256;
