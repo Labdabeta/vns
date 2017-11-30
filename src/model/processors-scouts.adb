@@ -70,7 +70,12 @@ package body Processors.Scouts is
         end loop;
     end Set_Scout_Registers;
 
-    function Scout_Time (Op : in Instruction_ID) return Natural is
+    function Scout_Time (
+        Op : in Instruction_ID;
+        State : in out Board;
+        Team : in Player_ID;
+        Unit : in Unit_Type;
+        RA : in Register_Type) return Natural is
     begin
         if Is_Float_Op (Op) then
             return Float_Time (Op);
@@ -78,6 +83,7 @@ package body Processors.Scouts is
 
         case Op is
             when SCOUT_RUN =>
+                Prepare_Move (State, Team, Unit, To_Direction (RA));
                 return 1;
             when SCOUT_WSG | SCOUT_RSG | SCOUT_WFG | SCOUT_RFG =>
                 return 4;

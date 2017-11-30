@@ -301,7 +301,7 @@ package body Processors.Instructions is
                     when UT_MACHINEGUNNER_SS | UT_MACHINEGUNNER_FS =>
                         return Machinegunner_Time (Op);
                     when UT_SCOUT_SS | UT_SCOUT_FS =>
-                        return Scout_Time (Op);
+                        return Scout_Time (Op, Which.State, Team, Unit, RA);
                     when UT_RIFLEMAN_SS | UT_RIFLEMAN_FS =>
                         return Rifleman_Time (Op);
                 end case;
