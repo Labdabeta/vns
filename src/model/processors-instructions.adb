@@ -131,6 +131,18 @@ package body Processors.Instructions is
         end case;
     end Is_Taken;
 
+    function Extract_Immediate_Register (From : in Unsigned_32) return
+        Small_Immediate_Type is
+        Result : Small_Immediate_Type := 0;
+    begin
+        if (From and 2#1000000000#) /= 0 then
+            Result := Small_Immediate_Type'First;
+        end if;
+
+        Result := Result + Small_Immediate_Type (From and 2#111111111#);
+        return Result;
+    end Extract_Immediate_Register;
+
     function Compute_Time (
         Which : in out Game;
         Unit : in Unit_Type;
@@ -149,9 +161,7 @@ package body Processors.Instructions is
         RA : Register_Type renames Me.Registers (A);
         RB : Register_Type renames Me.Registers (B);
         RC : Register_Type renames Me.Registers (C);
-        -- TODO: On all uses of setting small deal with negatives properly!
-        Small : Small_Immediate_Type := Small_Immediate_Type (
-            PCVal and 2#1111111111#);
+        Small : Small_Immediate_Type := Extract_Immediate_Register (PCVal);
         Immediate : Address_Type := Address_Type (
             PCVal and 2#11111111111111111111#);
     begin
@@ -329,9 +339,7 @@ package body Processors.Instructions is
         A : Register_Type renames Me.Registers (RA);
         B : Register_Type renames Me.Registers (RB);
         C : Register_Type renames Me.Registers (RC);
-        -- TODO: On all uses of setting small deal with negatives properly!
-        Small : Small_Immediate_Type := Small_Immediate_Type (
-            PCVal and 2#1111111111#);
+        Small : Small_Immediate_Type := Extract_Immediate_Register (PCVal);
         Immediate : Address_Type := Address_Type (
             PCVal and 2#11111111111111111111#);
         Position : Coordinate renames Us.Position (Team);
