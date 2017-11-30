@@ -107,7 +107,10 @@ package body Processors.Scouts is
         Machines : in out Processor_Array) is
     begin
         case Op is
-            when SCOUT_RUN => Do_Move (State, Team, Unit, To_Direction (A));
+            when SCOUT_RUN =>
+                Do_Move (State, Team, Unit, To_Direction (A));
+                B := Register_Type (Position.X);
+                C := Register_Type (Position.Y);
             when SCOUT_HIT => Do_Hit (State, Team, Unit, To_Direction (A));
             when SCOUT_WSG =>
                 Support (Team, X_Coordinate (B), Y_Coordinate (C)) := A;
