@@ -149,6 +149,7 @@ package body Processors.Instructions is
         RA : Register_Type renames Me.Registers (A);
         RB : Register_Type renames Me.Registers (B);
         RC : Register_Type renames Me.Registers (C);
+        -- TODO: On all uses of setting small deal with negatives properly!
         Small : Small_Immediate_Type := Small_Immediate_Type (
             PCVal and 2#1111111111#);
         Immediate : Address_Type := Address_Type (
@@ -328,6 +329,7 @@ package body Processors.Instructions is
         A : Register_Type renames Me.Registers (RA);
         B : Register_Type renames Me.Registers (RB);
         C : Register_Type renames Me.Registers (RC);
+        -- TODO: On all uses of setting small deal with negatives properly!
         Small : Small_Immediate_Type := Small_Immediate_Type (
             PCVal and 2#1111111111#);
         Immediate : Address_Type := Address_Type (

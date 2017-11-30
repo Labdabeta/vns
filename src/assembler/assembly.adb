@@ -415,6 +415,7 @@ package body Assembly is
                                 Missing_Labels, To_Unbounded_String (Loc)),
                             Update_Missing_Label'Access);
                     end;
+                    Current := Next_Terminal;
                 else
                     Current := Next_Terminal;
                     String_Ints_Maps.Insert (
