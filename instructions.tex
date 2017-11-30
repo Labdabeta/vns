@@ -17,7 +17,7 @@
            who,wht,qcs,qct,qbp,qck,gnd,whr,dst,cvr,ded,sht,dir,wlk,crl,swm,cap,rtt,hid,say,rad,yel,ear,die,nrt,nre,est,soe,sot,sow,wst,nrw,
            wcs,wct,wbp,wcl,tcs,tct,tbp,tcl,pnt,ccs,cct,cbp,ccl,ucs,uct,ubp,ucl,dcs,dct,dbp,dcl,mcs,mct,mbp,mcl,rcs,rct,rbp,rcl,tim,dly,adv,
            ask,plz,beg,gvl,kmk,sac,bom,air,sum,hak,emp,all,rmt,rsn,res,ref,rms,rmf,rss,rsf,rrs,rrf,wmt,wsn,wes,wef,wms,wmf,wss,wsf,wrs,wrf,
-           wtg,rtg,wsg,rsg,wfg,rfg,itf,fad,fsu,fmu,fdv,cel,flr,sin,cos,tan,pow,asn,acs,atn,log,fcp,mle,set,css,cfs,wss,wfs,gup,sup,cam,unc,
+           wtg,rtg,wsg,rsg,wfg,rfg,itf,fad,fsu,fmu,fdv,cel,rtf,sin,cos,tan,pow,asn,acs,atn,log,fcp,mle,set,css,cfs,wss,wfs,gup,sup,cam,unc,
            hip,nmr,ist,tgt,lie,mor,wir,cut,snd,dig,mlf,run,hit,raw},
  sensitive=false,
  comment=[l]{;},
@@ -276,6 +276,13 @@ properties. First nothing can be built on them, nor can units set up on them.
 Additionally they do not count as increased distance for weapon shots, so a unit
 on the shore can see all other units in or on the river as if they were right
 next to them.
+
+\subsection{Map}
+
+The map is fixed and all coordinates are transformed relative to each team. As
+such each team views the map's initial configuration as:
+
+{\centering\includegraphics[width=\textwidth]{res/map.png}\par}
 
 \subsection{Camouflage}
 
