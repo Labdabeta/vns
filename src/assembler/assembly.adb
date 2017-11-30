@@ -383,15 +383,14 @@ package body Assembly is
             return Ret;
         end Modifier;
 
-        procedure Set_Label (To : Unbounded_String) is
+        procedure Set_Label (Value : in out Cell; To : Unbounded_String) is
             -- Because for some reason To is passed by reference
             -- Thus Next_Terminal breaks it after keychecking
             Loc : String := To_String (To);
         begin
             if String_Int_Maps.Contains (Labels, To_Unbounded_String (Loc)) then
                 Current := Next_Terminal;
-                Set_Address (
-                    Result.Data (Unit) (Result.Lengths (Unit)),
+                Set_Address (Value,
                     Address_Type (
                         Integer (String_Int_Maps.Element (
                             Labels, To_Unbounded_String (Loc))) + Modifier));
@@ -493,7 +492,7 @@ package body Assembly is
                     Error ("expected argument type.");
                 end if;
             elsif Current.Kind = IDENTIFIER then
-                Set_Label (Current.Data);
+                Set_Label (Value, Current.Data);
             elsif Current.Kind = DOT then
                 Current := Next_Terminal;
                 Set_Address (Value,
@@ -546,7 +545,7 @@ package body Assembly is
                     Error ("can't have a negative address immediate");
                 end if;
             elsif Current.Kind = IDENTIFIER then
-                Set_Label (Current.Data);
+                Set_Label (Value, Current.Data);
             elsif Current.Kind = DOT then
                 Current := Next_Terminal;
                 Set_Address (Value,
