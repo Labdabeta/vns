@@ -515,15 +515,15 @@ package body Processors.Instructions is
                         C := -1;
                     end if;
                 else
-                    if Get_Unit (State, To_Unit (A), Enemy).Alive and
-                        not Get_Unit (State, To_Unit (A), Enemy).Hidden and
+                    if Get_Unit (State, To_Unit (-A), Enemy).Alive and
+                        not Get_Unit (State, To_Unit (-A), Enemy).Hidden and
                         not (To_Unit (A) = UT_SNIPER and
-                            Get_Unit (State, To_Unit (A), Enemy).Setup)
+                            Get_Unit (State, To_Unit (-A), Enemy).Setup)
                     then
                         B := Register_Type (Get_Unit (
-                            State, To_Unit (A), Enemy).Position (Team).X);
+                            State, To_Unit (-A), Enemy).Position (Team).X);
                         C := Register_Type (Get_Unit (
-                            State, To_Unit (A), Enemy).Position (Team).Y);
+                            State, To_Unit (-A), Enemy).Position (Team).Y);
                     else
                         B := -1;
                         C := -1;
