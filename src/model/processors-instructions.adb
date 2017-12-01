@@ -517,7 +517,7 @@ package body Processors.Instructions is
                 else
                     if Get_Unit (State, To_Unit (-A), Enemy).Alive and
                         not Get_Unit (State, To_Unit (-A), Enemy).Hidden and
-                        not (To_Unit (A) = UT_SNIPER and
+                        not (To_Unit (-A) = UT_SNIPER and
                             Get_Unit (State, To_Unit (-A), Enemy).Setup)
                     then
                         B := Register_Type (Get_Unit (
