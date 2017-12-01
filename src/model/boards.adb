@@ -255,7 +255,7 @@ package body Boards is
         Team : in Player_ID;
         Unit : in Unit_Type) return Boolean is
     begin
-        return State.Units (Team, Unit).Position (T_WHITE) = Home_Base;
+        return State.Units (Team, Unit).Position (Enemy_Of (Team)) = Home_Base;
     end Is_On_Target;
 
     function Team_Of (
