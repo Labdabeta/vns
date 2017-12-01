@@ -356,6 +356,9 @@ begin
         end if;
     end loop Frame_Loop;
 
+    Ada.Text_IO.Put_Line (
+        Team_ID'Image (Games.Winner (The_Game.all)) & " won!");
+
     SDL.Finalize;
     Games.Free_Game (The_Game);
 end Runner;
