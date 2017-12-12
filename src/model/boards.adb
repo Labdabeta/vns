@@ -496,6 +496,7 @@ package body Boards is
         Which_Way : in Coordinates.Direction) is
         Target : Coordinate := This.Units (Team, Unit).Position (T_WHITE);
     begin
+        This.Units (Team, Unit).Moving := False;
         Apply_Direction (Target, To_Team (Which_Way, Team));
         if (This.Terrain (Target.X, Target.Y) = TT_OPEN or
             This.Terrain (Target.X, Target.Y) = TT_BEACH or
@@ -514,6 +515,7 @@ package body Boards is
         Which_Way : in Coordinates.Direction) is
         Target : Coordinate := This.Units (Team, Unit).Position (T_WHITE);
     begin
+        This.Units (Team, Unit).Moving := False;
         Apply_Direction (Target, To_Team (Which_Way, Team));
         if This.Terrain (Target.X, Target.Y) = TT_WATER and
             Team_Of (This, To_Location (Target, T_WHITE)) = T_NONE
@@ -532,7 +534,7 @@ package body Boards is
         Cost : Resource_Points;
         Result : Boolean;
     begin
-        This.Units (Team, Unit).Shooting := True;
+        This.Units (Team, Unit).Shooting := False;
         case Unit is
             when UT_CAPTAIN => Cost := 32;
             when UT_MORTAR => Cost := 256;
