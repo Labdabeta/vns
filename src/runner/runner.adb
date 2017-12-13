@@ -127,7 +127,7 @@ procedure Runner is
 
     -- 0 = paused, Natural'Last = as fast as possible
     Frame_Rate : Natural := 0;
-    Old_Rate : Natural := 60;
+    Old_Rate : Natural := 5;
     Next : Time;
     procedure Draw_Game is
         B : Boards.Board := The_Game.State;
@@ -333,9 +333,9 @@ begin
                                 Old_Rate := Frame_Rate;
                                 Frame_Rate := Natural'Last;
                             when KEY_UP =>
-                                Frame_Rate := Frame_Rate + 10;
+                                Frame_Rate := Frame_Rate + 1;
                             when KEY_DOWN =>
-                                Frame_Rate := Frame_Rate - 10;
+                                Frame_Rate := Frame_Rate - 1;
                             when KEY_SPACE =>
                                 Old_Rate := Frame_Rate;
                                 Frame_Rate := 0;
