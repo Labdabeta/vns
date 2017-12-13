@@ -576,7 +576,7 @@ package body Boards is
             return Result;
         end if;
 
-        for Index in Positive range Path'First + 1 .. Path'Length loop
+        for Index in Positive range Path'First .. Path'Last loop
             for P in This.Units'Range (1) loop
                 for U in This.Units'Range (2) loop
                     if This.Units (P, U).Position (T_WHITE) = Path (Index) and

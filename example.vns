@@ -1,96 +1,100 @@
 #names.vns
 
-!captain
-
-; First gather enough resources to fire a quick mortar
-gvl
-gvl
-ask
-
-; Now run to the corner
-to_corner: dir r1, r0, r0
-wlk r1, r2, r3
-bnz r2, to_corner
-bnz r3, to_corner
-
-; Once in corner just grovel hard
-gvl
-jiz r0, .-1
-
-!mortar
-; Upgrade CPU 3 times
-ucl r1
-jiz r1, .-1
-set
-ucl r1
-jiz r1, .-1
-ucl r1
-jiz r1, .-1
-
-; Fire at enemy core repeatedly
-add r1, r0, 7
-sht r0, 30, r1
-jiz r0, .-1
-
-!sniper
-; Right away fire a shot at enemy mortar then lie down
-add r1, r0, 7
-sht r0, 30, r1
-lie
-
-; Get the first predictor upgrade for significant main loop speedup
-ubp r1
-jiz r1, .-1
-
-main_loop:; Clock, step forward, fire at nearest, repeat
-wlk east, r2, r3
-cmp r1, r2, 9; check if we're at water
-biz r1, traverse_water
-sht r1, r12, r13
-jiz r0, main_loop
-
-traverse_water:
-swm 2, r2, r3
-swm 2, r2, r3
-jiz r0, main_loop
-
-!engineer_ss
-to_beach:; Get to the beach
-add r1, r0, 17
-dir r2, r1, 15
-wlk r2, r3, r4
-cmp r5, r3, r1
-bnz r5, to_beach
-cmp r5, r4, 15
-bnz r5, to_beach
-
-; Start laying wire
-wir east, r0, r0
-wir north, r0, r0
-wlk west, r0, r0
-wir east, r0, r0
-wlk north, r0, r0
-wir north, r0, r0
-jiz r0, .-4
-
-!engineer_fs
-; TODO
-
-!mg_ss
-; TODO
-
-!mg_fs
-; TODO
-
 !scout_ss
-; TODO
+    run north_east, r0, r0
+    run north_east, r0, r0
+    run north_east, r0, r0
+    run north_east, r0, r0
+    run north_east, r0, r0
+    ; Make sure the sniper doesn't shoot us in the back
+    sub r18, r0, 1
+    sub r19, r0, 1
+    hid r0, 63 ; wait for scout_fs to cross first
+    run east, r0, r0
+    swm north_east, r0, r0
+    swm east, r0, r0
+    run north_east, r0, r0
+
+    ; hunt nearest enemies
+the_hunt:
+    dst r1, r22, r23
+    cmp r1, r1, 3
+    jlz r1, panic
+    jiz r0, dont_panic
+panic:
+    blx r0, murder_nearest; this would be a panic
+    jiz r0, the_hunt
+dont_panic:
+    wht r1, r22, r23
+    cmp r2, r1, -6
+    jiz r2, dont_tell_ss
+    blx r0, tell_sniper
+    jiz r0, the_hunt
+dont_tell_ss:
+    cmp r2, r1, -7
+    jiz r2, dont_tell
+    blx r0, tell_sniper
+    jiz r0, the_hunt
+dont_tell:
+    dir r1, r22, r23
+    run r1, r0, r0
+    jiz r0, the_hunt
+
+murder_nearest:
+    sht r1, r22, r23
+    blx r14
+
+tell_sniper:
+    add r18, r0, r22
+    add r19, r0, r23
+    lie
+    jiz r20, .
+    gup
+    blx r14
+
 
 !scout_fs
-; TODO
+    run north_east, r0, r0
+    run north_east, r0, r0
+    run north_east, r0, r0
+    run north_east, r0, r0
+    run north_east, r0, r0
+    run north_east, r0, r0
+    swm north_east, r0, r0
+    swm east, r0, r0
+    run north_east, r0, r0
+    run south_east, r0, r0
 
-!rifleman_ss
-; TODO
+    ; Bee-line for enemy base and cap it
+    add r1, r0, 8
+to_base:
+    dir r2, 31, r1
+    run r2, r3, r4
+    sub r3, r3, 31
+    jnz r3, to_base
+    sub r4, r4, 8
+    jnz r4, to_base
+    cap ; game over, so who cares what next!
 
-!rifleman_fs
-; TODO
 
+!sniper
+    wlk east, r0, r0
+    wlk east, r0, r0
+    wlk east, r0, r0
+    wlk east, r0, r0
+    wlk east, r0, r0
+    wlk east, r0, r0
+    wlk east, r0, r0
+    wlk east, r0, r0
+    wlk east, r0, r0
+    cam
+    lie
+wait_for_target:
+    add r24, r0, r0; zero the response register
+    cmp r1, r20, -1
+    jnz r1, wait_for_target
+    ; murder time!
+    sht r1, r20, r21
+    add r24, r0, 1; alert done-ness
+    cam
+    jiz r0, wait_for_target
