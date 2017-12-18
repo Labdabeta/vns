@@ -1,5 +1,5 @@
 project Assembler is
-    for Source_Dirs use ("assembler", "model");
+    for Source_Dirs use ("assembler", "model", ".");
     for Object_Dir use "../build";
     for Exec_Dir use "..";
 

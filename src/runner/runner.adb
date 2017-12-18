@@ -2,6 +2,7 @@ with Traceback;
 with Logger;
 with Getopt; use Getopt;
 
+with Version;
 with SDL; use SDL;
 with Viewer;
 
@@ -40,7 +41,7 @@ procedure Runner is
 
     procedure Show_Version is
     begin
-        Put_Line ("v0.1 POC");
+        Put_Line ("Von Neumann Standing Version " & Version.Tag);
     end Show_Version;
 
     Break_Frame : Natural := 0;
@@ -72,13 +73,14 @@ begin
             when 'x' =>
                 Break_Frame := Natural'Value (Option_Argument);
             when Option_Long =>
-                if Option_Argument = "--version" then
+                if Argument (Option_Index) = "--version" then
                     Show_Version;
-                elsif Option_Argument = "--help" then
+                elsif Argument (Option_Index) = "--help" then
                     Show_Help;
                 else
                     Show_Help;
                 end if;
+                Option_Index := Option_Index + 1;
             when others => Show_Help;
         end case;
     end loop;
