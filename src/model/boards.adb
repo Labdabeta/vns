@@ -754,10 +754,11 @@ package body Boards is
         Team : in Player_ID;
         Unit : in Unit_Type;
         Down : in Boolean := False) return Boolean is
-        Cost : Resource_Points := Cache_Size_Cost (This.Units (Team,
-            Unit).Cache_Space);
+        Level : Cache_Size := This.Units (Team, Unit).Cache_Space;
+        Cost : Resource_Points;
     begin
         if Down then
+            Cost := Cache_Size_Cost (Level);
             if This.Units (Team, Unit).Cache_Space = CS_NONE then
                 return False;
             else
@@ -767,6 +768,7 @@ package body Boards is
                 return True;
             end if;
         else
+            Cost := Cache_Size_Cost (Cache_Size'Succ (Level));
             if This.Points (Team) < Cost then
                 return False;
             else
@@ -783,10 +785,11 @@ package body Boards is
         Team : in Player_ID;
         Unit : in Unit_Type;
         Down : in Boolean := False) return Boolean is
-        Cost : Resource_Points := Cache_Type_Cost (This.Units (Team,
-            Unit).Cache_Kind);
+        Level : Cache_Type := This.Units (Team, Unit).Cache_Kind;
+        Cost : Resource_Points;
     begin
         if Down then
+            Cost := Cache_Type_Cost (Level);
             if This.Units (Team, Unit).Cache_Kind = CT_NONE then
                 return False;
             else
@@ -796,6 +799,7 @@ package body Boards is
                 return True;
             end if;
         else
+            Cost := Cache_Type_Cost (Cache_Type'Succ (Level));
             if This.Points (Team) < Cost then
                 return False;
             else
@@ -812,10 +816,11 @@ package body Boards is
         Team : in Player_ID;
         Unit : in Unit_Type;
         Down : in Boolean := False) return Boolean is
-        Cost : Resource_Points := Branch_Type_Cost (This.Units (Team,
-            Unit).Branch_Predictor);
+        Level : Branch_Type := This.Units (Team, Unit).Branch_Predictor;
+        Cost : Resource_Points;
     begin
         if Down then
+            Cost := Branch_Type_Cost (Level);
             if This.Units (Team, Unit).Branch_Predictor = BT_NONE then
                 return False;
             else
@@ -825,6 +830,7 @@ package body Boards is
                 return True;
             end if;
         else
+            Cost := Branch_Type_Cost (Branch_Type'Succ (Level));
             if This.Points (Team) < Cost then
                 return False;
             else
@@ -841,10 +847,11 @@ package body Boards is
         Team : in Player_ID;
         Unit : in Unit_Type;
         Down : in Boolean := False) return Boolean is
-        Cost : Resource_Points := Speed_Cost (This.Units (Team,
-            Unit).Speed);
+        Level : CPU_Speed := This.Units (Team, Unit).Speed;
+        Cost : Resource_Points;
     begin
         if Down then
+            Cost := Speed_Cost (Level);
             if This.Units (Team, Unit).Speed = CPUS_EIGHT_FRAMES then
                 return False;
             else
@@ -854,6 +861,7 @@ package body Boards is
                 return True;
             end if;
         else
+            Cost := Speed_Cost (CPU_Speed'Succ (Level));
             if This.Points (Team) < Cost then
                 return False;
             else
