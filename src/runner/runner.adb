@@ -1,5 +1,6 @@
 with Traceback;
 with Logger;
+with Getopt; use Getopt;
 
 with SDL; use SDL;
 with Viewer;
@@ -10,27 +11,79 @@ with Processors;
 with Boards; use Boards;
 with Loader;
 
-with Ada.Command_Line;
-with Ada.Text_IO;
+with Ada.Command_Line; use Ada.Command_Line;
+with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Real_Time; use Ada.Real_Time;
 
 procedure Runner is
     Max_Frame_Rate : constant := 60;
     The_Game : Games.Game_Access := new Games.Game;
+    Next_Option : Character;
+    Option_String : constant String := "hdqvw:b:x:f";
+
+    procedure Show_Help is
+    begin
+        Put_Line ("Usage: " & Command_Name & " [OPTION]... -w WHITE -b BLACK");
+        Put_Line ("Run a game of Von Neumann Standing.");
+        Put_Line (ASCII.HT & "-w FILE" & ASCII.HT &
+            "load FILE as team white binary");
+        Put_Line (ASCII.HT & "-b FILE" & ASCII.HT &
+            "load FILE as team black binary");
+        Put_Line (ASCII.HT & "-h, --help" & ASCII.HT &
+            "show this help message");
+        Put_Line (ASCII.HT & "-d" & ASCII.HT & "set debug mode (DIE->LOG)");
+        Put_Line (ASCII.HT & "-q" & ASCII.HT & "set quiet mode");
+        Put_Line (ASCII.HT & "-v" & ASCII.HT & "set verbose mode");
+        Put_Line (ASCII.HT & "-x" & ASCII.HT & "set start frame");
+        Put_Line (ASCII.HT & "--version" & ASCII.HT & "print version number");
+    end Show_Help;
+
+    procedure Show_Version is
+    begin
+        Put_Line ("v0.1 POC");
+    end Show_Version;
+
+    Break_Frame : Natural := 0;
+    White_Loaded : Boolean := False;
+    Black_Loaded : Boolean := False;
 begin
-    if Ada.Command_Line.Argument_Count /= 2 then
-        Ada.Text_IO.Put_Line (
-            Ada.Command_Line.Command_Name & " [white] [black]");
-        Ada.Text_IO.Put_Line (
-            ASCII.HT & "[white] - The assembled team white binary.");
-        Ada.Text_IO.Put_Line (
-            ASCII.HT & "[black] - The assembled team black binary.");
-        Ada.Text_IO.Put_Line ("");
-        Ada.Text_IO.Put_Line ("Runs a game of Von Neumann Standing.");
-        Ada.Text_IO.Put_Line ("");
-        Ada.Text_IO.Put_Line ("An assembled binary consists of the 11 " &
-        "executables for the team, each prefixed with their word length " &
-        "across 4 bytes.");
+    if Argument_Count = 0 then
+        Show_Help;
+        return;
+    end if;
+
+    Games.Initialize (The_Game.all);
+    loop
+        Next_Option := Get_Option (Option_String);
+
+        exit when Next_Option = Option_End;
+
+        case Next_Option is
+            when 'h' => Show_Help;
+            when 'd' => Games.Set_Debug_Mode (True);
+            when 'q' => Logger.Set_Verbosity (Logger.LOG_QUIET);
+            when 'v' => Logger.Set_Verbosity (Logger.LOG_VERBOSE);
+            when 'w' =>
+                Loader.Load_Team (The_Game.all, Option_Argument, T_WHITE);
+                White_Loaded := True;
+            when 'b' =>
+                Loader.Load_Team (The_Game.all, Option_Argument, T_BLACK);
+                Black_Loaded := True;
+            when 'x' =>
+                Break_Frame := Natural'Value (Option_Argument);
+            when Option_Long =>
+                if Option_Argument = "--version" then
+                    Show_Version;
+                elsif Option_Argument = "--help" then
+                    Show_Help;
+                else
+                    Show_Help;
+                end if;
+            when others => Show_Help;
+        end case;
+    end loop;
+
+    if not White_Loaded or not Black_Loaded then
         return;
     end if;
 
@@ -39,14 +92,11 @@ begin
         return;
     end if;
 
-    Games.Initialize (The_Game.all);
-
-    Loader.Load_Game (
-        The_Game.all,
-        Ada.Command_Line.Argument (1),
-        Ada.Command_Line.Argument (2));
-
     Viewer.Initialize;
+
+    for I in Natural range 1 .. Break_Frame loop
+        Games.Step_Game (The_Game.all);
+    end loop;
 
     while Games.Winner (The_Game.all) = Boards.T_NONE loop
         declare

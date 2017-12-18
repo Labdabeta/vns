@@ -3,6 +3,12 @@ with Boards;
 with Games;
 
 package Logger is
+    -- Used by 'user'
+    type Logger_Verbosity is (LOG_QUIET, LOG_NORMAL, LOG_VERBOSE);
+
+    procedure Set_Verbosity (As : in Logger_Verbosity);
+
+    -- Used by 'model'
     type Log_State is record
         Registers : Processors.Register_Array;
         State : Boards.Unit_State;
@@ -43,4 +49,6 @@ package Logger is
     procedure Toggle_Logging (
         Unit : in Boards.Unit_Type;
         Team : in Boards.Player_ID);
+private
+    Verbosity : Logger_Verbosity := LOG_NORMAL;
 end Logger;

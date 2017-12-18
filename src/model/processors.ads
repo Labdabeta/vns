@@ -29,6 +29,7 @@ package Processors is
     -- hood.
     procedure Initialize (This : out Unit_Processor);
     procedure Load_Code (This : in out Unit_Processor; Code : in Memory_Array);
+    procedure Set_Debug_Mode (Debug : in Boolean);
     procedure Set_Registers (
         Machines : in out Processor_Array;
         State : in Boards.Board);
@@ -81,4 +82,6 @@ private
         Advanced : Boolean;
         Behind : Boolean;
     end record;
+
+    Debug_Mode : Boolean := False;
 end Processors;

@@ -11,6 +11,7 @@ package Games is
         Tactical, Support, Flag : Processors.Shared_Grid;
         State : Boards.Board;
         Clock : Natural;
+        Debug : Boolean;
     end record;
     type Game_Access is access Game;
     subtype Not_Null_Game_Access is not null Game_Access;
@@ -22,6 +23,7 @@ package Games is
         Unit : in Boards.Unit_Type;
         Team : in Boards.Player_ID;
         Code : in Processors.Memory_Array);
+    procedure Set_Debug_Mode (Debug : in Boolean);
     procedure Step_Game (This : in out Game);
     function Winner (This : in Game) return Boards.Team_ID;
 private

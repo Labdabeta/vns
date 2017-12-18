@@ -8,6 +8,18 @@ package body Logger is
     Is_Logged : array (Unit_Type, Player_ID) of Boolean :=
         (others => (others => False));
 
+    procedure Set_Verbosity (As : in Logger_Verbosity) is
+    begin
+        Verbosity := As;
+        if Verbosity = LOG_VERBOSE then
+            for U in Is_Logged'Range (1) loop
+                for P in Is_Logged'Range (2) loop
+                    Is_Logged (U, P) := True;
+                end loop;
+            end loop;
+        end if;
+    end Set_Verbosity;
+
     procedure Log (What : in Log_Entry) is
     begin
         if not Is_Logged (What.Unit, What.Team) then
@@ -147,7 +159,7 @@ package body Logger is
         Team : in Boards.Player_ID;
         Wait : in Natural) is
     begin
-        if Is_Logged (Unit, Team) then
+        if Is_Logged (Unit, Team) and Verbosity = LOG_VERBOSE then
             Put_Line (
                 Boards.Player_ID'Image (Team) & " " &
                 Boards.Unit_Type'Image (Unit) & " CPU ready in " &
@@ -160,7 +172,7 @@ package body Logger is
         Team : in Boards.Player_ID;
         Wait : in Natural) is
     begin
-        if Is_Logged (Unit, Team) then
+        if Is_Logged (Unit, Team) and Verbosity = LOG_VERBOSE then
             Put_Line (
                 Boards.Player_ID'Image (Team) & " " &
                 Boards.Unit_Type'Image (Unit) & " Operation ready in " &
@@ -185,9 +197,11 @@ package body Logger is
         White : in Boards.Resource_Points;
         Black : in Boards.Resource_Points) is
     begin
-        Put_Line ("Universal Tick " & Natural'Image (Tick) &
-            " W|" & Resource_Points'Image (White) &
-            " B|" & Resource_Points'Image (Black));
+        if Verbosity = LOG_VERBOSE then
+            Put_Line ("Universal Tick " & Natural'Image (Tick) &
+                " W|" & Resource_Points'Image (White) &
+                " B|" & Resource_Points'Image (Black));
+        end if;
     end Log_UT;
 
     procedure Toggle_Logging (

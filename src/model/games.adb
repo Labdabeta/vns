@@ -22,6 +22,7 @@ package body Games is
         This.Shared := (others => (others => 0));
         Initialize (This.State);
         This.Clock := 0;
+        This.Debug := False;
 
         Random_Units.Reset (Unit_Generator);
         Random_Players.Reset (Player_Generator);
@@ -35,6 +36,11 @@ package body Games is
     begin
         Load_Code (This.Machines (Team, Unit), Code);
     end Load_Code;
+
+    procedure Set_Debug_Mode (Debug : in Boolean) is
+    begin
+        Processors.Set_Debug_Mode (Debug);
+    end Set_Debug_Mode;
 
     procedure Step_Game (This : in out Game) is
         Unit_Order : array (Unit_Type) of Unit_Type;

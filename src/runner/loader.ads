@@ -1,8 +1,9 @@
 with Games;
+with Boards;
 
 package Loader is
-    procedure Load_Game (
+    procedure Load_Team (
         The_Game : in out Games.Game;
-        White : in String;
-        Black : in String);
+        File : in String;
+        Team : in Boards.Player_ID);
 end Loader;

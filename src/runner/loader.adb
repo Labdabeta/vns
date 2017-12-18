@@ -7,15 +7,14 @@ package body Loader is
     package Register_IO is new Ada.Sequential_IO (Register_Type);
     use Register_IO;
 
-    procedure Load_Game (
+    procedure Load_Team (
         The_Game : in out Games.Game;
-        White : in String;
-        Black : in String) is
+        File : in String;
+        Team : in Boards.Player_ID) is
         -- Loads the 'next' memory array from the file
         procedure Load_Memory_Array_From_File (
             File : in File_Type;
-            Unit : in Unit_Type;
-            Team : in Player_ID) is
+            Unit : in Unit_Type) is
             Length : Register_Type;
         begin
             Read (File, Length);
@@ -33,15 +32,10 @@ package body Loader is
 
         Current : File_Type;
     begin
-        Open (Current, In_File, White);
+        Open (Current, In_File, File);
         for U in Unit_Type'Range loop
-            Load_Memory_Array_From_File (Current, U, T_WHITE);
+            Load_Memory_Array_From_File (Current, U);
         end loop;
         Close (Current);
-        Open (Current, In_File, Black);
-        for U in Unit_Type'Range loop
-            Load_Memory_Array_From_File (Current, U, T_BLACK);
-        end loop;
-        Close (Current);
-    end Load_Game;
+    end Load_Team;
 end Loader;

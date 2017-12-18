@@ -573,8 +573,11 @@ package body Processors.Instructions is
             when COMMON_YEL => Shared (Team, Immediate) := A;
             when COMMON_EAR => A := Shared (Team, Immediate);
             when COMMON_DIE =>
-                Logger.Log (A, B, C);
-                -- Kill_Unit (State, Team, Unit);
+                if Debug_Mode then
+                    Logger.Log (A, B, C);
+                else
+                    Kill_Unit (State, Team, Unit);
+                end if;
             when COMMON_NRT | COMMON_NRE | COMMON_EST | COMMON_SOE |
                 COMMON_SOT | COMMON_SOW | COMMON_WST | COMMON_NRW =>
                 declare

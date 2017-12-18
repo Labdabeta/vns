@@ -39,6 +39,11 @@ package body Processors is
         This.Memory (Code'Range) := Code;
     end Load_Code;
 
+    procedure Set_Debug_Mode (Debug : in Boolean) is
+    begin
+        Debug_Mode := Debug;
+    end Set_Debug_Mode;
+
     procedure Set_Registers (
         Machines : in out Processor_Array;
         State : in Board) is
