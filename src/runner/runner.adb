@@ -116,7 +116,8 @@ begin
     end loop;
 
     Ada.Text_IO.Put_Line (
-        Team_ID'Image (Games.Winner (The_Game.all)) & " won!");
+        Team_ID'Image (Games.Winner (The_Game.all)) & " won after " &
+        Natural'Image (The_Game.Clock) & "UT!");
 
     SDL.Finalize;
     Games.Free_Game (The_Game);
