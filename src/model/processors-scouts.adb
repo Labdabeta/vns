@@ -83,8 +83,12 @@ package body Processors.Scouts is
 
         case Op is
             when SCOUT_RUN =>
-                Prepare_Move (State, Team, Unit, To_Direction (RA));
-                return 1;
+                if Get_Unit (State, Unit, Team).Prone then
+                    return 0;
+                else
+                    Prepare_Move (State, Team, Unit, To_Direction (RA));
+                    return 1;
+                end if;
             when SCOUT_WSG | SCOUT_RSG | SCOUT_WFG | SCOUT_RFG =>
                 return 4;
             when SCOUT_CSS | SCOUT_CFS | SCOUT_WSS | SCOUT_WFS |
@@ -115,9 +119,11 @@ package body Processors.Scouts is
     begin
         case Op is
             when SCOUT_RUN =>
-                Do_Move (State, Team, Unit, To_Direction (A));
-                B := Register_Type (Us.Position (Team).X);
-                C := Register_Type (Us.Position (Team).Y);
+                if not Get_Unit (State, Unit, Team).Prone then
+                    Do_Move (State, Team, Unit, To_Direction (A));
+                    B := Register_Type (Us.Position (Team).X);
+                    C := Register_Type (Us.Position (Team).Y);
+                end if;
             when SCOUT_HIT => Do_Hit (State, Team, Unit, To_Direction (A));
             when SCOUT_WSG =>
                 Support (Team, X_Coordinate (B), Y_Coordinate (C)) := A;
