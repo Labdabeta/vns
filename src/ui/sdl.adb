@@ -96,7 +96,7 @@ package body SDL is
     function C_SDL_RenderClear (Renderer : in SDL_Renderer_ptr) return int;
     pragma Import (C, C_SDL_RenderClear, "SDL_RenderClear");
 
-    function C_SDL_RenderPresent (Renderer : in SDL_Renderer_ptr) return int;
+    procedure C_SDL_RenderPresent (Renderer : in SDL_Renderer_ptr);
     pragma Import (C, C_SDL_RenderPresent, "SDL_RenderPresent");
 
     function C_SDL_RenderCopyEx (
@@ -320,9 +320,7 @@ package body SDL is
     end Draw_Image_Centered;
 
     procedure End_Draw is begin
-        if C_SDL_RenderPresent (The_Renderer) /= 0 then
-            Ada.Text_IO.Put_Line ("RenderPresent: " & Value (C_SDL_GetError));
-        end if;
+        C_SDL_RenderPresent (The_Renderer);
     end End_Draw;
 
     procedure Finalize is begin
