@@ -35,6 +35,10 @@ package body Getopt is
                 return Option_End;
             end if;
 
+            if Current (Current'First) /= '-' then
+                return Option_End;
+            end if;
+
             if Current (Current'First + 1) = '-' then
                 if Current'Length = 2 then
                     Option_Index := Option_Index + 1;
