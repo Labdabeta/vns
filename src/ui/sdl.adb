@@ -142,6 +142,14 @@ package body SDL is
         return System.Address;
     pragma Import (C, C_SDL_CreateRGBSurfaceFrom, "SDL_CreateRGBSurfaceFrom");
 
+    function C_SDL_RenderDrawLine (
+        Renderer : SDL_Renderer_ptr;
+        X1 : int;
+        Y1 : int;
+        X2 : int;
+        Y2 : int) return int;
+    pragma Import (C, C_SDL_RenderDrawLine, "SDL_RenderDrawLine");
+
 --------------------------------------------------------------------------------
     --  SDL Constants
 --------------------------------------------------------------------------------
@@ -322,6 +330,33 @@ package body SDL is
     procedure End_Draw is begin
         C_SDL_RenderPresent (The_Renderer);
     end End_Draw;
+
+    procedure Draw_Line (
+        Using : in Colour;
+        From : in Coordinate;
+        To : in Coordinate) is
+    begin
+        if C_SDL_SetRenderDrawColor (
+            The_Renderer,
+            Unsigned_8 (Using.R),
+            Unsigned_8 (Using.G),
+            Unsigned_8 (Using.B),
+            Unsigned_8 (Using.A)) /= 0
+        then
+            Ada.Text_IO.Put_Line ("SetRenderDrawColor: " &
+                Value (C_SDL_GetError));
+        end if;
+
+        if C_SDL_RenderDrawLine (
+            The_Renderer,
+            int (From.X),
+            int (From.Y),
+            int (To.X),
+            int (To.Y)) /= 0
+        then
+            Ada.Text_IO.Put_Line ("RenderDrawLine: " & Value (C_SDL_GetError));
+        end if;
+    end Draw_Line;
 
     procedure Finalize is begin
         C_SDL_DestroyRenderer (The_Renderer);

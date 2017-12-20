@@ -122,6 +122,11 @@ package SDL is
     procedure Begin_Draw (On : Colour := (255, 0, 0, 0));
     procedure End_Draw; --  Actually render present
 
+    procedure Draw_Line (
+        Using : in Colour;
+        From : in Coordinate;
+        To : in Coordinate);
+
     function Within (
         Box : in Rectangle;
         Point : in Coordinate) return Boolean;

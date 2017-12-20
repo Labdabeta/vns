@@ -264,7 +264,10 @@ package body Boards is
     begin
         for P in This.Units'Range (1) loop
             for U in This.Units'Range (2) loop
-                if This.Units (P, U).Position = Where then
+                if
+                    This.Units (P, U).Position = Where and
+                    This.Units (P, U).Alive
+                then
                     return P;
                 end if;
             end loop;

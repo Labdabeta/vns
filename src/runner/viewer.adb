@@ -201,6 +201,16 @@ package body Viewer is
                         Draw_Image (
                             Sprite, Get_Render_Rect (Path (I)), Clips (ATTACK));
                     end loop;
+                    Draw_Line (
+                        Using => (255, 0, 0, 0),
+                        From => (
+                            X => 32 * Integer (Path (Path'First).X) + 16,
+                            Y => 32 * Integer (Path (Path'First).Y) + 16
+                            ),
+                        To => (
+                            X => 32 * Integer (Path (Path'Last).X) + 16,
+                            Y => 32 * Integer (Path (Path'Last).Y) + 16)
+                        );
                 end;
             end if;
 
@@ -299,9 +309,11 @@ package body Viewer is
                 when SDL.KEY_DOWN_EVENT =>
                     case What.Key is
                         when SDL.KEY_DOT =>
-                            Old_Rate := Frame_Rate;
-                            Frame_Rate := Natural'Last;
-                            Set_Next;
+                            if Frame_Rate /= Natural'Last then
+                                Old_Rate := Frame_Rate;
+                                Frame_Rate := Natural'Last;
+                                Set_Next;
+                            end if;
                         when SDL.KEY_UP =>
                             Frame_Rate := Frame_Rate + 1;
                             Set_Next;
