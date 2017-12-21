@@ -82,6 +82,23 @@ package body SDL is
     procedure C_SDL_DestroyRenderer (Renderer : in SDL_Renderer_ptr);
     pragma Import (C, C_SDL_DestroyRenderer, "SDL_DestroyRenderer");
 
+    procedure C_SDL_DestroyTexture (Texture : in System.Address);
+    pragma Import (C, C_SDL_DestroyTexture, "SDL_DestroyTexture");
+
+    function C_SDL_SetTextureAlphaMod (
+        Texture : in System.Address;
+        Alpha : in Unsigned_8)
+        return int;
+    pragma Import (C, C_SDL_SetTextureAlphaMod, "SDL_SetTextureAlphaMod");
+
+    function C_SDL_SetTextureColorMod (
+        Texture : in System.Address;
+        R : in Unsigned_8;
+        G : in Unsigned_8;
+        B : in Unsigned_8)
+        return int;
+    pragma Import (C, C_SDL_SetTextureColorMod, "SDL_SetTextureColorMod");
+
     function C_SDL_PollEvent (Event : access SDL_Event.SDL_Event) return int;
     pragma Import (C, C_SDL_PollEvent, "SDL_PollEvent");
 
@@ -108,9 +125,6 @@ package body SDL is
         Center : access SDL_Point;
         Flip : int) return int;
     pragma Import (C, C_SDL_RenderCopyEx, "SDL_RenderCopyEx");
-
-    procedure C_SDL_DestroyTexture (Texture : System.Address);
-    pragma Import (C, C_SDL_DestroyTexture, "SDL_DestroyTexture");
 
     function C_SDL_CreateTextureFromSurface (
         Renderer : in SDL_Renderer_ptr;
@@ -202,6 +216,11 @@ package body SDL is
         return Result;
     end Create_Image;
 
+    procedure Free_Image (Which : in out Image) is
+    begin
+        C_SDL_DestroyTexture (Which.Texture);
+    end Free_Image;
+
     procedure Display_Error is begin
         if C_SDL_ShowSimpleMessageBox (
             SDL_MESSAGEBOX_ERROR,
@@ -220,7 +239,8 @@ package body SDL is
         Rotation : in Angle := 0.0;
         Center : in Coordinate := (0, 0);
         VFlip : in Boolean := False;
-        HFlip : in Boolean := False) is
+        HFlip : in Boolean := False;
+        Blend : in Colour := (255, 255, 255, 255)) is
         C_Source : aliased SDL_Rect := (
             x => int (Source.Left),
             y => int (Source.Top),
@@ -243,6 +263,21 @@ package body SDL is
         if Which.Texture = System.Null_Address then
             Ada.Text_IO.Put_Line ("Can't render a null texture!");
             return;
+        end if;
+
+        -- First set alpha and colour mods
+        if C_SDL_SetTextureAlphaMod (Which.Texture, Unsigned_8 (Blend.A)) /= 0
+        then
+            Ada.Text_IO.Put_Line ("Warning: Alpha blending not supported.");
+        end if;
+
+        if C_SDL_SetTextureColorMod (
+            Which.Texture,
+            Unsigned_8 (Blend.R),
+            Unsigned_8 (Blend.G),
+            Unsigned_8 (Blend.B)) /= 0
+        then
+            Ada.Text_IO.Put_Line ("Warning: Colour blending not supported.");
         end if;
 
         if HFlip then
@@ -364,10 +399,6 @@ package body SDL is
         C_SDL_Quit;
     end Finalize;
 
-    procedure Free_Image (Which : in Image) is begin
-        C_SDL_DestroyTexture (Which.Texture);
-    end Free_Image;
-
     function Initialize (
        Title : in String;
        Width : in Positive;
@@ -384,7 +415,7 @@ package body SDL is
             SDL_WINDOWPOS_UNDEFINED,
             int (Width),
             int (Height),
-            0);
+            32); -- SDL_WINDOW_RESIZABLE
 
         if The_Window = Null_SDL_Window_ptr then
             Display_Error;

@@ -140,6 +140,8 @@ package SDL is
         Height : in Positive)
         return Image;
 
+    procedure Free_Image (Which : in out Image);
+
     procedure Draw_Image (
         Which : in Image;
         Destination : in Rectangle;
@@ -147,7 +149,8 @@ package SDL is
         Rotation : in Angle := 0.0;
         Center : in Coordinate := (0, 0);
         VFlip : in Boolean := False;
-        HFlip : in Boolean := False);
+        HFlip : in Boolean := False;
+        Blend : in Colour := (255, 255, 255, 255)); -- Sets alpha/col mod
 
     procedure Draw_Image_Centered (
         Which : in Image;

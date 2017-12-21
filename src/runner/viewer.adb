@@ -4,6 +4,7 @@ with Logger;
 with Coordinates; use Coordinates;
 with Boards; use Boards;
 with Sprite_Sheet;
+with Font_Sheet;
 with Ada.Real_Time; use Ada.Real_Time;
 
 package body Viewer is
@@ -114,6 +115,7 @@ package body Viewer is
         UT_SCOUT_FS => ((160, 608, 32, 32), (832, 608, 32, 32)));
 
     Sprite : SDL.Image;
+    Font : SDL.Image;
 
     -- 0 = paused, Natural'Last = as fast as possible
     Frame_Rate : Natural := 0;
@@ -123,6 +125,7 @@ package body Viewer is
     procedure Initialize is
     begin
         Sprite := SDL.Create_Image (Sprite_Sheet.Raw_Data (1)'Access, 448, 384);
+        Font := SDL.Create_Image (Font_Sheet.Raw_Data (1)'Access, 192, 192);
 
         -- This is a colour test
         SDL.Begin_Draw ((255, 127, 0, 255));
@@ -132,7 +135,7 @@ package body Viewer is
 
     procedure Finalize is
     begin
-        null;
+        null; -- TODO: implement SDL_DestroyTexture and use it on Sprite/Font
     end Finalize;
 
     procedure Draw_Game (Which : in Games.Game_Access) is

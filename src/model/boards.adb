@@ -155,7 +155,10 @@ package body Boards is
     begin
         for Index in Search_Path'Range loop
             for U in This.Units'Range (2) loop
-                if This.Units (Team, U).Position (T_WHITE) = Search_Path (Index)
+                if
+                    This.Units (Team, U).Position (T_WHITE) =
+                        Search_Path (Index) and
+                    This.Units (Team, U).Alive
                 then
                     if Skip_Left > 0 then
                         Skip_Left := Skip_Left - 1;
@@ -282,7 +285,10 @@ package body Boards is
     begin
         for P in This.Units'Range (1) loop
             for U in This.Units'Range (2) loop
-                if This.Units (P, U).Position = Where then
+                if
+                    This.Units (P, U).Position = Where and
+                    This.Units (P, U).Alive
+                then
                     return U;
                 end if;
             end loop;
@@ -351,10 +357,17 @@ package body Boards is
         Which_Way : in Coordinates.Direction;
         Result : out Coordinates.Coordinate) return Boolean is
         Space : Coordinate := This.Units (Team, Unit).Position (T_WHITE);
+        Found_Team : Team_ID;
+        Found_Unit : Unit_Type;
     begin
         loop
             Apply_Direction (Space, To_Team (Which_Way, Team));
-            if Team_Of (This, To_Location (Space, Team)) /= T_NONE then
+            Found_Team := Team_Of (This, To_Location (Space, Team));
+            Found_Unit := Unit_Of (This, To_Location (Space, Team));
+            if
+                Found_Team /= T_NONE and
+                This.Units (Found_Team, Found_Unit).Alive
+            then
                 Result := Space;
                 return True;
             end if;
@@ -378,7 +391,8 @@ package body Boards is
         for P in This.Units'Range (1) loop
             for U in This.Units'Range (2) loop
                 if This.Units (P, U).Shooting and
-                    This.Units (P, U).Destination = Where
+                    This.Units (P, U).Destination = Where and
+                    This.Units (P, U).Alive
                 then
                     return True;
                 end if;
@@ -396,7 +410,8 @@ package body Boards is
         for P in This.Units'Range (1) loop
             for U in This.Units'Range (2) loop
                 if This.Units (P, U).Shooting and
-                    This.Units (P, U).Destination = Where
+                    This.Units (P, U).Destination = Where and
+                    This.Units (P, U).Alive
                 then
                     return P;
                 end if;
@@ -414,7 +429,8 @@ package body Boards is
         for P in This.Units'Range (1) loop
             for U in This.Units'Range (2) loop
                 if This.Units (P, U).Shooting and
-                    This.Units (P, U).Destination = Where
+                    This.Units (P, U).Destination = Where and
+                    This.Units (P, U).Alive
                 then
                     return U;
                 end if;
@@ -583,7 +599,8 @@ package body Boards is
             for P in This.Units'Range (1) loop
                 for U in This.Units'Range (2) loop
                     if This.Units (P, U).Position (T_WHITE) = Path (Index) and
-                        (not This.Units (P, U).Prone or Index = Path'Last)
+                        (not This.Units (P, U).Prone or Index = Path'Last) and
+                        This.Units (P, U).Alive
                     then
                         This.Units (P, U).Alive := False;
                         return True;
