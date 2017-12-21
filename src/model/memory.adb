@@ -137,7 +137,7 @@ package body Memory is
             "ucl", "dcs", "dct", "dbp", "dcl", "mcs", "mct", "mbp",
             "mcl", "rcs", "rct", "rbp", "rcl", "tim", "dly", "adv",
             -- Specific
-            "wtg", "rtg", "wsg", "rsg", "wfg", "rfg", "itf", "fad",
+            "qhi", "qrs", "qsh", "qpr", "qsu", "qmv", "itf", "fad",
             "fsu", "fmu", "fdv", "cel", "flr", "sin", "cos", "tan",
             "pow", "asn", "acs", "atn", "log", "fcp", "mle", "set",
             "css", "cfs", "wss", "wfs", "bom", "air", "gup", "sup"),
@@ -179,7 +179,7 @@ package body Memory is
             "ucl", "dcs", "dct", "dbp", "dcl", "mcs", "mct", "mbp",
             "mcl", "rcs", "rct", "rbp", "rcl", "tim", "dly", "adv",
             -- Specific
-            "wir", "cut", "snd", "dig", "wfg", "rfg", "itf", "fad",
+            "wir", "cut", "snd", "dig", "qsu", "qmv", "itf", "fad",
             "fsu", "fmu", "fdv", "cel", "flr", "sin", "cos", "tan",
             "pow", "asn", "acs", "atn", "log", "fcp", "lie", "gup",
             "css", "cfs", "wss", "wfs", "bom", "air", "mor", "sup"),
@@ -200,7 +200,7 @@ package body Memory is
             "ucl", "dcs", "dct", "dbp", "dcl", "mcs", "mct", "mbp",
             "mcl", "rcs", "rct", "rbp", "rcl", "tim", "dly", "adv",
             -- Specific
-            "set", "gup", "wsg", "rsg", "wfg", "rfg", "itf", "fad",
+            "set", "gup", "qsh", "qpr", "qsu", "qmv", "itf", "fad",
             "fsu", "fmu", "fdv", "cel", "flr", "sin", "cos", "tan",
             "pow", "asn", "acs", "atn", "log", "fcp", "mle", "mlf",
             "css", "cfs", "wss", "wfs", "bom", "air", "mor", "sup"),
@@ -221,7 +221,7 @@ package body Memory is
             "ucl", "dcs", "dct", "dbp", "dcl", "mcs", "mct", "mbp",
             "mcl", "rcs", "rct", "rbp", "rcl", "tim", "dly", "adv",
             -- Specific
-            "run", "hit", "wsg", "rsg", "wfg", "rfg", "itf", "fad",
+            "run", "hit", "qsh", "qpr", "qsu", "qmv", "itf", "fad",
             "fsu", "fmu", "fdv", "cel", "flr", "sin", "cos", "tan",
             "pow", "asn", "acs", "atn", "log", "fcp", "lie", "gup",
             "css", "cfs", "wss", "wfs", "bom", "air", "mor", "sup"),
@@ -242,7 +242,7 @@ package body Memory is
             "ucl", "dcs", "dct", "dbp", "dcl", "mcs", "mct", "mbp",
             "mcl", "rcs", "rct", "rbp", "rcl", "tim", "dly", "adv",
             -- Specific
-            "wtg", "rtg", "wsg", "rsg", "wfg", "rfg", "itf", "fad",
+            "qhi", "qrs", "qsh", "qpr", "qsu", "qmv", "itf", "fad",
             "fsu", "fmu", "fdv", "cel", "flr", "sin", "cos", "tan",
             "pow", "asn", "acs", "atn", "log", "fcp", "lie", "gup",
             "css", "cfs", "wss", "wfs", "bom", "air", "mor", "sup"));

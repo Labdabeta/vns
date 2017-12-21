@@ -10,8 +10,8 @@ package body Processors.Engineers is
     ENGINEER_CUT : constant Instruction_ID := 97;
     ENGINEER_SND : constant Instruction_ID := 98;
     ENGINEER_DIG : constant Instruction_ID := 99;
-    ENGINEER_WFG : constant Instruction_ID := 100;
-    ENGINEER_RFG : constant Instruction_ID := 101;
+    ENGINEER_QSU : constant Instruction_ID := 100;
+    ENGINEER_QMV : constant Instruction_ID := 101;
     ENGINEER_LIE : constant Instruction_ID := 118;
     ENGINEER_GUP : constant Instruction_ID := 119;
     ENGINEER_CSS : constant Instruction_ID := 120;
@@ -74,8 +74,8 @@ package body Processors.Engineers is
         end if;
 
         case Op is
-            when ENGINEER_WFG | ENGINEER_RFG =>
-                return 4;
+            when ENGINEER_QSU | ENGINEER_QMV =>
+                return 1;
             when ENGINEER_WIR | ENGINEER_CUT | ENGINEER_SND | ENGINEER_DIG |
                 ENGINEER_CSS | ENGINEER_CFS | ENGINEER_WSS | ENGINEER_WFS |
                 ENGINEER_BOM | ENGINEER_AIR | ENGINEER_MOR | ENGINEER_SUP =>
@@ -96,8 +96,8 @@ package body Processors.Engineers is
         A : in out Register_Type;
         B : in out Register_Type;
         C : in out Register_Type;
-        Flags : in out Shared_Grid;
         Machines : in out Processor_Array) is
+        Enemy : Player_ID := Enemy_Of (Team);
     begin
         if Is_Float_Op (Op) then
             Float_Instruction (Op, A, B, C, Immediate);
@@ -120,10 +120,12 @@ package body Processors.Engineers is
                 Plant_Cover (State, Team, Unit, To_Direction (A), True);
                 B := Register_Type (Count_Wire (State));
                 C := Register_Type (Count_Cover (State));
-            when ENGINEER_WFG =>
-                Flags (Team, X_Coordinate (B), Y_Coordinate (C)) := A;
-            when ENGINEER_RFG =>
-                A := Flags (Team, X_Coordinate (B), Y_Coordinate (C));
+            when ENGINEER_QSU =>
+                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Setup);
+                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Setup);
+            when ENGINEER_QMV =>
+                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Moving);
+                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Moving);
             when ENGINEER_LIE => Set_Prone (State, Team, Unit, True);
             when ENGINEER_GUP => Set_Prone (State, Team, Unit, False);
             when ENGINEER_CSS | ENGINEER_CFS | ENGINEER_WSS | ENGINEER_WFS |

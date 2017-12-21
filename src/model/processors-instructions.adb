@@ -322,9 +322,6 @@ package body Processors.Instructions is
         Radios : Communications renames Which.Radios;
         Shared : Shared_Memory renames Which.Shared;
         Clock : Natural renames Which.Clock;
-        Tactical : Shared_Grid renames Which.Tactical;
-        Support : Shared_Grid renames Which.Support;
-        Flag : Shared_Grid renames Which.Flag;
         Us : Unit_State := Get_Unit (State, Unit, Team);
         Me : Unit_Processor renames Which.Machines (Team, Unit);
         PC : Register_Type renames Me.Registers (15);
@@ -675,22 +672,20 @@ package body Processors.Instructions is
                     when UT_CAPTAIN => Captain_Instruction (
                         Op, Team, Immediate, A, State, Shared, Radios);
                     when UT_MORTAR => Mortar_Instruction (
-                        Op, Team, Immediate, State, A, B, C, Tactical, Support,
-                        Flag, Machines);
+                        Op, Team, Immediate, State, A, B, C, Machines);
                     when UT_SNIPER => Sniper_Instruction (
                         Op, Team, Immediate, State, A, B, C, Machines);
                     when UT_ENGINEER_SS | UT_ENGINEER_FS =>
                         Engineer_Instruction (Op, Team, Unit, Immediate,
-                        State, A, B, C, Flag, Machines);
+                        State, A, B, C, Machines);
                     when UT_MACHINEGUNNER_SS | UT_MACHINEGUNNER_FS =>
                         Machinegunner_Instruction (Op, Team, Unit,
-                        Immediate, State, A, B, C, Support, Flag, Machines);
+                        Immediate, State, A, B, C, Machines);
                     when UT_SCOUT_SS | UT_SCOUT_FS => Scout_Instruction (
-                        Op, Team, Unit, Immediate, State, A, B, C, Support,
-                        Flag, Machines);
+                        Op, Team, Unit, Immediate, State, A, B, C, Machines);
                     when UT_RIFLEMAN_SS | UT_RIFLEMAN_FS =>
                         Rifleman_Instruction (Op, Team, Unit, Immediate,
-                        State, A, B, C, Tactical, Support, Flag, Machines);
+                        State, A, B, C, Machines);
                 end case;
         end case;
         New_Log.Post.Registers := Me.Registers;

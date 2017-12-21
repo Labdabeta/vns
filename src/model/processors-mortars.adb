@@ -3,15 +3,16 @@ with Coordinates; use Coordinates;
 
 with Processors.Asks; use Processors.Asks;
 with Processors.Floats; use Processors.Floats;
+with Processors.Registers; use Processors.Registers;
 
 package body Processors.Mortars is
     -- Instruction names
-    MORTAR_WTG : constant Instruction_ID := 96;
-    MORTAR_RTG : constant Instruction_ID := 97;
-    MORTAR_WSG : constant Instruction_ID := 98;
-    MORTAR_RSG : constant Instruction_ID := 99;
-    MORTAR_WFG : constant Instruction_ID := 100;
-    MORTAR_RFG : constant Instruction_ID := 101;
+    MORTAR_QHI : constant Instruction_ID := 96;
+    MORTAR_QRS : constant Instruction_ID := 97;
+    MORTAR_QSH : constant Instruction_ID := 98;
+    MORTAR_QPR : constant Instruction_ID := 99;
+    MORTAR_QSU : constant Instruction_ID := 100;
+    MORTAR_QMV : constant Instruction_ID := 101;
     MORTAR_MLE : constant Instruction_ID := 118;
     MORTAR_SET : constant Instruction_ID := 119;
     MORTAR_CSS : constant Instruction_ID := 120;
@@ -70,9 +71,9 @@ package body Processors.Mortars is
         end if;
 
         case Op is
-            when MORTAR_WTG | MORTAR_RTG | MORTAR_WSG | MORTAR_RSG |
-                MORTAR_WFG | MORTAR_RFG =>
-                return 4;
+            when MORTAR_QSU | MORTAR_QMV | MORTAR_QSH | MORTAR_QPR |
+                MORTAR_QHI | MORTAR_QRS =>
+                return 1;
             when MORTAR_CSS | MORTAR_CFS | MORTAR_WSS | MORTAR_WFS |
                 MORTAR_BOM | MORTAR_AIR =>
                 return 8;
@@ -93,28 +94,38 @@ package body Processors.Mortars is
         A : in out Register_Type;
         B : in out Register_Type;
         C : in out Register_Type;
-        Tactical : in out Shared_Grid;
-        Support : in out Shared_Grid;
-        Flag : in out Shared_Grid;
         Machines : in out Processor_Array) is
+        Enemy : Player_ID := Enemy_Of (Team);
     begin
         if Is_Float_Op (Op) then
             Float_Instruction (Op, A, B, C, Immediate);
         end if;
 
         case Op is
-            when MORTAR_WTG =>
-                Tactical (Team, X_Coordinate (B), Y_Coordinate (C)) := A;
-            when MORTAR_RTG =>
-                A := Tactical (Team, X_Coordinate (B), Y_Coordinate (C));
-            when MORTAR_WSG =>
-                Support (Team, X_Coordinate (B), Y_Coordinate (C)) := A;
-            when MORTAR_RSG =>
-                A := Support (Team, X_Coordinate (B), Y_Coordinate (C));
-            when MORTAR_WFG =>
-                Flag (Team, X_Coordinate (B), Y_Coordinate (C)) := A;
-            when MORTAR_RFG =>
-                A := Flag (Team, X_Coordinate (B), Y_Coordinate (C));
+            when MORTAR_QSU =>
+                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Setup);
+                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Setup);
+            when MORTAR_QMV =>
+                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Moving);
+                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Moving);
+            when MORTAR_QSH =>
+                B := From_Boolean (
+                    Get_Unit (State, To_Unit (A), Team).Shooting);
+                C := From_Boolean (
+                    Get_Unit (State, To_Unit (A), Enemy).Shooting);
+            when MORTAR_QPR =>
+                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Prone);
+                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Prone);
+            when MORTAR_QHI =>
+                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Hidden);
+                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Hidden);
+            when MORTAR_QRS =>
+                B := From_Boolean (
+                    Get_Unit (State, To_Unit (A), Team).Summoned or
+                    Get_Unit (State, To_Unit (A), Team).Retreating);
+                C := From_Boolean (
+                    Get_Unit (State, To_Unit (A), Enemy).Summoned or
+                    Get_Unit (State, To_Unit (A), Enemy).Retreating);
             when MORTAR_MLE => Do_Melee (State, Team, UT_MORTAR);
             when MORTAR_SET => Set_Setup (State, Team, UT_MORTAR, True);
             when MORTAR_GUP => Set_Setup (State, Team, UT_MORTAR, False);

@@ -8,7 +8,6 @@ package Games is
         Machines : Processors.Processor_Array;
         Radios : Processors.Communications;
         Shared : Processors.Shared_Memory;
-        Tactical, Support, Flag : Processors.Shared_Grid;
         State : Boards.Board;
         Clock : Natural;
         Debug : Boolean;

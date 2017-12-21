@@ -17,7 +17,7 @@
            who,wht,qcs,qct,qbp,qck,gnd,whr,dst,cvr,ded,sht,dir,wlk,crl,swm,cap,rtt,hid,say,rad,yel,ear,die,nrt,nre,est,soe,sot,sow,wst,nrw,
            wcs,wct,wbp,wcl,tcs,tct,tbp,tcl,pnt,ccs,cct,cbp,ccl,ucs,uct,ubp,ucl,dcs,dct,dbp,dcl,mcs,mct,mbp,mcl,rcs,rct,rbp,rcl,tim,dly,adv,
            ask,plz,beg,gvl,kmk,sac,bom,air,sum,hak,emp,all,rmt,rsn,res,ref,rms,rmf,rss,rsf,rrs,rrf,wmt,wsn,wes,wef,wms,wmf,wss,wsf,wrs,wrf,
-           wtg,rtg,wsg,rsg,wfg,rfg,itf,fad,fsu,fmu,fdv,cel,rtf,sin,cos,tan,pow,asn,acs,atn,log,fcp,mle,set,css,cfs,wss,wfs,gup,sup,cam,unc,
+           qhi,qrs,qsh,qpr,qsu,qmv,itf,fad,fsu,fmu,fdv,cel,rtf,sin,cos,tan,pow,asn,acs,atn,log,fcp,mle,set,css,cfs,wss,wfs,gup,sup,cam,unc,
            hip,nmr,ist,tgt,lie,mor,wir,cut,snd,dig,mlf,run,hit,raw},
  sensitive=false,
  comment=[l]{;},
@@ -727,6 +727,12 @@ The combat instructions are summarized below.
     \vnscode{SET} & Set up & Set up weapon. & 128 & Mortar/MG \\
     \vnscode{GUP} & Get up & Tear down weapon. & 128 & Mortar/MG \\
     \vnscode{DED a, b, c} & Dead & Set b and c if unit $a$ or $-a$ is dead respectively. & 1 & All \\
+    \vnscode{QHI a, b, c} & Query Hidden & Same as \vnscode{DED} but if hidden. & 1 & Mortar/Rifle \\
+    \vnscode{QRS a, b, c} & Query Retreat/Summon & Same as \vnscode{DED} but if retreating or summoned. & 1 & Mortar/Rifle \\
+    \vnscode{QSH a, b, c} & Query Shooting & Same as \vnscode{DED} but if shooting. & 1 & Mortar/MG/Scout/Rifle \\
+    \vnscode{QPR a, b, c} & Query Prone & Same as \vnscode{DED} but if prone. & 1 & Mortar/MG/Scout/Rifle \\
+    \vnscode{QSU a, b, c} & Query Setup & Same as \vnscode{DED} but if setup. & 1 & Mortar/Engineer/MG/Scout/Rifle \\
+    \vnscode{QMV a, b, c} & Query Moving & Same as \vnscode{DED} but if moving. & 1 & Mortar/Engineer/MG/Scout/Rifle \\
 \end{tabular}
 \end{minipage}
 
@@ -779,30 +785,6 @@ The communication instructions are summarized below.
 \end{tabular}
 \end{minipage}
 
-\subsubsection{Grid Operations}
-
-There are three grids that units can also use to communicate information. Each
-grid has one 32-bit value per space on the board. Only some units can access
-each grid. The grids are the tactical grid, the support grid, and the flag grid.
-All grid operations access their grids at the coordinate specified by b and c
-similarly to the query operations.
-
-The grid instructions are summarized below.
-
-\begin{minipage}{\textwidth}
-\captionof{table}{Grid Operations}
-\label{table:grid}
-\centering
-\begin{tabular}{lllll}
-    \hline \vnscode{CODE} & Instruction Names & Descriptions & Time (\RT) & Units \\ \hline
-    \vnscode{WTG a, b, c} & Write Tactical Grid & Set tactical grid to a. & 4 & Mortar, Rifle \\
-    \vnscode{RTG a, b, c} & Read Tactical Grid & Set a to tactical grid. & 4 & Mortar, Rifle \\
-    \vnscode{WSG a, b, c} & Write Support Grid & Set support grid to a. & 4 & Mortar, MG, Scout, Rifle \\
-    \vnscode{RSG a, b, c} & Read Support Grid & Set a to support grid. & 4 & Mortar, MG, Scout, Rifle \\
-    \vnscode{WFG a, b, c} & Write Flag Grid & Set flag grid to a. & 4 & Mortar, Engineer, MG, Scout, Rifle \\
-    \vnscode{RFG a, b, c} & Read Flag Grid & Set flag grid to a. & 4 & Mortar, Engineer, MG, Scout, Rifle \\
-\end{tabular}
-\end{minipage}
 
 \subsubsection{Request Operations}
 
@@ -1367,30 +1349,30 @@ click on them to see their reference table.
     95 & 94 & \hyperref[table:time]{\vnscode{DLY}} & Delay & 1 & All \\
     96 & 95 & \hyperref[table:time]{\vnscode{ADV}} & Advance & 4 & All \\
     97 & 96 & \hyperref[table:resource]{\vnscode{ASK}} & Ask & 4 & Captain \\
-    98 & 96 & \hyperref[table:grid]{\vnscode{WTG a, b, c}} & Write Tactical Grid & 4 & Mortar, Rifle \\
+    98 & 96 & \hyperref[table:combat]{\vnscode{QHI a, b, c}} & Query Hidden & 1 & Mortar, Rifle \\
     99 & 96 & \hyperref[table:sniper]{\vnscode{CAM}} & Camouflage & 64 & Sniper \\
     100 & 96 & \hyperref[table:combat]{\vnscode{WIR a, b, c}} & Wire & 8 & Engineer \\
     101 & 96 & \hyperref[table:combat]{\vnscode{SET}} & Set up & 128 & MG \\
     102 & 96 & \hyperref[table:movement]{\vnscode{RUN a, b, c}} & Run & 1 & Scout \\
     103 & 97 & \hyperref[table:resource]{\vnscode{PLZ}} & Please & 8 & Captain \\
-    104 & 97 & \hyperref[table:grid]{\vnscode{RTG a, b, c}} & Read Tactical Grid & 4 & Mortar, Rifle \\
+    104 & 97 & \hyperref[table:combat]{\vnscode{QRS a, b, c}} & Query Retreat/Summon & 1 & Mortar, Rifle \\
     105 & 97 & \hyperref[table:sniper]{\vnscode{UNC}} & Uncamouflage & 1 & Sniper \\
     106 & 97 & \hyperref[table:combat]{\vnscode{CUT a, b, c}} & Cut Wire & 8 & Engineer \\
     107 & 97 & \hyperref[table:combat]{\vnscode{GUP}} & Get up & 128 & MG \\
     108 & 97 & \hyperref[table:combat]{\vnscode{HIT a}} & Hit & 16 & Scout \\
     109 & 98 & \hyperref[table:resource]{\vnscode{BEG}} & Beg & 16 & Captain \\
-    110 & 98 & \hyperref[table:grid]{\vnscode{WSG a, b, c}} & Write Support Grid & 4 & Mortar, MG, Scout, Rifle \\
+    110 & 98 & \hyperref[table:combat]{\vnscode{QSH a, b, c}} & Query Shooting & 1 & Mortar, MG, Scout, Rifle \\
     111 & 98 & \hyperref[table:combat]{\vnscode{HIP a, b, c}} & Hip Shot & ? & Sniper \\
     112 & 98 & \hyperref[table:combat]{\vnscode{SND a, b, c}} & Sandbag & 8 & Engineer \\
     113 & 99 & \hyperref[table:resource]{\vnscode{GVL}} & Grovel & 32 & Captain \\
-    114 & 99 & \hyperref[table:grid]{\vnscode{RSG a, b, c}} & Read Support Grid & 4 & Mortar, MG, Scout, Rifle \\
+    114 & 99 & \hyperref[table:combat]{\vnscode{QPR a, b, c}} & Query Prone & 1 & Mortar, MG, Scout, Rifle \\
     115 & 99 & \hyperref[table:sniper]{\vnscode{NMR a, b, c}} & Next Mortar & 1 & Sniper \\
     116 & 99 & \hyperref[table:combat]{\vnscode{DIG a, b, c}} & Dig & 8 & Engineer \\
     117 & 100 & \hyperref[table:resource]{\vnscode{KMK}} & Kamakaze & 1 & Captain \\
-    118 & 100 & \hyperref[table:grid]{\vnscode{WFG a, b, c}} & Write Flag Grid & 4 & Mortar, Engineer, MG, Scout, Rifle \\
+    118 & 100 & \hyperref[table:combat]{\vnscode{QSU a, b, c}} & Query Setup & 1 & Mortar, Engineer, MG, Scout, Rifle \\
     119 & 100 & \hyperref[table:sniper]{\vnscode{IST a, b, c}} & Is Target & 8 & Sniper \\
     120 & 101 & \hyperref[table:resource]{\vnscode{SAC a}} & Sacrifice & 1 & Captain \\
-    121 & 101 & \hyperref[table:grid]{\vnscode{RFG a, b, c}} & Read Flag Grid & 4 & Mortar, Engineer, MG, Scout, Rifle \\
+    121 & 101 & \hyperref[table:combat]{\vnscode{QMV a, b, c}} & Query Moving & 1 & Mortar, Engineer, MG, Scout, Rifle \\
     122 & 101 & \hyperref[table:sniper]{\vnscode{TGT a, b, c}} & Target & 16 & Sniper \\
     123 & 102 & \hyperref[table:combat]{\vnscode{BOM}} & Bomb & 256 & Captain \\
     124 & 102 & \hyperref[table:float]{\vnscode{ITF a, i}} & Integer to Float & 8 & not Captain \\

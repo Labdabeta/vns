@@ -8,10 +8,10 @@ with Processors.Asks; use Processors.Asks;
 package body Processors.Machinegunners is
     MG_SET : constant Instruction_ID := 96;
     MG_GUP : constant Instruction_ID := 97;
-    MG_WSG : constant Instruction_ID := 98;
-    MG_RSG : constant Instruction_ID := 99;
-    MG_WFG : constant Instruction_ID := 100;
-    MG_RFG : constant Instruction_ID := 101;
+    MG_QSH : constant Instruction_ID := 98;
+    MG_QPR : constant Instruction_ID := 99;
+    MG_QSU : constant Instruction_ID := 100;
+    MG_QMV : constant Instruction_ID := 101;
     MG_MLE : constant Instruction_ID := 118;
     MG_MLF : constant Instruction_ID := 119;
     MG_CSS : constant Instruction_ID := 120;
@@ -82,8 +82,8 @@ package body Processors.Machinegunners is
         end if;
 
         case Op is
-            when MG_WSG | MG_RSG | MG_WFG | MG_RFG | MG_MLF =>
-                return 4;
+            when MG_QSU | MG_QMV | MG_QSH | MG_QPR =>
+                return 1;
             when MG_CSS | MG_CFS | MG_WSS | MG_WFS | MG_BOM |
                 MG_AIR | MG_MOR | MG_SUP =>
                 return 8;
@@ -105,9 +105,8 @@ package body Processors.Machinegunners is
         A : in out Register_Type;
         B : in out Register_Type;
         C : in out Register_Type;
-        Support : in out Shared_Grid;
-        Flags : in out Shared_Grid;
         Machines : in out Processor_Array) is
+        Enemy : Player_ID := Enemy_Of (Team);
     begin
         if Is_Float_Op (Op) then
             Float_Instruction (Op, A, B, C, Immediate);
@@ -116,14 +115,20 @@ package body Processors.Machinegunners is
         case Op is
             when MG_SET => Set_Setup (State, Team, Unit, True);
             when MG_GUP => Set_Setup (State, Team, Unit, False);
-            when MG_WSG =>
-                Support (Team, X_Coordinate (B), Y_Coordinate (C)) := A;
-            when MG_RSG =>
-                A := Support (Team, X_Coordinate (B), Y_Coordinate (C));
-            when MG_WFG =>
-                Flags (Team, X_Coordinate (B), Y_Coordinate (C)) := A;
-            when MG_RFG =>
-                A := Flags (Team, X_Coordinate (B), Y_Coordinate (C));
+            when MG_QSU =>
+                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Setup);
+                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Setup);
+            when MG_QMV =>
+                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Moving);
+                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Moving);
+            when MG_QSH =>
+                B := From_Boolean (
+                    Get_Unit (State, To_Unit (A), Team).Shooting);
+                C := From_Boolean (
+                    Get_Unit (State, To_Unit (A), Enemy).Shooting);
+            when MG_QPR =>
+                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Prone);
+                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Prone);
             when MG_MLE =>
                 Do_Melee (State, Team, Unit);
             when MG_MLF =>
