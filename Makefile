@@ -14,7 +14,10 @@ GPRCLEAN := $(if $(shell command -v gprclean 2> /dev/null),\
 VERSION_SOURCE=src/version.ads
 VERSION=$(shell git describe --tags)
 
-all: as run
+SDL_DIR=/usr/lib
+LATEX=pdflatex
+
+all: as run instructions
 
 config:
 	@echo 'package Version is' > $(VERSION_SOURCE)
@@ -25,9 +28,18 @@ as: config
 	$(GPRBUILD) -P src/assembler.gpr
 
 run: config
-	$(GPRBUILD) -P src/runner.gpr
+	$(GPRBUILD) -XSDL2_LIB_DIR=$(SDL_DIR) -P src/runner.gpr
+
+instructions: instructions.pdf
+
+%.pdf: %.tex
+	@$(LATEX) -interaction=batchmode $<
+	@$(LATEX) -interaction=batchmode $<
+	-@rm $*.aux $*.log $*.lot $*.out $*.toc
+
 
 clean: config
 	$(GPRCLEAN) -P src/assembler.gpr
 	$(GPRCLEAN) -P src/runner.gpr
+
 

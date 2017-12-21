@@ -37,6 +37,12 @@ package Processors is
         Which : in out Games.Game;
         Unit : in Boards.Unit_Type;
         Team : in Boards.Player_ID);
+
+    subtype Processor_Representation is String (1 .. 26);
+    function Get_Representation (
+        Which : in Unit_Processor;
+        Unit : in Boards.Unit_Type)
+        return Processor_Representation;
 private
     package Random_Registers is new
         Ada.Numerics.Discrete_Random (Register_Type);

@@ -123,7 +123,7 @@ begin
         return;
     end if;
 
-    if not SDL.Initialize ("Von Neumann Standing", 1024, 896) then
+    if not SDL.Initialize ("Von Neumann Standing", 1024, 928) then
         Ada.Text_IO.Put_Line ("SDL ERROR!");
         return;
     end if;

@@ -12,25 +12,24 @@ The prerequisites for this game are:
 
 ## Installation
 
-To install the game first use LaTeX to compile `instructions.tex` to generate
-the instructions.
+To install the game simply run `make` in the root directory. The all rule will
+produce all three resources required assuming you have the appropriate
+prerequisites.
 
-Next use gnatmake or gprbuild to compile the assembler and the runner. For those
-unfamiliar with the use of gnatmake and gprbuild they take project files after
-the `-P` flag. Thus to build the runner you would execute `gprbuild -P
-src/runner.gpr` and to build the assembler you would execute `gprbuild -P
-src/assembler.gpr`.
-
-NOTE: On windows it will be necessary when building the runner to specify
-`gprbuild -XSDL2_LIB_DIR=C:/Path/To/SDL2/lib` so that it can locate the SDL2
-library directory. Similarly for linux installs that don't put it in `/usr/lib`.
+NOTE: if SDL2 is not installed in the default `/usr/lib` directory then you
+should specify the lib location of SDL2 via the `SDL_DIR` option. For example if
+you installed SDL2 to `C:\Users\Example\SDL2\` then you would install via `make
+SDL_DIR=C:\Users\Example\SDL2\lib`.
 
 ## Running
 
-Once you have built the assembler and the runner you can assemble the example
-program `example.vns` to produce an executable (e.g. `./as example.vns
-example`). Once you have an executable you can run it against itself via `./run
-executable executable`.
+The first thing you should do once installing the game the first time is to read
+over instructions.pdf. This file will provide you with a basic overview of the
+game.
 
-A window should pop-up showing the sprite sheet as a splash screen. Press '.' to
-advance to the first frame or SPACE to run the game at up to 60fps.
+Once you have installed the game you can assemble the example program
+`example.vns` to produce an executable (e.g. `./as example.vns example.out`).
+Once you have an executable you can run it against itself via `./run example.out
+example.out`. A window should pop-up showing the initial state of the game.
+Press SPACE to run the game from there.
+

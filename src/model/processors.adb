@@ -1,7 +1,8 @@
 with Games; use Games;
 with Boards; use Boards;
 with Coordinates; use Coordinates;
-with Interfaces;
+with Interfaces; use Interfaces;
+with Memory;
 
 with Processors.Registers; use Processors.Registers;
 with Processors.Instructions; use Processors.Instructions;
@@ -130,4 +131,100 @@ package body Processors is
             end if;
         end if;
     end Step_Processor;
+
+    function Get_Representation (
+        Which : in Unit_Processor;
+        Unit : in Boards.Unit_Type)
+        return Processor_Representation is
+        function To_Str5 (Val : in Register_Type) return String is
+            Result : String (1 .. 5) := (others => ' ');
+            Copy : Register_Type := Val;
+        begin
+            for I in reverse Result'Range loop
+                Result (I) := Character'Val (
+                    Character'Pos ('0') + (Copy mod 10));
+                Copy := Copy / 10;
+            end loop;
+
+            if Copy > 0 then
+                Result (1) := '>';
+            end if;
+
+            for I in Result'Range loop
+                exit when I = Result'Last;
+                exit when Result (I) /= '0';
+                Result (I) := ' ';
+            end loop;
+
+            return Result;
+        end To_Str5;
+
+        function To_Str3 (Val : in Natural) return String is
+            Result : String (1 .. 3) := (others => ' ');
+            Copy : Natural := Val;
+        begin
+            for I in reverse Result'Range loop
+                Result (I) := Character'Val (
+                    Character'Pos ('0') + (Copy mod 10));
+                Copy := Copy / 10;
+            end loop;
+
+            if Copy > 0 then
+                Result (1) := '>';
+            end if;
+
+            for I in Result'Range loop
+                exit when I = Result'Last;
+                exit when Result (I) /= '0';
+                Result (I) := ' ';
+            end loop;
+
+            return Result;
+        end To_Str3;
+
+        Result : Processor_Representation := (others => ' ');
+        PC : Register_Type := Which.Registers (15);
+        PCVal : Unsigned_32;
+        Op : Instruction_ID;
+        RA : Register_Type;
+        RB : Register_Type;
+        RC : Register_Type;
+    begin
+        -- Subtract PC by 1 because Compute_Time already incremented it!
+        PC := PC - 1;
+        if PC < Register_Type (Address_Type'First) or
+            PC > Register_Type (Address_Type'Last)
+        then
+            return "- ERROR PC OUT OF RANGE - ";
+        end if;
+
+        PCVal := To_U32 (Which.Memory (Address_Type (PC)));
+        Op := Instruction_ID (Shift_Right (PCVal, 25));
+        RA := Which.Registers (
+            Register_Index (Shift_Right (PCVal, 20) and 2#11111#));
+        RB := Which.Registers (
+            Register_Index (Shift_Right (PCVal, 15) and 2#11111#));
+        RC := Which.Registers (
+            Register_Index (Shift_Right (PCVal, 10) and 2#11111#));
+        Result (1 .. 3) := Memory.To_String (Op, Unit);
+        if RA < 0 then
+            Result (4) := '-';
+            RA := -RA;
+        end if;
+        Result (5 .. 9) := To_Str5 (RA);
+        if RB < 0 then
+            Result (10) := '-';
+            RB := -RB;
+        end if;
+        Result (11 .. 15) := To_Str5 (RB);
+        if RC < 0 then
+            Result (16) := '-';
+            RC := -RC;
+        end if;
+        Result (17 .. 21) := To_Str5 (RC);
+
+        Result (23 .. 25) := To_Str3 (Which.ICounter);
+        Result (26) := Character'Val (Character'Pos ('0') + Which.CCounter);
+        return Result;
+    end Get_Representation;
 end Processors;
