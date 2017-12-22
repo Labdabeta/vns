@@ -788,6 +788,10 @@ package body Boards is
                 return True;
             end if;
         else
+            if Level = Cache_Size'Last then
+                return False;
+            end if;
+
             Cost := Cache_Size_Cost (Cache_Size'Succ (Level));
             if This.Points (Team) < Cost then
                 return False;
@@ -819,6 +823,10 @@ package body Boards is
                 return True;
             end if;
         else
+            if Level = Cache_Type'Last then
+                return False;
+            end if;
+
             Cost := Cache_Type_Cost (Cache_Type'Succ (Level));
             if This.Points (Team) < Cost then
                 return False;
@@ -850,6 +858,10 @@ package body Boards is
                 return True;
             end if;
         else
+            if Level = Branch_Type'Last then
+                return False;
+            end if;
+
             Cost := Branch_Type_Cost (Branch_Type'Succ (Level));
             if This.Points (Team) < Cost then
                 return False;
@@ -881,6 +893,10 @@ package body Boards is
                 return True;
             end if;
         else
+            if Level = CPU_Speed'Last then
+                return False;
+            end if;
+
             Cost := Speed_Cost (CPU_Speed'Succ (Level));
             if This.Points (Team) < Cost then
                 return False;
