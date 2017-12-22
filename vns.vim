@@ -20,8 +20,8 @@ syntax keyword vnsOperation pnt ccs cct cbp ccl ucs uct ubp ucl dcs dct dbp
 syntax keyword vnsOperation dcl mcs mct mbp mcl rcs rct rbp rcl tim dly adv
 syntax keyword vnsOperation ask plz beg gvl kmk sac bom air sum hak emp all
 syntax keyword vnsOperation rmt rsn res ref rms rmf rss rsf rrs rrf wmt wsn
-syntax keyword vnsOperation wes wef wms wmf wss wsf wrs wrf wtg rtg wsg rsg
-syntax keyword vnsOperation wfg rfg itf fad fsu fmu fdv cel rtf sin cos tan
+syntax keyword vnsOperation wes wef wms wmf wss wsf wrs wrf qhi qrs qsh qpr
+syntax keyword vnsOperation qsu qmv itf fad fsu fmu fdv cel rtf sin cos tan
 syntax keyword vnsOperation pow asn acs atn log fcp mle set css cfs wss wfs
 syntax keyword vnsOperation gup sup cam unc hip nmr ist tgt lie mor wir cut
 syntax keyword vnsOperation snd dig mlf run hit raw
