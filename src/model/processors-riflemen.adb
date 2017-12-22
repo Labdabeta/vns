@@ -3,14 +3,15 @@ with Coordinates; use Coordinates;
 
 with Processors.Floats; use Processors.Floats;
 with Processors.Asks; use Processors.Asks;
+with Processors.Registers; use Processors.Registers;
 
 package body Processors.Riflemen is
-    RIFLEMAN_WTG : constant Instruction_ID := 96;
-    RIFLEMAN_RTG : constant Instruction_ID := 97;
-    RIFLEMAN_WSG : constant Instruction_ID := 98;
-    RIFLEMAN_RSG : constant Instruction_ID := 99;
-    RIFLEMAN_WFG : constant Instruction_ID := 100;
-    RIFLEMAN_RFG : constant Instruction_ID := 101;
+    RIFLEMAN_QHI : constant Instruction_ID := 96;
+    RIFLEMAN_QRS : constant Instruction_ID := 97;
+    RIFLEMAN_QSH : constant Instruction_ID := 98;
+    RIFLEMAN_QPR : constant Instruction_ID := 99;
+    RIFLEMAN_QSU : constant Instruction_ID := 100;
+    RIFLEMAN_QMV : constant Instruction_ID := 101;
     RIFLEMAN_LIE : constant Instruction_ID := 118;
     RIFLEMAN_GUP : constant Instruction_ID := 119;
     RIFLEMAN_CSS : constant Instruction_ID := 120;
@@ -72,9 +73,9 @@ package body Processors.Riflemen is
         end if;
 
         case Op is
-            when RIFLEMAN_WTG | RIFLEMAN_RTG | RIFLEMAN_WSG | RIFLEMAN_RSG |
-                RIFLEMAN_WFG | RIFLEMAN_RFG =>
-                return 4;
+            when RIFLEMAN_QSU | RIFLEMAN_QMV | RIFLEMAN_QSH | RIFLEMAN_QPR |
+                RIFLEMAN_QHI | RIFLEMAN_QRS =>
+                return 1;
             when RIFLEMAN_CSS | RIFLEMAN_CFS | RIFLEMAN_WSS | RIFLEMAN_WFS |
                 RIFLEMAN_BOM | RIFLEMAN_AIR | RIFLEMAN_MOR | RIFLEMAN_SUP =>
                 return 8;
@@ -94,28 +95,38 @@ package body Processors.Riflemen is
         A : in out Register_Type;
         B : in out Register_Type;
         C : in out Register_Type;
-        Tactical : in out Shared_Grid;
-        Support : in out Shared_Grid;
-        Flags : in out Shared_Grid;
         Machines : in out Processor_Array) is
+        Enemy : Player_ID := Enemy_Of (Team);
     begin
         if Is_Float_Op (Op) then
             Float_Instruction (Op, A, B, C, Immediate);
         end if;
 
         case Op is
-            when RIFLEMAN_WTG =>
-                Tactical (Team, X_Coordinate (B), Y_Coordinate (C)) := A;
-            when RIFLEMAN_RTG =>
-                A := Tactical (Team, X_Coordinate (B), Y_Coordinate (C));
-            when RIFLEMAN_WSG =>
-                Support (Team, X_Coordinate (B), Y_Coordinate (C)) := A;
-            when RIFLEMAN_RSG =>
-                A := Support (Team, X_Coordinate (B), Y_Coordinate (C));
-            when RIFLEMAN_WFG =>
-                Support (Team, X_Coordinate (B), Y_Coordinate (C)) := A;
-            when RIFLEMAN_RFG =>
-                A := Support (Team, X_Coordinate (B), Y_Coordinate (C));
+            when RIFLEMAN_QSU =>
+                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Setup);
+                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Setup);
+            when RIFLEMAN_QMV =>
+                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Moving);
+                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Moving);
+            when RIFLEMAN_QSH =>
+                B := From_Boolean (
+                    Get_Unit (State, To_Unit (A), Team).Shooting);
+                C := From_Boolean (
+                    Get_Unit (State, To_Unit (A), Enemy).Shooting);
+            when RIFLEMAN_QPR =>
+                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Prone);
+                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Prone);
+            when RIFLEMAN_QHI =>
+                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Hidden);
+                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Hidden);
+            when RIFLEMAN_QRS =>
+                B := From_Boolean (
+                    Get_Unit (State, To_Unit (A), Team).Summoned or
+                    Get_Unit (State, To_Unit (A), Team).Retreating);
+                C := From_Boolean (
+                    Get_Unit (State, To_Unit (A), Enemy).Summoned or
+                    Get_Unit (State, To_Unit (A), Enemy).Retreating);
             when RIFLEMAN_LIE => Set_Prone (State, Team, Unit, True);
             when RIFLEMAN_GUP => Set_Prone (State, Team, Unit, False);
             when RIFLEMAN_CSS | RIFLEMAN_CFS | RIFLEMAN_WSS | RIFLEMAN_WFS |

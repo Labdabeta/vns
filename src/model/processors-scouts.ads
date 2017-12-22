@@ -19,7 +19,5 @@ private package Processors.Scouts is
         A : in out Register_Type;
         B : in out Register_Type;
         C : in out Register_Type;
-        Support : in out Shared_Grid;
-        Flags : in out Shared_Grid;
         Machines : in out Processor_Array);
 end Processors.Scouts;

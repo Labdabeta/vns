@@ -14,6 +14,5 @@ private package Processors.Engineers is
         A : in out Register_Type;
         B : in out Register_Type;
         C : in out Register_Type;
-        Flags : in out Shared_Grid;
         Machines : in out Processor_Array);
 end Processors.Engineers;

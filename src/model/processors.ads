@@ -18,8 +18,6 @@ package Processors is
         Boards.Player_ID, Boards.Unit_Type, Address_Type) of Register_Type;
     type Shared_Memory is array (Boards.Player_ID, Address_Type) of
         Register_Type;
-    type Shared_Grid is array (Boards.Player_ID, Coordinates.X_Coordinate,
-        Coordinates.Y_Coordinate) of Register_Type;
 
     type Unit_Processor is private;
     type Processor_Array is array (Boards.Player_ID, Boards.Unit_Type) of

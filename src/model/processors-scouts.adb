@@ -8,10 +8,10 @@ with Processors.Asks; use Processors.Asks;
 package body Processors.Scouts is
     SCOUT_RUN : constant Instruction_ID := 96;
     SCOUT_HIT : constant Instruction_ID := 97;
-    SCOUT_WSG : constant Instruction_ID := 98;
-    SCOUT_RSG : constant Instruction_ID := 99;
-    SCOUT_WFG : constant Instruction_ID := 100;
-    SCOUT_RFG : constant Instruction_ID := 101;
+    SCOUT_QSH : constant Instruction_ID := 98;
+    SCOUT_QPR : constant Instruction_ID := 99;
+    SCOUT_QSU : constant Instruction_ID := 100;
+    SCOUT_QMV : constant Instruction_ID := 101;
     SCOUT_LIE : constant Instruction_ID := 118;
     SCOUT_GUP : constant Instruction_ID := 119;
     SCOUT_CSS : constant Instruction_ID := 120;
@@ -89,8 +89,8 @@ package body Processors.Scouts is
                     Prepare_Move (State, Team, Unit, To_Direction (RA));
                     return 1;
                 end if;
-            when SCOUT_WSG | SCOUT_RSG | SCOUT_WFG | SCOUT_RFG =>
-                return 4;
+            when SCOUT_QSU | SCOUT_QMV | SCOUT_QSH | SCOUT_QPR =>
+                return 1;
             when SCOUT_CSS | SCOUT_CFS | SCOUT_WSS | SCOUT_WFS |
                 SCOUT_BOM | SCOUT_AIR | SCOUT_MOR | SCOUT_SUP =>
                 return 8;
@@ -112,10 +112,9 @@ package body Processors.Scouts is
         A : in out Register_Type;
         B : in out Register_Type;
         C : in out Register_Type;
-        Support : in out Shared_Grid;
-        Flags : in out Shared_Grid;
         Machines : in out Processor_Array) is
         Us : Unit_State := Get_Unit (State, Unit, Team);
+        Enemy : Player_ID := Enemy_Of (Team);
     begin
         case Op is
             when SCOUT_RUN =>
@@ -125,14 +124,20 @@ package body Processors.Scouts is
                     C := Register_Type (Us.Position (Team).Y);
                 end if;
             when SCOUT_HIT => Do_Hit (State, Team, Unit, To_Direction (A));
-            when SCOUT_WSG =>
-                Support (Team, X_Coordinate (B), Y_Coordinate (C)) := A;
-            when SCOUT_RSG =>
-                A := Support (Team, X_Coordinate (B), Y_Coordinate (C));
-            when SCOUT_WFG =>
-                Flags (Team, X_Coordinate (B), Y_Coordinate (C)) := A;
-            when SCOUT_RFG =>
-                A := Flags (Team, X_Coordinate (B), Y_Coordinate (C));
+            when SCOUT_QSU =>
+                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Setup);
+                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Setup);
+            when SCOUT_QMV =>
+                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Moving);
+                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Moving);
+            when SCOUT_QSH =>
+                B := From_Boolean (
+                    Get_Unit (State, To_Unit (A), Team).Shooting);
+                C := From_Boolean (
+                    Get_Unit (State, To_Unit (A), Enemy).Shooting);
+            when SCOUT_QPR =>
+                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Prone);
+                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Prone);
             when SCOUT_LIE => Set_Prone (State, Team, Unit, True);
             when SCOUT_GUP => Set_Prone (State, Team, Unit, False);
             when SCOUT_CSS | SCOUT_CFS | SCOUT_WSS | SCOUT_WFS |
