@@ -58,7 +58,7 @@ private
     type Cache_Contents is record
         Data : Cache_Array (0 .. 65535);
         Length : Address_Type;
-        Size : Boards.Cache_Size;
+        Size : Boards.Upgrade_Level;
     end record;
 
     type Branch_Direction is (DIR_TAKEN, DIR_NOT_TAKEN);

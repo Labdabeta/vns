@@ -63,10 +63,10 @@ package body Logger is
             " 30|" & Register_Type'Image (What.Pre.Registers (30)) &
             " 31|" & Register_Type'Image (What.Pre.Registers (31)));
         Put_Line ("Pre-State: " &
-            Cache_Size'Image (What.Pre.State.Cache_Space) & " " &
-            Cache_Type'Image (What.Pre.State.Cache_Kind) & " " &
-            Branch_Type'Image (What.Pre.State.Branch_Predictor) & " " &
-            CPU_Speed'Image (What.Pre.State.Speed) &
+            Upgrade_Level'Image (What.Pre.State.Upgrades (Cache_Size)) & " " &
+            Upgrade_Level'Image (What.Pre.State.Upgrades (Cache_Type)) & " " &
+            Upgrade_Level'Image (What.Pre.State.Upgrades (Branch_Type)) & " " &
+            Upgrade_Level'Image (What.Pre.State.Upgrades (CPU_Speed)) &
             " X|" & X_Coordinate'Image (What.Pre.State.Position (What.Team).X) &
             " Y|" & Y_Coordinate'Image (What.Pre.State.Position (What.Team).Y) &
             " Hidden|" & Boolean'Image (What.Pre.State.Hidden) &
@@ -117,10 +117,10 @@ package body Logger is
             " 30|" & Register_Type'Image (What.Post.Registers (30)) &
             " 31|" & Register_Type'Image (What.Post.Registers (31)));
         Put_Line ("Post-State: " &
-            Cache_Size'Image (What.Post.State.Cache_Space) & " " &
-            Cache_Type'Image (What.Post.State.Cache_Kind) & " " &
-            Branch_Type'Image (What.Post.State.Branch_Predictor) & " " &
-            CPU_Speed'Image (What.Post.State.Speed) &
+            Upgrade_Level'Image (What.Post.State.Upgrades (Cache_Size)) & " " &
+            Upgrade_Level'Image (What.Post.State.Upgrades (Cache_Type)) & " " &
+            Upgrade_Level'Image (What.Post.State.Upgrades (Branch_Type)) & " " &
+            Upgrade_Level'Image (What.Post.State.Upgrades (CPU_Speed)) &
             " X|" & X_Coordinate'Image (What.Post.State.Position (What.Team).X)
             & " Y|" & Y_Coordinate'Image (
                 What.Post.State.Position (What.Team).Y) &

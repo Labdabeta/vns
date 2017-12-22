@@ -2,7 +2,7 @@ with Boards;
 
 private package Processors.Branches is
     function Predict_Branch (
-        Kind : in Boards.Branch_Type;
+        Kind : in Boards.Upgrade_Level;
         Which : in Branch_State) return Boolean;
 
     procedure Advance_Prediction (Which : in out Two_State_Branch);

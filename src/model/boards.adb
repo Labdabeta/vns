@@ -97,10 +97,7 @@ package body Boards is
         for P in This.Units'Range (1) loop
             for U in This.Units'Range (2) loop
                 This.Units (P, U) := (
-                    Cache_Space => CS_NONE,
-                    Cache_Kind => CT_NONE,
-                    Branch_Predictor => BT_NONE,
-                    Speed => CPUS_EIGHT_FRAMES,
+                    Upgrades => (others => 0),
                     Position => To_Location (Unit_Coords (U), P),
                     Destination => To_Location (Unit_Coords (U), P),
                     Hidden => False,
@@ -769,213 +766,62 @@ package body Boards is
         This.Units (Team, Unit).Retreating := Retreat;
     end Set_Unit_Retreat;
 
-    function Try_Upgrade_Cache_Size (
+    function Try_Upgrade (
         This : in out Board;
         Team : in Player_ID;
         Unit : in Unit_Type;
-        Down : in Boolean := False) return Boolean is
-        Level : Cache_Size := This.Units (Team, Unit).Cache_Space;
+        Which : in Upgrade_Type;
+        Down : in Boolean := False)
+        return Boolean is
+        Level : Upgrade_Level := This.Units (Team, Unit).Upgrades (Which);
         Cost : Resource_Points;
     begin
         if Down then
-            Cost := Cache_Size_Cost (Level);
-            if This.Units (Team, Unit).Cache_Space = CS_NONE then
+            Cost := Upgrade_Cost (Which, Level);
+            if This.Units (Team, Unit).Upgrades (Which) = 0 then
                 return False;
             else
                 This.Points (Team) := This.Points (Team) + (Cost / 2);
-                This.Units (Team, Unit).Cache_Space :=
-                    Cache_Size'Pred (This.Units (Team, Unit).Cache_Space);
+                This.Units (Team, Unit).Upgrades (Which) :=
+                    This.Units (Team, Unit).Upgrades (Which) - 1;
                 return True;
             end if;
         else
-            if Level = Cache_Size'Last then
+            if Level = Upgrade_Level'Last then
                 return False;
             end if;
 
-            Cost := Cache_Size_Cost (Cache_Size'Succ (Level));
+            Cost := Upgrade_Cost (Which, Level + 1);
             if This.Points (Team) < Cost then
                 return False;
             else
                 This.Points (Team) := This.Points (Team) - Cost;
-                This.Units (Team, Unit).Cache_Space :=
-                    Cache_Size'Succ (This.Units (Team, Unit).Cache_Space);
+                This.Units (Team, Unit).Upgrades (Which) :=
+                    This.Units (Team, Unit).Upgrades (Which) + 1;
                 return True;
             end if;
         end if;
-    end Try_Upgrade_Cache_Size;
+    end Try_Upgrade;
 
-    function Try_Upgrade_Cache_Type (
+    function Try_Max (
         This : in out Board;
         Team : in Player_ID;
         Unit : in Unit_Type;
-        Down : in Boolean := False) return Boolean is
-        Level : Cache_Type := This.Units (Team, Unit).Cache_Kind;
-        Cost : Resource_Points;
+        Which : in Upgrade_Type;
+        Down : in Boolean := False)
+        return Boolean is
     begin
-        if Down then
-            Cost := Cache_Type_Cost (Level);
-            if This.Units (Team, Unit).Cache_Kind = CT_NONE then
-                return False;
-            else
-                This.Points (Team) := This.Points (Team) + (Cost / 2);
-                This.Units (Team, Unit).Cache_Kind :=
-                    Cache_Type'Pred (This.Units (Team, Unit).Cache_Kind);
-                return True;
-            end if;
-        else
-            if Level = Cache_Type'Last then
-                return False;
-            end if;
-
-            Cost := Cache_Type_Cost (Cache_Type'Succ (Level));
-            if This.Points (Team) < Cost then
-                return False;
-            else
-                This.Points (Team) := This.Points (Team) - Cost;
-                This.Units (Team, Unit).Cache_Kind :=
-                    Cache_Type'Succ (This.Units (Team, Unit).Cache_Kind);
-                return True;
-            end if;
-        end if;
-    end Try_Upgrade_Cache_Type;
-
-    function Try_Upgrade_Branch_Type (
-        This : in out Board;
-        Team : in Player_ID;
-        Unit : in Unit_Type;
-        Down : in Boolean := False) return Boolean is
-        Level : Branch_Type := This.Units (Team, Unit).Branch_Predictor;
-        Cost : Resource_Points;
-    begin
-        if Down then
-            Cost := Branch_Type_Cost (Level);
-            if This.Units (Team, Unit).Branch_Predictor = BT_NONE then
-                return False;
-            else
-                This.Points (Team) := This.Points (Team) + (Cost / 2);
-                This.Units (Team, Unit).Branch_Predictor :=
-                    Branch_Type'Pred (This.Units (Team, Unit).Branch_Predictor);
-                return True;
-            end if;
-        else
-            if Level = Branch_Type'Last then
-                return False;
-            end if;
-
-            Cost := Branch_Type_Cost (Branch_Type'Succ (Level));
-            if This.Points (Team) < Cost then
-                return False;
-            else
-                This.Points (Team) := This.Points (Team) - Cost;
-                This.Units (Team, Unit).Branch_Predictor :=
-                    Branch_Type'Succ (This.Units (Team, Unit).Branch_Predictor);
-                return True;
-            end if;
-        end if;
-    end Try_Upgrade_Branch_Type;
-
-    function Try_Upgrade_CPU_Speed (
-        This : in out Board;
-        Team : in Player_ID;
-        Unit : in Unit_Type;
-        Down : in Boolean := False) return Boolean is
-        Level : CPU_Speed := This.Units (Team, Unit).Speed;
-        Cost : Resource_Points;
-    begin
-        if Down then
-            Cost := Speed_Cost (Level);
-            if This.Units (Team, Unit).Speed = CPUS_EIGHT_FRAMES then
-                return False;
-            else
-                This.Points (Team) := This.Points (Team) + (Cost / 2);
-                This.Units (Team, Unit).Speed :=
-                    CPU_Speed'Pred (This.Units (Team, Unit).Speed);
-                return True;
-            end if;
-        else
-            if Level = CPU_Speed'Last then
-                return False;
-            end if;
-
-            Cost := Speed_Cost (CPU_Speed'Succ (Level));
-            if This.Points (Team) < Cost then
-                return False;
-            else
-                This.Points (Team) := This.Points (Team) - Cost;
-                This.Units (Team, Unit).Speed :=
-                    CPU_Speed'Succ (This.Units (Team, Unit).Speed);
-                return True;
-            end if;
-        end if;
-    end Try_Upgrade_CPU_Speed;
-
-    function Try_Max_Cache_Size (
-        This : in out Board;
-        Team : in Player_ID;
-        Unit : in Unit_Type;
-        Down : in Boolean := False) return Boolean is
-    begin
-        while Try_Upgrade_Cache_Size (This, Team, Unit, Down) loop
+        while Try_Upgrade (This, Team, Unit, Which, Down) loop
             null;
         end loop;
 
         if Down then
-            return This.Units (Team, Unit).Cache_Space = Cache_Size'First;
+            return This.Units (Team, Unit).Upgrades (Which) = 0;
         else
-            return This.Units (Team, Unit).Cache_Space = Cache_Size'Last;
+            return This.Units (Team, Unit).Upgrades (Which) =
+                Upgrade_Level'Last;
         end if;
-    end Try_Max_Cache_Size;
-
-    function Try_Max_Cache_Type (
-        This : in out Board;
-        Team : in Player_ID;
-        Unit : in Unit_Type;
-        Down : in Boolean := False) return Boolean is
-    begin
-        while Try_Upgrade_Cache_Type (This, Team, Unit, Down) loop
-            null;
-        end loop;
-
-        if Down then
-            return This.Units (Team, Unit).Cache_Kind = Cache_Type'First;
-        else
-            return This.Units (Team, Unit).Cache_Kind = Cache_Type'Last;
-        end if;
-    end Try_Max_Cache_Type;
-
-    function Try_Max_Branch_Type (
-        This : in out Board;
-        Team : in Player_ID;
-        Unit : in Unit_Type;
-        Down : in Boolean := False) return Boolean is
-    begin
-        while Try_Upgrade_Branch_Type (This, Team, Unit, Down) loop
-            null;
-        end loop;
-
-        if Down then
-            return This.Units (Team, Unit).Branch_Predictor = Branch_Type'First;
-        else
-            return This.Units (Team, Unit).Branch_Predictor = Branch_Type'Last;
-        end if;
-    end Try_Max_Branch_Type;
-
-    function Try_Max_CPU_Speed (
-        This : in out Board;
-        Team : in Player_ID;
-        Unit : in Unit_Type;
-        Down : in Boolean := False) return Boolean is
-    begin
-        while Try_Upgrade_CPU_Speed (This, Team, Unit, Down) loop
-            null;
-        end loop;
-
-        if Down then
-            return This.Units (Team, Unit).Speed = CPU_Speed'First;
-        else
-            return This.Units (Team, Unit).Speed = CPU_Speed'Last;
-        end if;
-    end Try_Max_CPU_Speed;
+    end Try_Max;
 
     procedure Bomb_Water (This : in out Board; Team : in Player_ID) is begin
         if This.Points (Team) >= 128 then

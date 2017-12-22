@@ -20,7 +20,7 @@ package body Processors.Caches is
     end Check_Cache;
 
     procedure Add_To_Cache (
-        Kind : in Cache_Type;
+        Kind : in Upgrade_Level;
         Which : in out Cache_Contents;
         Address : in Address_Type;
         Memory : in Memory_Array) is

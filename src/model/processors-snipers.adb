@@ -123,7 +123,8 @@ package body Processors.Snipers is
                     if My_Valid then
                         My_ICount := Machines (Team, UT_MORTAR).ICounter;
                         My_CCount := Machines (Team, UT_MORTAR).CCounter;
-                        case Get_Unit (State, UT_MORTAR, Team).Speed is
+                        case Get_Unit (State, UT_MORTAR, Team).Upgrades
+                                (CPU_Speed) is
                             when CPUS_EIGHT_FRAMES =>
                                 My_Time := My_ICount * 8 - (8 - My_CCount);
                             when CPUS_SIX_FRAMES =>
@@ -140,7 +141,8 @@ package body Processors.Snipers is
                     if You_Valid then
                         You_ICount := Machines (Team, UT_MORTAR).ICounter;
                         You_CCount := Machines (Team, UT_MORTAR).CCounter;
-                        case Get_Unit (State, UT_MORTAR, Team).Speed is
+                        case Get_Unit (State, UT_MORTAR, Team).Upgrades
+                                (CPU_Speed) is
                             when CPUS_EIGHT_FRAMES =>
                                 You_Time := You_ICount * 8 - (8 - You_CCount);
                             when CPUS_SIX_FRAMES =>

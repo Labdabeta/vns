@@ -8,7 +8,7 @@ private package Processors.Caches is
 
     -- Adds the Address:Value pair to the cache, possibly flushing it
     procedure Add_To_Cache (
-        Kind : in Boards.Cache_Type;
+        Kind : in Boards.Upgrade_Level;
         Which : in out Cache_Contents;
         Address : in Address_Type;
         Memory : in Memory_Array);

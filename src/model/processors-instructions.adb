@@ -216,7 +216,7 @@ package body Processors.Instructions is
                 return 16;
             when COMMON_JIZ | COMMON_JNZ | COMMON_JGZ | COMMON_JLZ |
                 COMMON_JGE | COMMON_JLE =>
-                if Us.Branch_Predictor = BT_PERFECT then
+                if Us.Upgrades (Branch_Type) = BT_PERFECT then
                     return 1;
                 end if;
 
@@ -227,14 +227,14 @@ package body Processors.Instructions is
                 end if;
             when COMMON_BIZ | COMMON_BNZ | COMMON_BGZ | COMMON_BLZ |
                 COMMON_BGE | COMMON_BLE =>
-                case Us.Branch_Predictor is
+                case Us.Upgrades (Branch_Type) is
                     when BT_PERFECT =>
                         return 1;
                     when BT_NONE =>
                         return 8;
                     when others =>
                         if Is_Taken (Op, RA) =
-                            Predict_Branch (Us.Branch_Predictor,
+                            Predict_Branch (Us.Upgrades (Branch_Type),
                                 Me.Predictor (Address_Type (PC)))
                         then
                             return 1;
@@ -473,33 +473,33 @@ package body Processors.Instructions is
                 if Team_Of (State, BC) = T_NONE then
                     A := -1;
                 else
-                    A := Cache_Size'Pos (Get_Unit (
+                    A := Register_Type (Get_Unit (
                         State, Unit_Of (State, BC),
-                        Team_Of (State, BC)).Cache_Space);
+                        Team_Of (State, BC)).Upgrades (Cache_Size));
                 end if;
             when COMMON_QCT =>
                 if Team_Of (State, BC) = T_NONE then
                     A := -1;
                 else
-                    A := Cache_Type'Pos (Get_Unit (
+                    A := Register_Type (Get_Unit (
                         State, Unit_Of (State, BC),
-                        Team_Of (State, BC)).Cache_Kind);
+                        Team_Of (State, BC)).Upgrades (Cache_Type));
                 end if;
             when COMMON_QBP =>
                 if Team_Of (State, BC) = T_NONE then
                     A := -1;
                 else
-                    A := Branch_Type'Pos (Get_Unit (
+                    A := Register_Type (Get_Unit (
                         State, Unit_Of (State, BC),
-                        Team_Of (State, BC)).Branch_Predictor);
+                        Team_Of (State, BC)).Upgrades (Branch_Type));
                 end if;
             when COMMON_QCK =>
                 if Team_Of (State, BC) = T_NONE then
                     A := -1;
                 else
-                    A := CPU_Speed'Pos (Get_Unit (
+                    A := Register_Type (Get_Unit (
                         State, Unit_Of (State, BC),
-                        Team_Of (State, BC)).Speed);
+                        Team_Of (State, BC)).Upgrades (CPU_Speed));
                 end if;
             when COMMON_GND =>
                 A := Terrain_Type'Pos (Terrain_Of (State, BC)) + 1;
@@ -597,68 +597,96 @@ package body Processors.Instructions is
                         end if;
                     end if;
                 end;
-            when COMMON_WCS => A := Cache_Size'Pos (Us.Cache_Space);
-            when COMMON_WCT => A := Cache_Type'Pos (Us.Cache_Kind);
-            when COMMON_WBP => A := Branch_Type'Pos (Us.Branch_Predictor);
-            when COMMON_WCL => A := CPU_Speed'Pos (Us.Speed);
+            when COMMON_WCS => A := Register_Type (Us.Upgrades (Cache_Size));
+            when COMMON_WCT => A := Register_Type (Us.Upgrades (Cache_Type));
+            when COMMON_WBP => A := Register_Type (Us.Upgrades (Branch_Type));
+            when COMMON_WCL => A := Register_Type (Us.Upgrades (CPU_Speed));
             when COMMON_TCS =>
-                A := Cache_Size'Pos (
-                    Get_Unit (State, To_Unit (A), Team).Cache_Space);
+                A := Register_Type (
+                    Get_Unit (State, To_Unit (A), Team).Upgrades (Cache_Size));
             when COMMON_TCT =>
-                A := Cache_Type'Pos (
-                    Get_Unit (State, To_Unit (A), Team).Cache_Kind);
+                A := Register_Type (
+                    Get_Unit (State, To_Unit (A), Team).Upgrades (Cache_Type));
             when COMMON_TBP =>
-                A := Branch_Type'Pos (
-                    Get_Unit (State, To_Unit (A), Team).Branch_Predictor);
+                A := Register_Type (
+                    Get_Unit (State, To_Unit (A), Team).Upgrades (Branch_Type));
             when COMMON_TCL =>
-                A := CPU_Speed'Pos (Get_Unit (State, To_Unit (A), Team).Speed);
+                A := Register_Type (
+                    Get_Unit (State, To_Unit (A), Team).Upgrades (CPU_Speed));
             when COMMON_PNT => A := Register_Type (Get_Points (State, Team));
             when COMMON_CCS =>
-                A := Register_Type (Cache_Size_Cost (Us.Cache_Space));
+                if Us.Upgrades (Cache_Size) < Upgrade_Level'Last then
+                    A := Register_Type (Upgrade_Cost (Cache_Size,
+                        Us.Upgrades (Cache_Size) + 1));
+                else
+                    A := 0;
+                end if;
             when COMMON_CCT =>
-                A := Register_Type (Cache_Type_Cost (Us.Cache_Kind));
+                if Us.Upgrades (Cache_Type) < Upgrade_Level'Last then
+                    A := Register_Type (Upgrade_Cost (Cache_Type,
+                        Us.Upgrades (Cache_Type) + 1));
+                else
+                    A := 0;
+                end if;
             when COMMON_CBP =>
-                A := Register_Type (Branch_Type_Cost (Us.Branch_Predictor));
-            when COMMON_CCL => A := Register_Type (Speed_Cost (Us.Speed));
+                if Us.Upgrades (Branch_Type) < Upgrade_Level'Last then
+                    A := Register_Type (Upgrade_Cost (Branch_Type,
+                        Us.Upgrades (Branch_Type) + 1));
+                else
+                    A := 0;
+                end if;
+            when COMMON_CCL =>
+                if Us.Upgrades (CPU_Speed) < Upgrade_Level'Last then
+                    A := Register_Type (Upgrade_Cost (CPU_Speed,
+                        Us.Upgrades (CPU_Speed) + 1));
+                else
+                    A := 0;
+                end if;
             when COMMON_UCS =>
-                A := From_Boolean (Try_Upgrade_Cache_Size (State, Team, Unit));
+                A := From_Boolean (Try_Upgrade (State, Team, Unit, Cache_Size));
             when COMMON_UCT =>
-                A := From_Boolean (Try_Upgrade_Cache_Type (State, Team, Unit));
+                A := From_Boolean (Try_Upgrade (State, Team, Unit, Cache_Type));
             when COMMON_UBP =>
-                A := From_Boolean (Try_Upgrade_Branch_Type (State, Team, Unit));
+                A := From_Boolean (
+                    Try_Upgrade (State, Team, Unit, Branch_Type));
             when COMMON_UCL =>
-                A := From_Boolean (Try_Upgrade_CPU_Speed (State, Team, Unit));
+                A := From_Boolean (Try_Upgrade (State, Team, Unit, CPU_Speed));
             when COMMON_DCS =>
                 A := From_Boolean (
-                    Try_Upgrade_Cache_Size (State, Team, Unit, True));
+                    Try_Upgrade (State, Team, Unit, Cache_Size, True));
             when COMMON_DCT =>
                 A := From_Boolean (
-                    Try_Upgrade_Cache_Type (State, Team, Unit, True));
+                    Try_Upgrade (State, Team, Unit, Cache_Type, True));
             when COMMON_DBP =>
                 A := From_Boolean (
-                    Try_Upgrade_Branch_Type (State, Team, Unit, True));
+                    Try_Upgrade (State, Team, Unit, Branch_Type, True));
             when COMMON_DCL =>
                 A := From_Boolean (
-                    Try_Upgrade_CPU_Speed (State, Team, Unit, True));
+                    Try_Upgrade (State, Team, Unit, CPU_Speed, True));
             when COMMON_MCS =>
-                A := From_Boolean (Try_Max_Cache_Size (State, Team, Unit));
+                A := From_Boolean (
+                    Try_Max (State, Team, Unit, Cache_Size));
             when COMMON_MCT =>
-                A := From_Boolean (Try_Max_Cache_Type (State, Team, Unit));
+                A := From_Boolean (
+                    Try_Max (State, Team, Unit, Cache_Type));
             when COMMON_MBP =>
-                A := From_Boolean (Try_Max_Branch_Type (State, Team, Unit));
+                A := From_Boolean (
+                    Try_Max (State, Team, Unit, Branch_Type));
             when COMMON_MCL =>
-                A := From_Boolean (Try_Max_CPU_Speed (State, Team, Unit));
+                A := From_Boolean (
+                    Try_Max (State, Team, Unit, CPU_Speed));
             when COMMON_RCS =>
                 A := From_Boolean (
-                    Try_Max_Cache_Size (State, Team, Unit, True));
+                    Try_Max (State, Team, Unit, Cache_Size, True));
             when COMMON_RCT =>
                 A := From_Boolean (
-                    Try_Max_Cache_Type (State, Team, Unit, True));
+                    Try_Max (State, Team, Unit, Cache_Type, True));
             when COMMON_RBP =>
                 A := From_Boolean (
-                    Try_Max_Branch_Type (State, Team, Unit, True));
+                    Try_Max (State, Team, Unit, Branch_Type, True));
             when COMMON_RCL =>
-                A := From_Boolean (Try_Max_CPU_Speed (State, Team, Unit, True));
+                A := From_Boolean (
+                    Try_Max (State, Team, Unit, CPU_Speed, True));
             when COMMON_TIM =>
                 A := Register_Type (Clock);
                 B := Register_Type (Me.Clock);

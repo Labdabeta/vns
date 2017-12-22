@@ -2,13 +2,38 @@ with Coordinates;
 
 -- TODO: Improve 'Image for enums
 package Boards is
-    type Cache_Size is (CS_NONE, CS_64, CS_1024, CS_4096, CS_65536);
-    type Cache_Type is (
-        CT_NONE, CT_TWO_WAY, CT_FOUR_WAY, CT_EIGHT_WAY, CT_FULLY);
-    type Branch_Type is (BT_NONE, BT_ONE_BIT, BT_TWO_BIT, BT_TWO_LEVEL_TWO_BIT,
-        BT_PERFECT);
-    type CPU_Speed is (CPUS_EIGHT_FRAMES, CPUS_SIX_FRAMES, CPUS_FOUR_FRAMES,
-        CPUS_TWO_FRAMES, CPUS_EVERY_FRAME);
+    type Upgrade_Type is (Cache_Size, Cache_Type, Branch_Type, CPU_Speed);
+    type Upgrade_Level is range 0 .. 4;
+
+    -- Cache Size definitions
+    CS_NONE : constant Upgrade_Level := 0;
+    CS_64 : constant Upgrade_Level := 1;
+    CS_1024 : constant Upgrade_Level := 2;
+    CS_4096 : constant Upgrade_Level := 3;
+    CS_65536 : constant Upgrade_Level := 4;
+
+    -- Cache Type definitions
+    CT_NONE : constant Upgrade_Level := 0;
+    CT_TWO_WAY : constant Upgrade_Level := 1;
+    CT_FOUR_WAY : constant Upgrade_Level := 2;
+    CT_EIGHT_WAY : constant Upgrade_Level := 3;
+    CT_FULLY : constant Upgrade_Level := 4;
+
+    -- Branch Type definitions
+    BT_NONE : constant Upgrade_Level := 0;
+    BT_ONE_BIT : constant Upgrade_Level := 1;
+    BT_TWO_BIT : constant Upgrade_Level := 2;
+    BT_TWO_LEVEL_TWO_BIT : constant Upgrade_Level := 3;
+    BT_PERFECT : constant Upgrade_Level := 4;
+
+    -- CPU Speed definitions
+    CPUS_EIGHT_FRAMES : constant Upgrade_Level := 0;
+    CPUS_SIX_FRAMES : constant Upgrade_Level := 1;
+    CPUS_FOUR_FRAMES : constant Upgrade_Level := 2;
+    CPUS_TWO_FRAMES : constant Upgrade_Level := 3;
+    CPUS_EVERY_FRAME : constant Upgrade_Level := 4;
+
+    type Upgrade_Array is array (Upgrade_Type) of Upgrade_Level;
     type Unit_Type is (UT_CAPTAIN, UT_MORTAR, UT_SNIPER, UT_ENGINEER_SS,
         UT_ENGINEER_FS, UT_MACHINEGUNNER_SS, UT_MACHINEGUNNER_FS, UT_SCOUT_SS,
         UT_SCOUT_FS, UT_RIFLEMAN_SS, UT_RIFLEMAN_FS);
@@ -24,10 +49,7 @@ package Boards is
     Home_Base : constant Coordinates.Coordinate := (0, 7);
 
     type Unit_State is record
-        Cache_Space : Cache_Size;
-        Cache_Kind : Cache_Type;
-        Branch_Predictor : Branch_Type;
-        Speed : CPU_Speed;
+        Upgrades : Upgrade_Array;
         Position, Destination : Location;
         Hidden, Alive, Summoned, Retreating, Setup, Moving, Shooting, Prone :
             Boolean;
@@ -44,14 +66,10 @@ package Boards is
         UT_RIFLEMAN_SS, UT_RIFLEMAN_FS);
     UID_OF : constant array (Unit_Type) of Integer := (
         1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
-    Cache_Size_Cost : constant array (Cache_Size) of Resource_Points := (
-        0, 32, 64, 256, 1024);
-    Cache_Type_Cost : constant array (Cache_Type) of Resource_Points := (
-        0, 32, 64, 256, 1024);
-    Branch_Type_Cost : constant array (Branch_Type) of Resource_Points := (
-        0, 32, 64, 256, 1024);
-    Speed_Cost : constant array (CPU_Speed) of Resource_Points := (
-        0, 64, 128, 512, 2048);
+    Upgrade_Cost : constant array (Upgrade_Type, Upgrade_Level)
+        of Resource_Points := (
+            Cache_Size | Cache_Type | Branch_Type => (0, 32, 64, 256, 1024),
+            CPU_Speed => (0, 64, 128, 512, 2048));
 
     procedure Initialize (This : out Board);
 
@@ -264,53 +282,21 @@ package Boards is
         Unit : in Unit_Type;
         Retreat : in Boolean);
 
-    function Try_Upgrade_Cache_Size (
+    function Try_Upgrade (
         This : in out Board;
         Team : in Player_ID;
         Unit : in Unit_Type;
-        Down : in Boolean := False) return Boolean;
+        Which : in Upgrade_Type;
+        Down : in Boolean := False)
+        return Boolean;
 
-    function Try_Upgrade_Cache_Type (
+    function Try_Max (
         This : in out Board;
         Team : in Player_ID;
         Unit : in Unit_Type;
-        Down : in Boolean := False) return Boolean;
-
-    function Try_Upgrade_Branch_Type (
-        This : in out Board;
-        Team : in Player_ID;
-        Unit : in Unit_Type;
-        Down : in Boolean := False) return Boolean;
-
-    function Try_Upgrade_CPU_Speed (
-        This : in out Board;
-        Team : in Player_ID;
-        Unit : in Unit_Type;
-        Down : in Boolean := False) return Boolean;
-
-    function Try_Max_Cache_Size (
-        This : in out Board;
-        Team : in Player_ID;
-        Unit : in Unit_Type;
-        Down : in Boolean := False) return Boolean;
-
-    function Try_Max_Cache_Type (
-        This : in out Board;
-        Team : in Player_ID;
-        Unit : in Unit_Type;
-        Down : in Boolean := False) return Boolean;
-
-    function Try_Max_Branch_Type (
-        This : in out Board;
-        Team : in Player_ID;
-        Unit : in Unit_Type;
-        Down : in Boolean := False) return Boolean;
-
-    function Try_Max_CPU_Speed (
-        This : in out Board;
-        Team : in Player_ID;
-        Unit : in Unit_Type;
-        Down : in Boolean := False) return Boolean;
+        Which : in Upgrade_Type;
+        Down : in Boolean := False)
+        return Boolean;
 
     procedure Bomb_Water (This : in out Board; Team : in Player_ID);
 

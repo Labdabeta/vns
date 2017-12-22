@@ -3,7 +3,7 @@ with Boards; use Boards;
 package body Processors.Branches is
     -- Returns true if the branch should probably be taken, false otherwise
     function Predict_Branch (
-        Kind : in Branch_Type;
+        Kind : in Upgrade_Level;
         Which : in Branch_State) return Boolean is
     begin
         case Kind is

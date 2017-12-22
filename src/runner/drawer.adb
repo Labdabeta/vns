@@ -175,19 +175,19 @@ package body Drawer is
             if Player = Active_Team then
                 Draw_Image (
                     Sprite, Rect (2, Unit_Y (Unit)),
-                    CS_Clip (State.Cache_Space),
+                    CS_Clip (State.Upgrades (Cache_Size)),
                     Blend => Team_Colour (Active_Team));
                 Draw_Image (
                     Sprite, Rect (3, Unit_Y (Unit)),
-                    CT_Clip (State.Cache_Kind),
+                    CT_Clip (State.Upgrades (Cache_Type)),
                     Blend => Team_Colour (Active_Team));
                 Draw_Image (
                     Sprite, Rect (4, Unit_Y (Unit)),
-                    BP_Clip (State.Branch_Predictor),
+                    BP_Clip (State.Upgrades (Branch_Type)),
                     Blend => Team_Colour (Active_Team));
                 Draw_Image (
                     Sprite, Rect (5, Unit_Y (Unit)),
-                    CPU_Clip (State.Speed),
+                    CPU_Clip (State.Upgrades (CPU_Speed)),
                     Blend => Team_Colour (Active_Team));
             end if;
         end Draw_Unit;

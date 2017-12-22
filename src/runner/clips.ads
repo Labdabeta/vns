@@ -66,35 +66,35 @@ package Clips is
         UT_RIFLEMAN_SS | UT_RIFLEMAN_FS => (
             Sprite_Clips (WHITE_RIFLE), Sprite_Clips (BLACK_RIFLE)));
     Terrain_Clip : array (Boards.Terrain_Type) of SDL.Rectangle := (
-        TT_OPEN => Sprite_Clips (GRASS),
-        TT_WIRE => Sprite_Clips (WIRE),
-        TT_SAND => Sprite_Clips (COVER),
-        TT_BEACH => Sprite_Clips (BEACH),
-        TT_WATER => Sprite_Clips (WATER),
-        TT_BASE => Sprite_Clips (QUERY));
-    CS_Clip : array (Boards.Cache_Size) of SDL.Rectangle := (
-        CS_NONE => Sprite_Clips (CS_0),
-        CS_64 => Sprite_Clips (CS_1),
-        CS_1024 => Sprite_Clips (CS_2),
-        CS_4096 => Sprite_Clips (CS_3),
-        CS_65536 => Sprite_Clips (CS_4));
-    CT_Clip : array (Boards.Cache_Type) of SDL.Rectangle := (
-        CT_NONE => Sprite_Clips (CT_0),
-        CT_TWO_WAY => Sprite_Clips (CT_1),
-        CT_FOUR_WAY => Sprite_Clips (CT_2),
-        CT_EIGHT_WAY => Sprite_Clips (CT_3),
-        CT_FULLY => Sprite_Clips (CT_4));
-    BP_Clip : array (Boards.Branch_Type) of SDL.Rectangle := (
-        BT_NONE => Sprite_Clips (BP_0),
-        BT_ONE_BIT => Sprite_Clips (BP_1),
-        BT_TWO_BIT => Sprite_Clips (BP_2),
-        BT_TWO_LEVEL_TWO_BIT => Sprite_Clips (BP_3),
-        BT_PERFECT => Sprite_Clips (BP_4));
-    CPU_Clip : array (Boards.CPU_Speed) of SDL.Rectangle := (
-        CPUS_EIGHT_FRAMES => Sprite_Clips (CPU_0),
-        CPUS_SIX_FRAMES => Sprite_Clips (CPU_1),
-        CPUS_FOUR_FRAMES => Sprite_Clips (CPU_2),
-        CPUS_TWO_FRAMES => Sprite_Clips (CPU_3),
-        CPUS_EVERY_FRAME => Sprite_Clips (CPU_4));
+        Sprite_Clips (GRASS),
+        Sprite_Clips (WIRE),
+        Sprite_Clips (COVER),
+        Sprite_Clips (BEACH),
+        Sprite_Clips (WATER),
+        Sprite_Clips (QUERY));
+    CS_Clip : array (Boards.Upgrade_Level) of SDL.Rectangle := (
+        Sprite_Clips (CS_0),
+        Sprite_Clips (CS_1),
+        Sprite_Clips (CS_2),
+        Sprite_Clips (CS_3),
+        Sprite_Clips (CS_4));
+    CT_Clip : array (Boards.Upgrade_Level) of SDL.Rectangle := (
+        Sprite_Clips (CT_0),
+        Sprite_Clips (CT_1),
+        Sprite_Clips (CT_2),
+        Sprite_Clips (CT_3),
+        Sprite_Clips (CT_4));
+    BP_Clip : array (Boards.Upgrade_Level) of SDL.Rectangle := (
+        Sprite_Clips (BP_0),
+        Sprite_Clips (BP_1),
+        Sprite_Clips (BP_2),
+        Sprite_Clips (BP_3),
+        Sprite_Clips (BP_4));
+    CPU_Clip : array (Boards.Upgrade_Level) of SDL.Rectangle := (
+        Sprite_Clips (CPU_0),
+        Sprite_Clips (CPU_1),
+        Sprite_Clips (CPU_2),
+        Sprite_Clips (CPU_3),
+        Sprite_Clips (CPU_4));
     function Font_Clip (C : Character) return SDL.Rectangle;
 end Clips;

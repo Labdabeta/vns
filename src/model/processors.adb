@@ -79,12 +79,7 @@ package body Processors is
         State : Board renames Which.State;
         Machines : Processor_Array renames Which.Machines;
         Us : Unit_State := Get_Unit (Which.State, Unit, Team);
-        Reset_Counter : array (CPU_Speed) of Natural := (
-            CPUS_EIGHT_FRAMES => 7,
-            CPUS_SIX_FRAMES => 5,
-            CPUS_FOUR_FRAMES => 3,
-            CPUS_TWO_FRAMES => 1,
-            CPUS_EVERY_FRAME => 0);
+        Reset_Counter : array (Upgrade_Level) of Natural := (7, 5, 3, 1, 0);
 
         procedure Execute_Step is begin
             if Machines (Team, Unit).Clock = 0 then
@@ -113,7 +108,7 @@ package body Processors is
             if Machines (Team, Unit).CCounter = 0 then
                 Execute_Step;
                 Machines (Team, Unit).CCounter := Reset_Counter (
-                    Get_Unit (State, Unit, Team).Speed);
+                    Get_Unit (State, Unit, Team).Upgrades (CPU_Speed));
                 if Machines (Team, Unit).Advanced then
                     Machines (Team, Unit).CCounter :=
                         Machines (Team, Unit).CCounter - 1;
