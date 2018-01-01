@@ -13,8 +13,7 @@ private package Processors.Captains is
     procedure Captain_Instruction (
         Op : in Instruction_ID;
         Team : in Boards.Player_ID;
-        Immediate : in Address_Type;
-        A : in out Register_Type;
+        Me : in out Unit_Processor;
         State : in out Boards.Board;
         Shared : in out Shared_Memory;
         Radios : in out Communications);

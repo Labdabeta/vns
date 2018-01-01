@@ -650,7 +650,7 @@ package body Processors.Instructions is
             when others =>
                 case Unit is
                     when UT_CAPTAIN => Captain_Instruction (Me.Op, Team,
-                        Me.Immediate, A, State, Shared, Radios);
+                        Me, State, Shared, Radios);
                     when UT_MORTAR => Mortar_Instruction (Me.Op, Team,
                         Me.Immediate, State, A, B, C, Machines);
                     when UT_SNIPER => Sniper_Instruction (Me.Op, Team,

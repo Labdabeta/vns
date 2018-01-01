@@ -111,11 +111,11 @@ package body Processors.Captains is
     procedure Captain_Instruction (
         Op : in Instruction_ID;
         Team : in Boards.Player_ID;
-        Immediate : in Address_Type;
-        A : in out Register_Type;
+        Me : in out Unit_Processor;
         State : in out Boards.Board;
         Shared : in out Shared_Memory;
         Radios : in out Communications) is
+        A : Register_Type renames Me.Registers (Me.RA);
     begin
         case Op is
             when CAPTAIN_ASK =>
@@ -130,66 +130,66 @@ package body Processors.Captains is
                 Increment_Points (State, Team, 1024);
                 Kill_Unit (State, Team, UT_CAPTAIN);
             when CAPTAIN_SAC =>
-                if Get_Unit (State, To_Unit (A), Team).Alive then
+                if Get_Unit (State, To_Unit (Me.A), Team).Alive then
                     Increment_Points (State, Team, 1024);
-                    Kill_Unit (State, Team, To_Unit (A));
+                    Kill_Unit (State, Team, To_Unit (Me.A));
                 end if;
             when CAPTAIN_BOM =>
                 Bomb_Water (State, Team);
             when CAPTAIN_AIR =>
                 Bomb_Beach (State, Team);
             when CAPTAIN_SUM =>
-                Set_Unit_Summon (State, Team, To_Unit (A), True);
+                Set_Unit_Summon (State, Team, To_Unit (Me.A), True);
             when CAPTAIN_HAK =>
-                Shared (Enemy_Of (Team), Immediate) := A;
+                Shared (Enemy_Of (Team), Me.Immediate) := Me.A;
             when CAPTAIN_EMP =>
                 for Index in Shared'Range (2) loop
-                    Shared (Enemy_Of (Team), Index) := A;
+                    Shared (Enemy_Of (Team), Index) := Me.A;
                 end loop;
             when CAPTAIN_ALL =>
                 for Index in Unit_Type'Range loop
-                    Radios (Team, Index, Immediate) := A;
+                    Radios (Team, Index, Me.Immediate) := Me.A;
                 end loop;
             when CAPTAIN_RMT =>
-                A := Radios (Team, UT_MORTAR, Immediate);
+                A := Radios (Team, UT_MORTAR, Me.Immediate);
             when CAPTAIN_RSN =>
-                A := Radios (Team, UT_SNIPER, Immediate);
+                A := Radios (Team, UT_SNIPER, Me.Immediate);
             when CAPTAIN_RES =>
-                A := Radios (Team, UT_ENGINEER_SS, Immediate);
+                A := Radios (Team, UT_ENGINEER_SS, Me.Immediate);
             when CAPTAIN_REF =>
-                A := Radios (Team, UT_ENGINEER_FS, Immediate);
+                A := Radios (Team, UT_ENGINEER_FS, Me.Immediate);
             when CAPTAIN_RMS =>
-                A := Radios (Team, UT_MACHINEGUNNER_SS, Immediate);
+                A := Radios (Team, UT_MACHINEGUNNER_SS, Me.Immediate);
             when CAPTAIN_RMF =>
-                A := Radios (Team, UT_MACHINEGUNNER_FS, Immediate);
+                A := Radios (Team, UT_MACHINEGUNNER_FS, Me.Immediate);
             when CAPTAIN_RSS =>
-                A := Radios (Team, UT_SCOUT_SS, Immediate);
+                A := Radios (Team, UT_SCOUT_SS, Me.Immediate);
             when CAPTAIN_RSF =>
-                A := Radios (Team, UT_SCOUT_FS, Immediate);
+                A := Radios (Team, UT_SCOUT_FS, Me.Immediate);
             when CAPTAIN_RRS =>
-                A := Radios (Team, UT_RIFLEMAN_SS, Immediate);
+                A := Radios (Team, UT_RIFLEMAN_SS, Me.Immediate);
             when CAPTAIN_RRF =>
-                A := Radios (Team, UT_RIFLEMAN_FS, Immediate);
+                A := Radios (Team, UT_RIFLEMAN_FS, Me.Immediate);
             when CAPTAIN_WMT =>
-                Radios (Team, UT_MORTAR, Immediate) := A;
+                Radios (Team, UT_MORTAR, Me.Immediate) := Me.A;
             when CAPTAIN_WSN =>
-                Radios (Team, UT_SNIPER, Immediate) := A;
+                Radios (Team, UT_SNIPER, Me.Immediate) := Me.A;
             when CAPTAIN_WES =>
-                Radios (Team, UT_ENGINEER_SS, Immediate) := A;
+                Radios (Team, UT_ENGINEER_SS, Me.Immediate) := Me.A;
             when CAPTAIN_WEF =>
-                Radios (Team, UT_ENGINEER_FS, Immediate) := A;
+                Radios (Team, UT_ENGINEER_FS, Me.Immediate) := Me.A;
             when CAPTAIN_WMS =>
-                Radios (Team, UT_MACHINEGUNNER_SS, Immediate) := A;
+                Radios (Team, UT_MACHINEGUNNER_SS, Me.Immediate) := Me.A;
             when CAPTAIN_WMF =>
-                Radios (Team, UT_MACHINEGUNNER_FS, Immediate) := A;
+                Radios (Team, UT_MACHINEGUNNER_FS, Me.Immediate) := Me.A;
             when CAPTAIN_WSS =>
-                Radios (Team, UT_SCOUT_SS, Immediate) := A;
+                Radios (Team, UT_SCOUT_SS, Me.Immediate) := Me.A;
             when CAPTAIN_WSF =>
-                Radios (Team, UT_SCOUT_FS, Immediate) := A;
+                Radios (Team, UT_SCOUT_FS, Me.Immediate) := Me.A;
             when CAPTAIN_WRS =>
-                Radios (Team, UT_RIFLEMAN_SS, Immediate) := A;
+                Radios (Team, UT_RIFLEMAN_SS, Me.Immediate) := Me.A;
             when CAPTAIN_WRF =>
-                Radios (Team, UT_RIFLEMAN_FS, Immediate) := A;
+                Radios (Team, UT_RIFLEMAN_FS, Me.Immediate) := Me.A;
             when others => null;
         end case;
     end Captain_Instruction;
