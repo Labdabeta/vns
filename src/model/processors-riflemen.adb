@@ -79,7 +79,7 @@ package body Processors.Riflemen is
             when RIFLEMAN_CSS | RIFLEMAN_CFS | RIFLEMAN_WSS | RIFLEMAN_WFS |
                 RIFLEMAN_BOM | RIFLEMAN_AIR | RIFLEMAN_MOR | RIFLEMAN_SUP =>
                 return 8;
-            when RIFLEMAN_GUP =>
+            when RIFLEMAN_LIE | RIFLEMAN_GUP =>
                 return 64;
             when others =>
                 return 0;

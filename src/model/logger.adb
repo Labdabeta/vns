@@ -185,11 +185,11 @@ package body Logger is
         Team : in Boards.Player_ID;
         Text : in String) is
     begin
-        if Is_Logged (Unit, Team) then
-            Put_Line (
-                Boards.Player_ID'Image (Team) & " " &
-                Boards.Unit_Type'Image (Unit) & " died due to " & Text);
-        end if;
+        -- if Is_Logged (Unit, Team) then
+        Put_Line (
+            Boards.Player_ID'Image (Team) & " " &
+            Boards.Unit_Type'Image (Unit) & " died due to " & Text);
+        -- end if;
     end Log_Error;
 
     procedure Log_UT (

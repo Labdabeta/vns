@@ -139,7 +139,7 @@ package body Processors.Captains is
             when CAPTAIN_AIR =>
                 Bomb_Beach (State, Team);
             when CAPTAIN_SUM =>
-                Set_Unit_Summon (State, Team, Unit_Type'Val (A - 1), True);
+                Set_Unit_Summon (State, Team, To_Unit (A), True);
             when CAPTAIN_HAK =>
                 Shared (Enemy_Of (Team), Immediate) := A;
             when CAPTAIN_EMP =>

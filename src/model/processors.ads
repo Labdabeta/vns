@@ -85,6 +85,16 @@ private
         Clock : Natural;
         Advanced : Boolean;
         Behind : Boolean;
+
+        -- These are copies, to be used as the actuals to arguments
+        RA : Register_Index;
+        RB : Register_Index;
+        RC : Register_Index;
+        A : Register_Type;
+        B : Register_Type;
+        C : Register_Type;
+        Op : Instruction_ID;
+        Immediate : Address_Type;
     end record;
 
     Debug_Mode : Boolean := False;

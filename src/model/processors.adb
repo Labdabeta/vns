@@ -29,6 +29,11 @@ package body Processors is
         This.Memory := (others => 0);
         This.Registers := (others => 0);
         This.Registers (13) := Register_Type (Address_Type'Last);
+        This.A := 0;
+        This.B := 0;
+        This.C := 0;
+        This.Op := 0;
+        This.Immediate := 0;
         This.ICounter := 0; -- Set to first instruction runtime if clock is 0
         This.CCounter := 0;
         This.Clock := 0;
@@ -77,52 +82,116 @@ package body Processors is
         Team : in Player_ID) is
         use Interfaces;
         State : Board renames Which.State;
-        Machines : Processor_Array renames Which.Machines;
+        Me : Unit_Processor renames Which.Machines (Team, Unit);
         Us : Unit_State := Get_Unit (Which.State, Unit, Team);
         Reset_Counter : array (Upgrade_Level) of Natural := (7, 5, 3, 1, 0);
 
-        procedure Execute_Step is begin
-            if Machines (Team, Unit).Clock = 0 then
-                Machines (Team, Unit).ICounter :=
-                    Compute_Time (Which, Unit, Team);
+        procedure Execute_Step is
+            PC : Register_Type renames Me.Registers (15);
+            PCVal : Unsigned_32 := To_U32 (Me.Memory (Address_Type (PC)));
+
+            function Extract_Immediate_Register return Register_Type is
+                Result : Register_Type := 0;
+            begin
+                if (PCVal and 2#1000000000#) /= 0 then
+                    Result := Register_Type (Small_Immediate_Type'First);
+                end if;
+
+                Result := Result + Register_Type (PCVal and 2#111111111#);
+                return Result;
+            end Extract_Immediate_Register;
+
+            procedure Fetch_Instruction is
+            begin
+                Me.RA := Register_Index (Shift_Right (PCVal, 20) and 2#11111#);
+                Me.RB := Register_Index (Shift_Right (PCVal, 15) and 2#11111#);
+                Me.RC := Register_Index (Shift_Right (PCVal, 10) and 2#11111#);
+                Me.Registers (12) := Register_Type (Extract_Immediate_Register);
+                Me.A := Me.Registers (Me.RA);
+                Me.B := Me.Registers (Me.RB);
+                Me.C := Me.Registers (Me.RC);
+                Me.Op := Instruction_ID (Shift_Right (PCVal, 25));
+                Me.Immediate :=
+                    Address_Type (PCVal and 2#11111111111111111111#);
+                PC := PC + 1;
+            end Fetch_Instruction;
+        begin
+            if Me.Clock = 0 then
+                Fetch_Instruction;
+                Me.ICounter := Compute_Time (Which, Unit, Team);
             end if;
 
-            Machines (Team, Unit).Clock := Machines (Team, Unit).Clock + 1;
+            if Us.Summoned then
+                Prepare_Move (
+                    Which.State,
+                    Team, Unit,
+                    Get_Direction_Towards (
+                        Us.Position (Team),
+                        Get_Unit (Which.State, UT_CAPTAIN, Team).Position
+                            (Team)));
+                Me.ICounter := 1;
+                return;
+            end if;
 
-            if Machines (Team, Unit).ICounter = 0 then
-                while Machines (Team, Unit).ICounter = 0 loop
+            if Us.Retreating then
+                Prepare_Move (
+                    Which.State,
+                    Team, Unit,
+                    Get_Direction_Towards (Us.Position (Team), Home_Base));
+                Me.ICounter := 1;
+                return;
+            end if;
+
+            Me.Clock := Me.Clock + 1;
+
+            if Me.ICounter = 0 then
+                while Me.ICounter = 0 loop
                     Do_Instruction (Which, Unit, Team);
-                    Machines (Team, Unit).ICounter :=
-                        Compute_Time (Which, Unit, Team);
+
+                    -- Writeback - THIS WONT WORK
+                    -- Need to use direct register access as targets of writes
+                    -- across processors-XXX.adb. Lots of work! Must do!
+                    --
+                    -- EG: add r1, r1, 10
+                    -- A := me.registers (1); -- r1
+                    -- B := me.registers (1); -- r1
+                    -- C := me.registers (12); -- 10
+                    -- A := B + C; -- r1 + 10
+                    -- me.registers (1) := A; -- r1 + 10 :)
+                    -- me.registers (1) := B; -- r1 :o overwritten
+                    --
+                    -- Me.Registers (Me.RA) := Me.A;
+                    -- Me.Registers (Me.RB) := Me.B;
+                    -- Me.Registers (Me.RC) := Me.C;
+
+                    Set_Registers (Which.Machines, Which.State);
+
+                    Fetch_Instruction;
+                    Me.ICounter := Compute_Time (Which, Unit, Team);
                 end loop;
-                Machines (Team, Unit).ICounter :=
-                    Machines (Team, Unit).ICounter - 1;
+                Me.ICounter := Me.ICounter - 1;
             else
-                Machines (Team, Unit).ICounter :=
-                    Machines (Team, Unit).ICounter - 1;
-                Logger.Log_IWait (Unit, Team, Machines (Team, Unit).ICounter);
+                Me.ICounter := Me.ICounter - 1;
+                Logger.Log_IWait (Unit, Team, Me.ICounter);
             end if;
         end Execute_Step;
     begin
         if Us.Alive then
-            if Machines (Team, Unit).CCounter = 0 then
+            if Me.CCounter = 0 then
                 Execute_Step;
-                Machines (Team, Unit).CCounter := Reset_Counter (
+                Me.CCounter := Reset_Counter (
                     Get_Unit (State, Unit, Team).Upgrades (CPU_Speed));
-                if Machines (Team, Unit).Advanced then
-                    Machines (Team, Unit).CCounter :=
-                        Machines (Team, Unit).CCounter - 1;
-                    Machines (Team, Unit).Advanced := False;
+                if Me.Advanced then
+                    Me.CCounter := Me.CCounter - 1;
+                    Me.Advanced := False;
                 end if;
-                if Machines (Team, Unit).Behind then
-                    Machines (Team, Unit).CCounter :=
-                        Machines (Team, Unit).CCounter + 1;
-                    Machines (Team, Unit).Behind := False;
+                if Me.Behind then
+                    Me.CCounter := Me.CCounter + 1;
+                    Me.Behind := False;
                 end if;
             else
-                Machines (Team, Unit).CCounter :=
-                    Machines (Team, Unit).CCounter - 1;
-                Logger.Log_CWait (Unit, Team, Machines (Team, Unit).CCounter);
+                Me.CCounter := Me.CCounter - 1;
+                Logger.Log_CWait (Unit, Team, Me.CCounter);
             end if;
         end if;
     end Step_Processor;
@@ -195,12 +264,9 @@ package body Processors is
 
         PCVal := To_U32 (Which.Memory (Address_Type (PC)));
         Op := Instruction_ID (Shift_Right (PCVal, 25));
-        RA := Which.Registers (
-            Register_Index (Shift_Right (PCVal, 20) and 2#11111#));
-        RB := Which.Registers (
-            Register_Index (Shift_Right (PCVal, 15) and 2#11111#));
-        RC := Which.Registers (
-            Register_Index (Shift_Right (PCVal, 10) and 2#11111#));
+        RA := Which.A;
+        RB := Which.B;
+        RC := Which.C;
         Result (1 .. 3) := Memory.To_String (Op, Unit);
         if RA < 0 then
             Result (4) := '-';

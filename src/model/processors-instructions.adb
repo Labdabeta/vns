@@ -131,18 +131,6 @@ package body Processors.Instructions is
         end case;
     end Is_Taken;
 
-    function Extract_Immediate_Register (From : in Unsigned_32) return
-        Small_Immediate_Type is
-        Result : Small_Immediate_Type := 0;
-    begin
-        if (From and 2#1000000000#) /= 0 then
-            Result := Small_Immediate_Type'First;
-        end if;
-
-        Result := Result + Small_Immediate_Type (From and 2#111111111#);
-        return Result;
-    end Extract_Immediate_Register;
-
     function Compute_Time (
         Which : in out Game;
         Unit : in Unit_Type;
@@ -150,45 +138,10 @@ package body Processors.Instructions is
         Us : Unit_State := Get_Unit (Which.State, Unit, Team);
         Me : Unit_Processor renames Which.Machines (Team, Unit);
         PC : Register_Type renames Me.Registers (15);
-        PCVal : Unsigned_32 := To_U32 (Me.Memory (Address_Type (PC)));
-        Op : Instruction_ID := Instruction_ID (Shift_Right (PCVal, 25));
-        A : Register_Index :=
-            Register_Index (Shift_Right (PCVal, 20) and 2#11111#);
-        B : Register_Index :=
-            Register_Index (Shift_Right (PCVal, 15) and 2#11111#);
-        C : Register_Index :=
-            Register_Index (Shift_Right (PCVal, 10) and 2#11111#);
-        RA : Register_Type renames Me.Registers (A);
-        RB : Register_Type renames Me.Registers (B);
-        RC : Register_Type renames Me.Registers (C);
-        Small : Small_Immediate_Type := Extract_Immediate_Register (PCVal);
-        Immediate : Address_Type := Address_Type (
-            PCVal and 2#11111111111111111111#);
     begin
-        if Us.Summoned then
-            Prepare_Move (
-                Which.State,
-                Team, Unit,
-                Get_Direction_Towards (
-                    Us.Position (Team),
-                    Get_Unit (Which.State, UT_CAPTAIN, Team).Position (Team)));
-            return 1;
-        end if;
+        Logger.Log_Prep (Unit, Team, Me.Op);
 
-        if Us.Retreating then
-            Prepare_Move (
-                Which.State,
-                Team, Unit,
-                Get_Direction_Towards (Us.Position (Team), Home_Base));
-            return 1;
-        end if;
-
-        PC := PC + 1;
-        Me.Registers (12) := Register_Type (Small);
-
-        Logger.Log_Prep (Unit, Team, Op);
-
-        case Op is
+        case Me.Op is
             when COMMON_RTT | COMMON_DIE =>
                 return 0;
             when COMMON_ADD | COMMON_SUB | COMMON_AND | COMMON_ORR |
@@ -220,7 +173,7 @@ package body Processors.Instructions is
                     return 1;
                 end if;
 
-                if Is_Taken (Op, RA) then
+                if Is_Taken (Me.Op, Me.A) then
                     return 1;
                 else
                     return 8;
@@ -233,7 +186,7 @@ package body Processors.Instructions is
                     when BT_NONE =>
                         return 8;
                     when others =>
-                        if Is_Taken (Op, RA) =
+                        if Is_Taken (Me.Op, Me.A) =
                             Predict_Branch (Us.Upgrades (Branch_Type),
                                 Me.Predictor (Address_Type (PC)))
                         then
@@ -243,28 +196,29 @@ package body Processors.Instructions is
                         end if;
                 end case;
             when COMMON_LDR | COMMON_STR =>
-                if Check_Cache (Me.Cache, Immediate) then
+                if Check_Cache (Me.Cache, Me.Immediate) then
                     return 1;
                 else
                     return 8;
                 end if;
             when COMMON_POP | COMMON_PSH =>
                 if Check_Cache (
-                    Me.Cache, Address_Type (Me.Registers (13)) - Immediate)
+                    Me.Cache, Address_Type (Me.Registers (13)) - Me.Immediate)
                 then
                     return 1;
                 else
                     return 8;
                 end if;
             when COMMON_SHT =>
-                Prepare_Shoot (Which.State, Team, Unit, To_Coordinate (RB, RC));
+                Prepare_Shoot (Which.State, Team, Unit,
+                    To_Coordinate (Me.B, Me.C));
                 return Compute_Fire_Time (Which.State, Unit, Us.Position,
-                    To_Location (To_Coordinate (RB, RC), Team));
+                    To_Location (To_Coordinate (Me.B, Me.C), Team));
             when COMMON_WLK =>
                 if Us.Setup and Unit /= UT_SNIPER then
                     return 0;
                 end if;
-                Prepare_Move (Which.State, Team, Unit, To_Direction (RA));
+                Prepare_Move (Which.State, Team, Unit, To_Direction (Me.A));
                 if Us.Setup then -- Sniper CAMO
                     if Us.Prone then
                         return 32;
@@ -276,7 +230,7 @@ package body Processors.Instructions is
                 end if;
                 return 8;
             when COMMON_CRL | COMMON_SWM =>
-                Prepare_Move (Which.State, Team, Unit, To_Direction (RA));
+                Prepare_Move (Which.State, Team, Unit, To_Direction (Me.A));
                 return 64;
             when COMMON_CAP =>
                 if Is_On_Target (Which.State, Team, Unit) then
@@ -286,24 +240,25 @@ package body Processors.Instructions is
                 end if;
             when COMMON_HID =>
                 Set_Unit_Visibility (Which.State, Team, Unit, False);
-                return Natural (RA) + Natural (Immediate);
+                return Natural (Me.A) + Natural (Me.Immediate);
             when others =>
                 case Unit is
                     when UT_CAPTAIN =>
-                        return Captain_Time (Op, RA, Team, Which.State);
+                        return Captain_Time (Me.Op, Me.A, Team, Which.State);
                     when UT_MORTAR =>
-                        return Mortar_Time (Op);
+                        return Mortar_Time (Me.Op);
                     when UT_SNIPER =>
                         return Sniper_Time (
-                            Op, RB, RC, Us.Position, Team, Which.State);
+                            Me.Op, Me.B, Me.C, Us.Position, Team, Which.State);
                     when UT_ENGINEER_SS | UT_ENGINEER_FS =>
-                        return Engineer_Time (Op);
+                        return Engineer_Time (Me.Op);
                     when UT_MACHINEGUNNER_SS | UT_MACHINEGUNNER_FS =>
-                        return Machinegunner_Time (Op);
+                        return Machinegunner_Time (Me.Op);
                     when UT_SCOUT_SS | UT_SCOUT_FS =>
-                        return Scout_Time (Op, Which.State, Team, Unit, RA);
+                        return Scout_Time (
+                            Me.Op, Which.State, Team, Unit, Me.A);
                     when UT_RIFLEMAN_SS | UT_RIFLEMAN_FS =>
-                        return Rifleman_Time (Op);
+                        return Rifleman_Time (Me.Op);
                 end case;
         end case;
     exception
@@ -325,26 +280,15 @@ package body Processors.Instructions is
         Us : Unit_State := Get_Unit (State, Unit, Team);
         Me : Unit_Processor renames Which.Machines (Team, Unit);
         PC : Register_Type renames Me.Registers (15);
-        PCVal : Unsigned_32 := To_U32 (Me.Memory (Address_Type (PC - 1)));
-        Op : Instruction_ID := Instruction_ID (Shift_Right (PCVal, 25));
-        RA : Register_Index :=
-            Register_Index (Shift_Right (PCVal, 20) and 2#11111#);
-        RB : Register_Index :=
-            Register_Index (Shift_Right (PCVal, 15) and 2#11111#);
-        RC : Register_Index :=
-            Register_Index (Shift_Right (PCVal, 10) and 2#11111#);
-        A : Register_Type renames Me.Registers (RA);
-        B : Register_Type renames Me.Registers (RB);
-        C : Register_Type renames Me.Registers (RC);
-        Small : Small_Immediate_Type := Extract_Immediate_Register (PCVal);
-        Immediate : Address_Type := Address_Type (
-            PCVal and 2#11111111111111111111#);
+        A : Register_Type renames Me.Registers (Me.RA);
+        B : Register_Type renames Me.Registers (Me.RB);
+        C : Register_Type renames Me.Registers (Me.RC);
         Position : Coordinate renames Us.Position (Team);
         New_Log : Logger.Log_Entry;
         Enemy : Player_ID := Enemy_Of (Team);
 
         function BC return Location is begin
-            return To_Location (To_Coordinate (B, C), Team);
+            return To_Location (To_Coordinate (Me.B, Me.C), Team);
         end BC;
 
     begin
@@ -371,84 +315,87 @@ package body Processors.Instructions is
             return;
         end if;
 
-        Me.Registers (12) := Register_Type (Small);
-        -- PC has already been incremented
-
         New_Log.Pre.Registers := Me.Registers;
         New_Log.Pre.State := Get_Unit (State, Unit, Team);
         New_Log.Unit := Unit;
         New_Log.Team := Team;
-        New_Log.Operation := Op;
-        New_Log.A := RA;
-        New_Log.B := RB;
-        New_Log.C := RC;
-        New_Log.Small := Small;
-        New_Log.Immediate := Immediate;
+        New_Log.Operation := Me.Op;
+        New_Log.A := Me.RA;
+        New_Log.B := Me.RB;
+        New_Log.C := Me.RC;
+        New_Log.Small := 0;
+        New_Log.Immediate := Me.Immediate;
 
-        case Op is
-            when COMMON_ADD => A := B + C;
-            when COMMON_SUB => A := B - C;
-            when COMMON_MUL => A := B * C;
-            when COMMON_DIV => A := B / C;
-            when COMMON_AND => A := From_U32 (To_U32 (B) and To_U32 (C));
-            when COMMON_ORR => A := From_U32 (To_U32 (B) or To_U32 (C));
-            when COMMON_XOR => A := From_U32 (To_U32 (B) xor To_U32 (C));
-            when COMMON_NAN => A := From_U32 (not (To_U32 (B) and To_U32 (C)));
+        case Me.Op is
+            when COMMON_ADD => A := Me.B + Me.C;
+            when COMMON_SUB => A := Me.B - Me.C;
+            when COMMON_MUL => A := Me.B * Me.C;
+            when COMMON_DIV => A := Me.B / Me.C;
+            when COMMON_AND =>
+                A := From_U32 (To_U32 (Me.B) and To_U32 (Me.C));
+            when COMMON_ORR =>
+                A := From_U32 (To_U32 (Me.B) or To_U32 (Me.C));
+            when COMMON_XOR =>
+                A := From_U32 (To_U32 (Me.B) xor To_U32 (Me.C));
+            when COMMON_NAN =>
+                A := From_U32 (not (To_U32 (Me.B) and To_U32 (Me.C)));
             when COMMON_CLZ =>
-                B := Count_Leading_Zeroes (A);
-                C := Count_Leading_Ones (A);
+                B := Count_Leading_Zeroes (Me.A);
+                C := Count_Leading_Ones (Me.A);
             when COMMON_CNT =>
-                B := Count_Zeroes (A);
-                C := Count_Ones (A);
-            when COMMON_LSR => A := Shift_Right (B, C);
-            when COMMON_LSL => A := Shift_Left (B, C);
-            when COMMON_ABS => B := abs A; C := -abs A;
+                B := Count_Zeroes (Me.A);
+                C := Count_Ones (Me.A);
+            when COMMON_LSR => A := Shift_Right (Me.B, Me.C);
+            when COMMON_LSL => A := Shift_Left (Me.B, Me.C);
+            when COMMON_ABS => B := abs Me.A; C := -abs Me.A;
             when COMMON_RND =>
                 A := Random_Registers.Random (Register_Generator);
                 B := Random_Registers.Random (Register_Generator);
                 C := Random_Registers.Random (Register_Generator);
             when COMMON_CMP =>
-                if B > C then
+                if Me.B > Me.C then
                     A := 1;
-                elsif B < C then
+                elsif Me.B < Me.C then
                     A := -1;
                 else
                     A := 0;
                 end if;
             when COMMON_JIZ | COMMON_BIZ =>
-                if A = 0 then
-                    PC := Register_Type (Immediate);
+                if Me.A = 0 then
+                    PC := Register_Type (Me.Immediate);
                 end if;
             when COMMON_JNZ | COMMON_BNZ =>
-                if A /= 0 then
-                    PC := Register_Type (Immediate);
+                if Me.A /= 0 then
+                    PC := Register_Type (Me.Immediate);
                 end if;
             when COMMON_JGZ | COMMON_BGZ =>
-                if A > 0 then
-                    PC := Register_Type (Immediate);
+                if Me.A > 0 then
+                    PC := Register_Type (Me.Immediate);
                 end if;
             when COMMON_JLZ | COMMON_BLZ =>
-                if A < 0 then
-                    PC := Register_Type (Immediate);
+                if Me.A < 0 then
+                    PC := Register_Type (Me.Immediate);
                 end if;
             when COMMON_JGE | COMMON_BGE =>
-                if A >= 0 then
-                    PC := Register_Type (Immediate);
+                if Me.A >= 0 then
+                    PC := Register_Type (Me.Immediate);
                 end if;
             when COMMON_JLE | COMMON_BLE =>
-                if A <= 0 then
-                    PC := Register_Type (Immediate);
+                if Me.A <= 0 then
+                    PC := Register_Type (Me.Immediate);
                 end if;
             when COMMON_BLX =>
                 Me.Registers (14) := Me.Registers (15);
-                PC := A + Register_Type (Immediate);
-            when COMMON_LDR => A := Me.Memory (Address_Type (B + C));
-            when COMMON_STR => Me.Memory (Address_Type (B + C)) := A;
+                PC := Me.A + Register_Type (Me.Immediate);
+            when COMMON_LDR => A := Me.Memory (Address_Type (Me.B + Me.C));
+            when COMMON_STR => Me.Memory (Address_Type (Me.B + Me.C)) := Me.A;
             when COMMON_POP =>
                 Me.Registers (13) := Me.Registers (13) + 1;
-                A := Me.Memory (Address_Type (Me.Registers (13)) + Immediate);
+                A := Me.Memory (
+                    Address_Type (Me.Registers (13)) + Me.Immediate);
             when COMMON_PSH =>
-                Me.Memory (Address_Type (Me.Registers (13)) + Immediate) := A;
+                Me.Memory (Address_Type (Me.Registers (13)) + Me.Immediate) :=
+                    Me.A;
                 Me.Registers (13) := Me.Registers (13) - 1;
             when COMMON_WHO =>
                 if Team_Of (State, BC) = Team then
@@ -501,43 +448,44 @@ package body Processors.Instructions is
             when COMMON_GND =>
                 A := Terrain_Type'Pos (Terrain_Of (State, BC)) + 1;
             when COMMON_WHR =>
-                if A > 0 then
-                    if Get_Unit (State, To_Unit (A), Team).Alive then
+                if Me.A > 0 then
+                    if Get_Unit (State, To_Unit (Me.A), Team).Alive then
                         B := Register_Type (Get_Unit (
-                            State, To_Unit (A), Team).Position (Team).X);
+                            State, To_Unit (Me.A), Team).Position (Team).X);
                         C := Register_Type (Get_Unit (
-                            State, To_Unit (A), Team).Position (Team).Y);
+                            State, To_Unit (Me.A), Team).Position (Team).Y);
                     else
                         B := -1;
                         C := -1;
                     end if;
                 else
-                    if Get_Unit (State, To_Unit (-A), Enemy).Alive and
-                        not Get_Unit (State, To_Unit (-A), Enemy).Hidden and
-                        not (To_Unit (-A) = UT_SNIPER and
-                            Get_Unit (State, To_Unit (-A), Enemy).Setup)
+                    if Get_Unit (State, To_Unit (-Me.A), Enemy).Alive and
+                        not Get_Unit (State, To_Unit (-Me.A), Enemy).Hidden and
+                        not (To_Unit (-Me.A) = UT_SNIPER and
+                            Get_Unit (State, To_Unit (-Me.A), Enemy).Setup)
                     then
                         B := Register_Type (Get_Unit (
-                            State, To_Unit (-A), Enemy).Position (Team).X);
+                            State, To_Unit (-Me.A), Enemy).Position (Team).X);
                         C := Register_Type (Get_Unit (
-                            State, To_Unit (-A), Enemy).Position (Team).Y);
+                            State, To_Unit (-Me.A), Enemy).Position (Team).Y);
                     else
                         B := -1;
                         C := -1;
                     end if;
                 end if;
             when COMMON_DST =>
-                A := Get_Path_To (Position, To_Coordinate (B, C))'Length;
+                A :=
+                    Get_Path_To (Position, To_Coordinate (Me.B, Me.C))'Length;
             when COMMON_CVR =>
                 A := Register_Type (Cover_Between (State, Team, Unit, BC));
             when COMMON_DED =>
-                if Get_Unit (State, To_Unit (A), Team).Alive then
+                if Get_Unit (State, To_Unit (Me.A), Team).Alive then
                     B := 0;
                 else
                     B := 1;
                 end if;
 
-                if Get_Unit (State, To_Unit (A), Enemy).Alive then
+                if Get_Unit (State, To_Unit (Me.A), Enemy).Alive then
                     C := 0;
                 else
                     C := 1;
@@ -546,17 +494,17 @@ package body Processors.Instructions is
                 A := From_Boolean (Do_Shoot (State, Team, Unit, BC));
             when COMMON_DIR =>
                 A := Direction'Pos (Get_Direction_Towards (
-                    Position, To_Coordinate (B, C))) + 1;
+                    Position, To_Coordinate (Me.B, Me.C))) + 1;
             when COMMON_WLK =>
-                Do_Move (State, Team, Unit, To_Direction (A));
+                Do_Move (State, Team, Unit, To_Direction (Me.A));
                 B := Register_Type (Position.X);
                 C := Register_Type (Position.Y);
             when COMMON_CRL =>
-                Do_Crawl (State, Team, Unit, To_Direction (A));
+                Do_Crawl (State, Team, Unit, To_Direction (Me.A));
                 B := Register_Type (Position.X);
                 C := Register_Type (Position.Y);
             when COMMON_SWM =>
-                Do_Swim (State, Team, Unit, To_Direction (A));
+                Do_Swim (State, Team, Unit, To_Direction (Me.A));
                 B := Register_Type (Position.X);
                 C := Register_Type (Position.Y);
             when COMMON_CAP =>
@@ -565,13 +513,13 @@ package body Processors.Instructions is
                 end if;
             when COMMON_RTT => Set_Unit_Retreat (State, Team, Unit, True);
             when COMMON_HID => Set_Unit_Visibility (State, Team, Unit, True);
-            when COMMON_SAY => Radios (Team, Unit, Immediate) := A;
-            when COMMON_RAD => A := Radios (Team, Unit, Immediate);
-            when COMMON_YEL => Shared (Team, Immediate) := A;
-            when COMMON_EAR => A := Shared (Team, Immediate);
+            when COMMON_SAY => Radios (Team, Unit, Me.Immediate) := Me.A;
+            when COMMON_RAD => A := Radios (Team, Unit, Me.Immediate);
+            when COMMON_YEL => Shared (Team, Me.Immediate) := Me.A;
+            when COMMON_EAR => A := Shared (Team, Me.Immediate);
             when COMMON_DIE =>
                 if Debug_Mode then
-                    Logger.Log (A, B, C);
+                    Logger.Log (Me.A, Me.B, Me.C);
                 else
                     Kill_Unit (State, Team, Unit);
                 end if;
@@ -581,7 +529,7 @@ package body Processors.Instructions is
                     Dest : Coordinate;
                 begin
                     if Find_Unit (State, Team, Unit,
-                        Direction'Val (Op - COMMON_NRT), Dest)
+                        Direction'Val (Me.Op - COMMON_NRT), Dest)
                     then
                         B := Register_Type (Dest.X);
                         C := Register_Type (Dest.Y);
@@ -596,20 +544,21 @@ package body Processors.Instructions is
                 end;
             when COMMON_WCS => A := Register_Type (Us.Upgrades (Cache_Size));
             when COMMON_WCT => A := Register_Type (Us.Upgrades (Cache_Type));
-            when COMMON_WBP => A := Register_Type (Us.Upgrades (Branch_Type));
+            when COMMON_WBP => A :=
+                Register_Type (Us.Upgrades (Branch_Type));
             when COMMON_WCL => A := Register_Type (Us.Upgrades (CPU_Speed));
             when COMMON_TCS =>
-                A := Register_Type (
-                    Get_Unit (State, To_Unit (A), Team).Upgrades (Cache_Size));
+                A := Register_Type (Get_Unit (
+                    State, To_Unit (Me.A), Team).Upgrades (Cache_Size));
             when COMMON_TCT =>
-                A := Register_Type (
-                    Get_Unit (State, To_Unit (A), Team).Upgrades (Cache_Type));
+                A := Register_Type (Get_Unit (
+                    State, To_Unit (Me.A), Team).Upgrades (Cache_Type));
             when COMMON_TBP =>
-                A := Register_Type (
-                    Get_Unit (State, To_Unit (A), Team).Upgrades (Branch_Type));
+                A := Register_Type (Get_Unit (
+                    State, To_Unit (Me.A), Team).Upgrades (Branch_Type));
             when COMMON_TCL =>
-                A := Register_Type (
-                    Get_Unit (State, To_Unit (A), Team).Upgrades (CPU_Speed));
+                A := Register_Type (Get_Unit (
+                    State, To_Unit (Me.A), Team).Upgrades (CPU_Speed));
             when COMMON_PNT => A := Register_Type (Get_Points (State, Team));
             when COMMON_CCS =>
                 if Us.Upgrades (Cache_Size) < Upgrade_Level'Last then
@@ -640,14 +589,17 @@ package body Processors.Instructions is
                     A := 0;
                 end if;
             when COMMON_UCS =>
-                A := From_Boolean (Try_Upgrade (State, Team, Unit, Cache_Size));
+                A :=
+                    From_Boolean (Try_Upgrade (State, Team, Unit, Cache_Size));
             when COMMON_UCT =>
-                A := From_Boolean (Try_Upgrade (State, Team, Unit, Cache_Type));
+                A :=
+                    From_Boolean (Try_Upgrade (State, Team, Unit, Cache_Type));
             when COMMON_UBP =>
-                A := From_Boolean (
-                    Try_Upgrade (State, Team, Unit, Branch_Type));
+                A :=
+                    From_Boolean (Try_Upgrade (State, Team, Unit, Branch_Type));
             when COMMON_UCL =>
-                A := From_Boolean (Try_Upgrade (State, Team, Unit, CPU_Speed));
+                A :=
+                    From_Boolean (Try_Upgrade (State, Team, Unit, CPU_Speed));
             when COMMON_DCS =>
                 A := From_Boolean (
                     Try_Upgrade (State, Team, Unit, Cache_Size, True));
@@ -689,7 +641,7 @@ package body Processors.Instructions is
                 B := Register_Type (Me.Clock);
                 C := 0;
                 for Index in Unit_Type'Range loop
-                    C := C + Register_Type (Machines (Team, Index).Clock);
+                    C := Me.C + Register_Type (Machines (Team, Index).Clock);
                 end loop;
             when COMMON_DLY =>
                 Me.Behind := True;
@@ -697,25 +649,27 @@ package body Processors.Instructions is
                 Me.Advanced := True;
             when others =>
                 case Unit is
-                    when UT_CAPTAIN => Captain_Instruction (
-                        Op, Team, Immediate, A, State, Shared, Radios);
-                    when UT_MORTAR => Mortar_Instruction (
-                        Op, Team, Immediate, State, A, B, C, Machines);
-                    when UT_SNIPER => Sniper_Instruction (
-                        Op, Team, Immediate, State, A, B, C, Machines);
+                    when UT_CAPTAIN => Captain_Instruction (Me.Op, Team,
+                        Me.Immediate, A, State, Shared, Radios);
+                    when UT_MORTAR => Mortar_Instruction (Me.Op, Team,
+                        Me.Immediate, State, A, B, C, Machines);
+                    when UT_SNIPER => Sniper_Instruction (Me.Op, Team,
+                        Me.Immediate, State, A, B, C, Machines);
                     when UT_ENGINEER_SS | UT_ENGINEER_FS =>
-                        Engineer_Instruction (Op, Team, Unit, Immediate,
+                        Engineer_Instruction (Me.Op, Team, Unit, Me.Immediate,
                         State, A, B, C, Machines);
                     when UT_MACHINEGUNNER_SS | UT_MACHINEGUNNER_FS =>
-                        Machinegunner_Instruction (Op, Team, Unit,
-                        Immediate, State, A, B, C, Machines);
+                        Machinegunner_Instruction (Me.Op, Team, Unit,
+                        Me.Immediate, State, A, B, C, Machines);
                     when UT_SCOUT_SS | UT_SCOUT_FS => Scout_Instruction (
-                        Op, Team, Unit, Immediate, State, A, B, C, Machines);
+                        Me.Op, Team, Unit, Me.Immediate, State,
+                        A, B, C, Machines);
                     when UT_RIFLEMAN_SS | UT_RIFLEMAN_FS =>
-                        Rifleman_Instruction (Op, Team, Unit, Immediate,
+                        Rifleman_Instruction (Me.Op, Team, Unit, Me.Immediate,
                         State, A, B, C, Machines);
                 end case;
         end case;
+
         New_Log.Post.Registers := Me.Registers;
         New_Log.Post.State := Get_Unit (State, Unit, Team);
         Logger.Log (New_Log);
