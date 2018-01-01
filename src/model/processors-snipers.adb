@@ -50,6 +50,11 @@ package body Processors.Snipers is
                 29 => Register_Type (Nearest_Enemy.Position (Team).Y),
                 30 => Register_Type (Enemy_Captain.Position (Team).X),
                 31 => Register_Type (Enemy_Captain.Position (Team).Y));
+
+            -- Check if the nearest enemy is wrong and set to -1, -1 if so
+            if Nearest_Enemy = Null_Unit then
+                Machines (Team, UT_SNIPER).Registers (28 .. 29) := (-1, -1);
+            end if;
         end Set_Team_Sniper_Registers;
     begin
         for T in Player_ID'Range loop

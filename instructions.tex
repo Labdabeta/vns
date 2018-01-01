@@ -291,6 +291,14 @@ while camouflaged the sniper's speed is halved. However, only scouts will be
 able to see the sniper while it is camouflaged. When the sniper fires a shot it
 automatically exits camouflage.
 
+\subsection{Death}
+
+When units die they stop execution entirely. Anything that examines them
+directly will still find them in the state they were in before they were alive,
+however indirect queries will not find them. For example they will never show up
+as a nearest unit, but a dead captain will show up at the position it died at as
+the captain's position.
+
 \subsection{Victory}
 
 A team wins when any unit captures the enemy's base. This takes a long time and

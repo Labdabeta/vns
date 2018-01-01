@@ -55,6 +55,14 @@ package Boards is
             Boolean;
     end record;
 
+    -- Null unit is shooting and moving, which is impossible, thus unique.
+    Null_Unit : constant Unit_State := (
+        Upgrades => (others => 0),
+        Position => (others => (0, 0)),
+        Destination => (others => (0, 0)),
+        Hidden => False, Alive => False, Summoned => False, Retreating => False,
+        Setup => False, Moving => True, Shooting => True, Prone => False);
+
     Enemy_Of : constant array (Player_ID) of Player_ID := (T_BLACK, T_WHITE);
     Engineer_IDs : constant array (Board_Side) of Unit_Type := (
         UT_ENGINEER_SS, UT_ENGINEER_FS);

@@ -71,6 +71,11 @@ package body Processors.Captains is
                 27 => Compute_Life_Value (UT_SCOUT_FS),
                 28 => Compute_Life_Value (UT_RIFLEMAN_SS),
                 29 => Compute_Life_Value (UT_RIFLEMAN_FS));
+
+            -- Check if the nearest ally is wrong and set to -1, -1 if so
+            if Nearest_Ally = Null_Unit then
+                Machines (Team, UT_CAPTAIN).Registers (18 .. 19) := (-1, -1);
+            end if;
         end Set_Team_Captain_Registers;
     begin
         for T in Player_ID'Range loop

@@ -14,14 +14,14 @@ scout_fs=9
 rifleman_ss=10
 rifleman_fs=11
 
-north=1
-north_east=2
-east=3
-south_east=4
-south=5
-south_west=6
-west=7
-north_west=8
+N=1
+NE=2
+E=3
+SE=4
+S=5
+SW=6
+W=7
+NW=8
 
 ground=1
 wire=2

@@ -32,6 +32,10 @@ package body Processors.Engineers is
             Pos : Coordinate :=
                 Get_Unit (State, Engineer_IDs (Side), Team).Position (Team);
             Them : Player_ID := Enemy_Of (Team);
+            Nearest_Ally : Unit_State := Get_Nearest_Ally (
+                State, To_Location (Pos, Team), Team);
+            Nearest_Enemy : Unit_State := Get_Nearest_Ally (
+                State, To_Location (Pos, Team), Enemy_Of (Team));
         begin
             Machines (Team, Engineer_IDs (Side)).Registers (20 .. 31) := (
                 20 => Register_Type (Get_Nearest_Terrain (
@@ -42,14 +46,10 @@ package body Processors.Engineers is
                     State, To_Location (Pos, Team), Team, TT_WIRE).X),
                 23 => Register_Type (Get_Nearest_Terrain (
                     State, To_Location (Pos, Team), Team, TT_WIRE).Y),
-                24 => Register_Type (Get_Nearest_Ally (
-                    State, To_Location (Pos, Team), Team).Position (Team).X),
-                25 => Register_Type (Get_Nearest_Ally (
-                    State, To_Location (Pos, Team), Team).Position (Team).Y),
-                26 => Register_Type (Get_Nearest_Ally (
-                    State, To_Location (Pos, Team), Them).Position (Team).X),
-                27 => Register_Type (Get_Nearest_Ally (
-                    State, To_Location (Pos, Team), Them).Position (Team).Y),
+                24 => Register_Type (Nearest_Ally.Position (Team).X),
+                25 => Register_Type (Nearest_Ally.Position (Team).Y),
+                26 => Register_Type (Nearest_Enemy.Position (Team).X),
+                27 => Register_Type (Nearest_Enemy.Position (Team).Y),
                 28 => Register_Type (Get_Nearest_Terrain (
                     State, To_Location (Pos, Team), Team, TT_WATER).X),
                 29 => Register_Type (Get_Nearest_Terrain (
@@ -58,6 +58,17 @@ package body Processors.Engineers is
                     State, To_Location (Pos, Team), Team)),
                 31 => Register_Type (Distance_To_Base (
                     State, To_Location (Pos, Team), Them)));
+
+            -- Check if the nearest ally/enemy is wrong and set to -1, -1 if so
+            if Nearest_Ally = Null_Unit then
+                Machines (Team, Engineer_IDs (Side)).Registers (24) := -1;
+                Machines (Team, Engineer_IDs (Side)).Registers (25) := -1;
+            end if;
+
+            if Nearest_Enemy = Null_Unit then
+                Machines (Team, Engineer_IDs (Side)).Registers (26) := -1;
+                Machines (Team, Engineer_IDs (Side)).Registers (27) := -1;
+            end if;
         end Set_Team_Side_Engineer_Registers;
     begin
         for T in Player_ID'Range loop

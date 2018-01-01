@@ -66,6 +66,14 @@ package body Processors.Machinegunners is
                     Count_Nearby_Enemies (State, Pos, Them, 5)),
                 31 => Register_Type (
                     Count_Nearby_Enemies (State, Pos, Them, 6)));
+
+            -- Check if the nearest enemy is wrong and set to -1, -1 if so
+            if Get_Nearest_Ally (State, Pos, Them) = Null_Unit then
+                Machines (Team, Machinegunner_IDs (Side)).Registers (17) := -1;
+                Machines (Team, Machinegunner_IDs (Side)).Registers (18) := -1;
+                Machines (Team, Machinegunner_IDs (Side)).Registers (19) :=
+                    Register_Type'Last;
+            end if;
         end Set_Team_Side_Machinegunner_Registers;
     begin
         for T in Player_ID'Range loop

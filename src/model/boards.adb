@@ -166,7 +166,7 @@ package body Boards is
             end loop;
         end loop;
 
-        return This.Units (Team, UT_CAPTAIN);
+        return Null_Unit;
     end Get_Nearest_Ally;
 
     function Count_Nearby_Enemies (

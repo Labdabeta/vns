@@ -61,6 +61,32 @@ package body Processors.Scouts is
                 29 => Register_Type (Nearest_Enemies (4).Y),
                 30 => Register_Type (Nearest_Enemies (5).X),
                 31 => Register_Type (Nearest_Enemies (5).Y));
+
+            -- Check if the nearest allies are wrong and set to -1, -1 if so
+            if Get_Nearest_Ally (State, Pos, Them, 0) = Null_Unit then
+                Machines (Team, Scout_IDs (Side)).Registers (22) := -1;
+                Machines (Team, Scout_IDs (Side)).Registers (23) := -1;
+            end if;
+
+            if Get_Nearest_Ally (State, Pos, Them, 1) = Null_Unit then
+                Machines (Team, Scout_IDs (Side)).Registers (24) := -1;
+                Machines (Team, Scout_IDs (Side)).Registers (25) := -1;
+            end if;
+
+            if Get_Nearest_Ally (State, Pos, Them, 2) = Null_Unit then
+                Machines (Team, Scout_IDs (Side)).Registers (26) := -1;
+                Machines (Team, Scout_IDs (Side)).Registers (27) := -1;
+            end if;
+
+            if Get_Nearest_Ally (State, Pos, Them, 3) = Null_Unit then
+                Machines (Team, Scout_IDs (Side)).Registers (28) := -1;
+                Machines (Team, Scout_IDs (Side)).Registers (29) := -1;
+            end if;
+
+            if Get_Nearest_Ally (State, Pos, Them, 4) = Null_Unit then
+                Machines (Team, Scout_IDs (Side)).Registers (30) := -1;
+                Machines (Team, Scout_IDs (Side)).Registers (31) := -1;
+            end if;
         end Set_Team_Side_Scout_Registers;
     begin
         for T in Player_ID'Range loop
