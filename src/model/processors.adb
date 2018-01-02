@@ -182,7 +182,9 @@ package body Processors is
                 Me.CCounter := Reset_Counter (
                     Get_Unit (State, Unit, Team).Upgrades (CPU_Speed));
                 if Me.Advanced then
-                    Me.CCounter := Me.CCounter - 1;
+                    if Me.CCounter > 0 then
+                        Me.CCounter := Me.CCounter - 1;
+                    end if;
                     Me.Advanced := False;
                 end if;
                 if Me.Behind then
