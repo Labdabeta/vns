@@ -145,8 +145,10 @@ package body Processors.Scouts is
             when SCOUT_RUN =>
                 if not Get_Unit (State, Unit, Team).Prone then
                     Do_Move (State, Team, Unit, To_Direction (Me.A));
-                    B := Register_Type (Us.Position (Team).X);
-                    C := Register_Type (Us.Position (Team).Y);
+                    B := Register_Type (
+                        Get_Unit (State, Unit, Team).Position (Team).X);
+                    C := Register_Type (
+                        Get_Unit (State, Unit, Team).Position (Team).Y);
                 end if;
             when SCOUT_HIT => Do_Hit (State, Team, Unit, To_Direction (Me.A));
             when SCOUT_QSU =>

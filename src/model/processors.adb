@@ -115,6 +115,7 @@ package body Processors is
                 Me.Immediate :=
                     Address_Type (PCVal and 2#11111111111111111111#);
                 PC := PC + 1;
+                Set_Registers (Which.Machines, Which.State);
                 Me.ICounter := Compute_Time (Which, Unit, Team);
             end Fetch_Instruction;
         begin

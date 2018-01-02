@@ -496,16 +496,22 @@ package body Processors.Instructions is
                     Position, To_Coordinate (Me.B, Me.C))) + 1;
             when COMMON_WLK =>
                 Do_Move (State, Team, Unit, To_Direction (Me.A));
-                B := Register_Type (Position.X);
-                C := Register_Type (Position.Y);
+                B := Register_Type (
+                    Get_Unit (State, Unit, Team).Position (Team).X);
+                C := Register_Type (
+                    Get_Unit (State, Unit, Team).Position (Team).Y);
             when COMMON_CRL =>
                 Do_Crawl (State, Team, Unit, To_Direction (Me.A));
-                B := Register_Type (Position.X);
-                C := Register_Type (Position.Y);
+                B := Register_Type (
+                    Get_Unit (State, Unit, Team).Position (Team).X);
+                C := Register_Type (
+                    Get_Unit (State, Unit, Team).Position (Team).Y);
             when COMMON_SWM =>
                 Do_Swim (State, Team, Unit, To_Direction (Me.A));
-                B := Register_Type (Position.X);
-                C := Register_Type (Position.Y);
+                B := Register_Type (
+                    Get_Unit (State, Unit, Team).Position (Team).X);
+                C := Register_Type (
+                    Get_Unit (State, Unit, Team).Position (Team).Y);
             when COMMON_CAP =>
                 if Is_On_Target (State, Team, Unit) then
                     Win_Game (State, Team);
