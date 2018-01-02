@@ -33,7 +33,7 @@ package body Memory is
     begin
         if Value < 0 then
             Which.Small := 2#1000000000# or (
-                not Small_Immediate (-Value + 1));
+                not Small_Immediate (-Value - 1));
         else
             Which.Small := Small_Immediate (Value);
         end if;
