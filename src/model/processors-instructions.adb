@@ -474,8 +474,7 @@ package body Processors.Instructions is
                     end if;
                 end if;
             when COMMON_DST =>
-                A :=
-                    Get_Path_To (Position, To_Coordinate (Me.B, Me.C))'Length;
+                A := Get_Path_To (Position, To_Coordinate (Me.B, Me.C))'Length;
             when COMMON_CVR =>
                 A := Register_Type (Cover_Between (State, Team, Unit, BC));
             when COMMON_DED =>

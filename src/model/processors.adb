@@ -103,6 +103,7 @@ package body Processors is
 
             procedure Fetch_Instruction is
             begin
+                PCVal := To_U32 (Me.Memory (Address_Type (PC)));
                 Me.RA := Register_Index (Shift_Right (PCVal, 20) and 2#11111#);
                 Me.RB := Register_Index (Shift_Right (PCVal, 15) and 2#11111#);
                 Me.RC := Register_Index (Shift_Right (PCVal, 10) and 2#11111#);
@@ -114,11 +115,11 @@ package body Processors is
                 Me.Immediate :=
                     Address_Type (PCVal and 2#11111111111111111111#);
                 PC := PC + 1;
+                Me.ICounter := Compute_Time (Which, Unit, Team);
             end Fetch_Instruction;
         begin
             if Me.Clock = 0 then
                 Fetch_Instruction;
-                Me.ICounter := Compute_Time (Which, Unit, Team);
             end if;
 
             if Us.Summoned then
@@ -148,26 +149,9 @@ package body Processors is
                 while Me.ICounter = 0 loop
                     Do_Instruction (Which, Unit, Team);
 
-                    -- Writeback - THIS WONT WORK
-                    -- Need to use direct register access as targets of writes
-                    -- across processors-XXX.adb. Lots of work! Must do!
-                    --
-                    -- EG: add r1, r1, 10
-                    -- A := me.registers (1); -- r1
-                    -- B := me.registers (1); -- r1
-                    -- C := me.registers (12); -- 10
-                    -- A := B + C; -- r1 + 10
-                    -- me.registers (1) := A; -- r1 + 10 :)
-                    -- me.registers (1) := B; -- r1 :o overwritten
-                    --
-                    -- Me.Registers (Me.RA) := Me.A;
-                    -- Me.Registers (Me.RB) := Me.B;
-                    -- Me.Registers (Me.RC) := Me.C;
-
                     Set_Registers (Which.Machines, Which.State);
 
                     Fetch_Instruction;
-                    Me.ICounter := Compute_Time (Which, Unit, Team);
                 end loop;
                 Me.ICounter := Me.ICounter - 1;
             else

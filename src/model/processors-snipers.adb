@@ -193,6 +193,7 @@ package body Processors.Snipers is
                     BC : Location := To_Location (
                         To_Coordinate (Me.B, Me.C), Team);
                 begin
+                    A := 0;
                     if Is_Targeted (State, BC) then
                         if Targeting_Team (State, BC) = Team then
                             A := From_Unit (Targeting_Unit (State, BC));
