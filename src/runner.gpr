@@ -21,6 +21,9 @@ project Runner is
             when "profile" =>
                 for Default_Switches ("Ada") use Base_Switches & ("-O2", "-g");
         end case;
+
+        for Switches ("sprite_sheet.ads") use ("-O0");
+        for Switches ("font_sheet.ads") use ("-O0");
     end Compiler;
 
     package Builder is

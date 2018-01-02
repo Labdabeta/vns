@@ -1,4 +1,4 @@
-.PHONY: all clean config
+.PHONY: all clean config force
 
 GPRBUILD=$(if $(shell command -v gprbuild 2> /dev/null),\
 	gprbuild,\
@@ -16,6 +16,7 @@ VERSION=$(shell git describe --tags)
 
 SDL_DIR=/usr/lib
 LATEX=pdflatex
+GPRFLAGS=-d
 
 all: as run instructions
 
@@ -25,10 +26,10 @@ config:
 	@echo 'end Version;' >> $(VERSION_SOURCE)
 
 as: config
-	$(GPRBUILD) -P src/assembler.gpr
+	$(GPRBUILD) $(GPRFLAGS) -P src/assembler.gpr
 
 run: config
-	$(GPRBUILD) -XSDL2_LIB_DIR=$(SDL_DIR) -P src/runner.gpr
+	$(GPRBUILD) $(GPRFLAGS) -XSDL2_LIB_DIR=$(SDL_DIR) -P src/runner.gpr
 
 instructions: instructions.pdf
 
@@ -37,6 +38,11 @@ instructions: instructions.pdf
 	@$(LATEX) -interaction=batchmode $<
 	-@rm $*.aux $*.log $*.lot $*.out $*.toc
 
+force: GPRFLAGS+=-f
+force: all
+
+mode-%: GPRFLAGS+=-Xmode=%
+mode-%: all
 
 clean: config
 	$(GPRCLEAN) -P src/assembler.gpr

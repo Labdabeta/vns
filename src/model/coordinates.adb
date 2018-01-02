@@ -1,3 +1,4 @@
+with Ada.Text_IO;
 
 package body Coordinates is
     function Get_Direction_Towards (
@@ -167,166 +168,66 @@ package body Coordinates is
     function Get_Path_To (
         Source, Destination : Coordinate)
         return Coordinate_Path is
-        Delta_X : Integer := Integer (Destination.X) - Integer (Source.X);
-        Delta_Y : Integer := Integer (Destination.Y) - Integer (Source.Y);
-        type Integer_Coord is record
-            X, Y : Integer;
-        end record;
-        type Integer_Path is array (Positive range <>) of Integer_Coord;
-        function Octant_Zero (X0, Y0, X1, Y1 : Integer)
-            return Integer_Path is
-            DX : Integer := X1 - X0;
-            DY : Integer := Y1 - Y0;
-            D : Integer := 2 * DY - DX;
-            Y : Integer := Y0;
-            Result : Integer_Path (1 .. DX);
+        X0 : Integer := Integer (Source.X);
+        X1 : Integer := Integer (Destination.X);
+        Y0 : Integer := Integer (Source.Y);
+        Y1 : Integer := Integer (Destination.Y);
+        Delta_X : Integer := abs (X1 - X0);
+        Delta_Y : Integer := abs (Y1 - Y0);
+        Step_X : Integer;
+        Step_Y : Integer;
+        Error : Integer;
+        Error2 : Integer;
+        Path_Length : Positive;
+        Empty_Result : Coordinate_Path (1 .. 0);
+    begin
+        if Source = Destination then
+            return Empty_Result;
+        end if;
+
+        if Source.X < Destination.X then
+            Step_X := 1;
+        else
+            Step_X := -1;
+        end if;
+
+        if Source.Y < Destination.Y then
+            Step_Y := 1;
+        else
+            Step_Y := -1;
+        end if;
+
+        if Delta_X > Delta_Y then
+            Path_Length := Positive (Delta_X);
+            Error := Delta_X / 2;
+        else
+            Path_Length := Positive (Delta_Y);
+            Error := -Delta_Y / 2;
+        end if;
+
+        declare
+            Result : Coordinate_Path (1 .. Path_Length + 1);
+            Next : Positive := 1;
         begin
-            for X in Integer range X0 .. X1 loop
-                if X > X0 then
-                    Result (X - X0) := (X, Y);
+            loop
+                Result (Next) := (X_Coordinate (X0), Y_Coordinate (Y0));
+                Next := Next + 1;
+
+                exit when X0 = X1 and Y0 = Y1;
+                Error2 := Error;
+
+                if Error2 > -Delta_X then
+                    Error := Error - Delta_Y;
+                    X0 := X0 + Step_X;
                 end if;
 
-                if D > 0 then
-                    Y := Y + 1;
-                    D := D - 2 * DX;
+                if Error2 < Delta_Y then
+                    Error := Error + Delta_X;
+                    Y0 := Y0 + Step_Y;
                 end if;
-                D := D + 2 * DY;
             end loop;
-            return Result;
-        end Octant_Zero;
-    begin
-        if Delta_X > 0 then
-            if Delta_Y > 0 then
-                if Delta_X > Delta_Y then
-                    -- O0
-                    declare
-                        Result : Integer_Path := Octant_Zero (
-                        Integer (Source.X), Integer (Source.Y),
-                        Integer (Destination.X), Integer (Destination.Y));
-                        Ret : Coordinate_Path (Result'First .. Result'Last);
-                    begin
-                        for Index in Result'Range loop
-                            Ret (Index) := (
-                                X_Coordinate (Result (Index).X),
-                                Y_Coordinate (Result (Index).Y));
-                        end loop;
-                        return Ret;
-                    end;
-                else
-                    -- O1
-                    declare
-                        Result : Integer_Path := Octant_Zero (
-                            Integer (Source.Y), Integer (Source.X),
-                            Integer (Destination.Y), Integer (Destination.X));
-                        Ret : Coordinate_Path (Result'First .. Result'Last);
-                    begin
-                        for Index in Result'Range loop
-                            Ret (Index) := (
-                                X_Coordinate (Result (Index).Y),
-                                Y_Coordinate (Result (Index).X));
-                        end loop;
-                        return Ret;
-                    end;
-                end if;
-            else
-                if Delta_X > -Delta_Y then
-                    -- O7
-                    declare
-                        Result : Integer_Path := Octant_Zero (
-                            Integer (Source.X), -Integer (Source.Y),
-                            Integer (Destination.X), -Integer (Destination.Y));
-                        Ret : Coordinate_Path (Result'First .. Result'Last);
-                    begin
-                        for Index in Result'Range loop
-                            Ret (Index) := (
-                                X_Coordinate (Result (Index).X),
-                                Y_Coordinate (-Result (Index).Y));
-                        end loop;
-                        return Ret;
-                    end;
-                else
-                    -- O6
-                    declare
-                        Result : Integer_Path := Octant_Zero (
-                            -Integer (Source.Y), Integer (Source.X),
-                            -Integer (Destination.Y), Integer (Destination.X));
-                        Ret : Coordinate_Path (Result'First .. Result'Last);
-                    begin
-                        for Index in Result'Range loop
-                            Ret (Index) := (
-                                X_Coordinate (Result (Index).Y),
-                                Y_Coordinate (-Result (Index).X));
-                        end loop;
-                        return Ret;
-                    end;
-                end if;
-            end if;
-        else
-            if Delta_Y > 0 then
-                if -Delta_X > Delta_Y then
-                    -- O3
-                    declare
-                        Result : Integer_Path := Octant_Zero (
-                            -Integer (Source.X), Integer (Source.Y),
-                            -Integer (Destination.X), Integer (Destination.Y));
-                        Ret : Coordinate_Path (Result'First .. Result'Last);
-                    begin
-                        for Index in Result'Range loop
-                            Ret (Index) := (
-                                X_Coordinate (-Result (Index).X),
-                                Y_Coordinate (Result (Index).Y));
-                        end loop;
-                        return Ret;
-                    end;
-                else
-                    -- O2
-                    declare
-                        Result : Integer_Path := Octant_Zero (
-                            Integer (Source.Y), -Integer (Source.X),
-                            Integer (Destination.Y), -Integer (Destination.X));
-                        Ret : Coordinate_Path (Result'First .. Result'Last);
-                    begin
-                        for Index in Result'Range loop
-                            Ret (Index) := (
-                                X_Coordinate (-Result (Index).Y),
-                                Y_Coordinate (Result (Index).X));
-                        end loop;
-                        return Ret;
-                    end;
-                end if;
-            else
-                if -Delta_X > -Delta_Y then
-                    -- O4
-                    declare
-                        Result : Integer_Path := Octant_Zero (
-                            -Integer (Source.X), -Integer (Source.Y),
-                            -Integer (Destination.X), -Integer (Destination.Y));
-                        Ret : Coordinate_Path (Result'First .. Result'Last);
-                    begin
-                        for Index in Result'Range loop
-                            Ret (Index) := (
-                                X_Coordinate (-Result (Index).X),
-                                Y_Coordinate (-Result (Index).Y));
-                        end loop;
-                        return Ret;
-                    end;
-                else
-                    -- O5
-                    declare
-                        Result : Integer_Path := Octant_Zero (
-                            -Integer (Source.Y), -Integer (Source.X),
-                            -Integer (Destination.Y), -Integer (Destination.X));
-                        Ret : Coordinate_Path (Result'First .. Result'Last);
-                    begin
-                        for Index in Result'Range loop
-                            Ret (Index) := (
-                                X_Coordinate (-Result (Index).Y),
-                                Y_Coordinate (-Result (Index).X));
-                        end loop;
-                        return Ret;
-                    end;
-                end if;
-            end if;
-        end if;
+
+            return Result (2 .. Result'Last);
+        end;
     end Get_Path_To;
 end Coordinates;
