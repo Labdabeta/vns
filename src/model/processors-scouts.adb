@@ -130,45 +130,50 @@ package body Processors.Scouts is
     end Scout_Time;
 
     procedure Scout_Instruction (
-        Op : in Instruction_ID;
         Team : in Boards.Player_ID;
         Unit : in Boards.Unit_Type;
-        Immediate : in Address_Type;
         State : in out Boards.Board;
-        A : in out Register_Type;
-        B : in out Register_Type;
-        C : in out Register_Type;
         Machines : in out Processor_Array) is
+        Me : Unit_Processor renames Machines (Team, Unit);
+        A : Register_Type renames Me.Registers (Me.RA);
+        B : Register_Type renames Me.Registers (Me.RB);
+        C : Register_Type renames Me.Registers (Me.RC);
         Us : Unit_State := Get_Unit (State, Unit, Team);
         Enemy : Player_ID := Enemy_Of (Team);
     begin
-        case Op is
+        case Me.Op is
             when SCOUT_RUN =>
                 if not Get_Unit (State, Unit, Team).Prone then
-                    Do_Move (State, Team, Unit, To_Direction (A));
+                    Do_Move (State, Team, Unit, To_Direction (Me.A));
                     B := Register_Type (Us.Position (Team).X);
                     C := Register_Type (Us.Position (Team).Y);
                 end if;
-            when SCOUT_HIT => Do_Hit (State, Team, Unit, To_Direction (A));
+            when SCOUT_HIT => Do_Hit (State, Team, Unit, To_Direction (Me.A));
             when SCOUT_QSU =>
-                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Setup);
-                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Setup);
+                B := From_Boolean (
+                    Get_Unit (State, To_Unit (Me.A), Team).Setup);
+                C := From_Boolean (
+                    Get_Unit (State, To_Unit (Me.A), Enemy).Setup);
             when SCOUT_QMV =>
-                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Moving);
-                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Moving);
+                B := From_Boolean (
+                    Get_Unit (State, To_Unit (Me.A), Team).Moving);
+                C := From_Boolean (
+                    Get_Unit (State, To_Unit (Me.A), Enemy).Moving);
             when SCOUT_QSH =>
                 B := From_Boolean (
-                    Get_Unit (State, To_Unit (A), Team).Shooting);
+                    Get_Unit (State, To_Unit (Me.A), Team).Shooting);
                 C := From_Boolean (
-                    Get_Unit (State, To_Unit (A), Enemy).Shooting);
+                    Get_Unit (State, To_Unit (Me.A), Enemy).Shooting);
             when SCOUT_QPR =>
-                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Prone);
-                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Prone);
+                B := From_Boolean (
+                    Get_Unit (State, To_Unit (Me.A), Team).Prone);
+                C := From_Boolean (
+                    Get_Unit (State, To_Unit (Me.A), Enemy).Prone);
             when SCOUT_LIE => Set_Prone (State, Team, Unit, True);
             when SCOUT_GUP => Set_Prone (State, Team, Unit, False);
             when SCOUT_CSS | SCOUT_CFS | SCOUT_WSS | SCOUT_WFS |
                 SCOUT_BOM | SCOUT_AIR | SCOUT_MOR | SCOUT_SUP =>
-                Ask_Instruction (Op, Team, B, C, Immediate, State, A, Machines);
+                Ask_Instruction (Team, Unit, State, Machines);
             when others => null;
         end case;
     end Scout_Instruction;

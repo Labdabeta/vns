@@ -11,7 +11,6 @@ private package Processors.Captains is
         State : in out Boards.Board)
         return Natural;
     procedure Captain_Instruction (
-        Op : in Instruction_ID;
         Team : in Boards.Player_ID;
         Me : in out Unit_Processor;
         State : in out Boards.Board;

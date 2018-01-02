@@ -41,12 +41,10 @@ package body Processors.Floats is
         end case;
     end Float_Time;
 
-    procedure Float_Instruction (
-        Op : in Instruction_ID;
-        A : in out Register_Type;
-        B : in out Register_Type;
-        C : in out Register_Type;
-        Immediate : in Address_Type) is
+    procedure Float_Instruction (Me : in out Unit_Processor) is
+        A : Register_Type renames Me.Registers (Me.RA);
+        B : Register_Type renames Me.Registers (Me.RB);
+        C : Register_Type renames Me.Registers (Me.RC);
         package Value_Functions is new
             Ada.Numerics.Generic_Elementary_Functions (Float);
         use Value_Functions;
@@ -55,29 +53,29 @@ package body Processors.Floats is
         function To_F is new Ada.Unchecked_Conversion (
             Register_Type, Float);
     begin
-        case Op is
-            when FLOAT_ITF => A := To_R (Float (Immediate));
-            when FLOAT_FAD => A := To_R (To_F (B) + To_F (C));
-            when FLOAT_FSU => A := To_R (To_F (B) - To_F (C));
-            when FLOAT_FMU => A := To_R (To_F (B) * To_F (C));
-            when FLOAT_FDV => A := To_R (To_F (B) / To_F (C));
+        case Me.Op is
+            when FLOAT_ITF => A := To_R (Float (Me.Immediate));
+            when FLOAT_FAD => A := To_R (To_F (Me.B) + To_F (Me.C));
+            when FLOAT_FSU => A := To_R (To_F (Me.B) - To_F (Me.C));
+            when FLOAT_FMU => A := To_R (To_F (Me.B) * To_F (Me.C));
+            when FLOAT_FDV => A := To_R (To_F (Me.B) / To_F (Me.C));
             when FLOAT_CEL =>
-                B := Register_Type (Float'Ceiling (To_F (A)));
-                C := Register_Type (Float'Floor (To_F (A)));
+                B := Register_Type (Float'Ceiling (To_F (Me.A)));
+                C := Register_Type (Float'Floor (To_F (Me.A)));
             when FLOAT_RTF => A := Register_Type (Float'Floor (
-                To_F (A) / Float (Immediate)));
-            when FLOAT_SIN => A := To_R (Sin (To_F (A)));
-            when FLOAT_COS => A := To_R (Cos (To_F (A)));
-            when FLOAT_TAN => A := To_R (Tan (To_F (A)));
-            when FLOAT_POW => A := To_R (To_F (B) ** To_F (C));
-            when FLOAT_ASN => A := To_R (Arcsin (To_F (A)));
-            when FLOAT_ACS => A := To_R (Arccos (To_F (A)));
-            when FLOAT_ATN => A := To_R (Arctan (To_F (A)));
-            when FLOAT_LOG => A := To_R (Log (To_F (B), To_F (C)));
+                To_F (Me.A) / Float (Me.Immediate)));
+            when FLOAT_SIN => A := To_R (Sin (To_F (Me.A)));
+            when FLOAT_COS => A := To_R (Cos (To_F (Me.A)));
+            when FLOAT_TAN => A := To_R (Tan (To_F (Me.A)));
+            when FLOAT_POW => A := To_R (To_F (Me.B) ** To_F (Me.C));
+            when FLOAT_ASN => A := To_R (Arcsin (To_F (Me.A)));
+            when FLOAT_ACS => A := To_R (Arccos (To_F (Me.A)));
+            when FLOAT_ATN => A := To_R (Arctan (To_F (Me.A)));
+            when FLOAT_LOG => A := To_R (Log (To_F (Me.B), To_F (Me.C)));
             when FLOAT_FCP =>
-                if To_F (B) > To_F (C) then
+                if To_F (Me.B) > To_F (Me.C) then
                     A := 1;
-                elsif To_F (B) < To_F (C) then
+                elsif To_F (Me.B) < To_F (Me.C) then
                     A := -1;
                 else
                     A := 0;

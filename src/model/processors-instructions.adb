@@ -649,24 +649,20 @@ package body Processors.Instructions is
                 Me.Advanced := True;
             when others =>
                 case Unit is
-                    when UT_CAPTAIN => Captain_Instruction (Me.Op, Team,
-                        Me, State, Shared, Radios);
-                    when UT_MORTAR => Mortar_Instruction (Me.Op, Team,
-                        Me.Immediate, State, A, B, C, Machines);
-                    when UT_SNIPER => Sniper_Instruction (Me.Op, Team,
-                        Me.Immediate, State, A, B, C, Machines);
+                    when UT_CAPTAIN =>
+                        Captain_Instruction (Team, Me, State, Shared, Radios);
+                    when UT_MORTAR =>
+                        Mortar_Instruction (Team, State, Machines);
+                    when UT_SNIPER =>
+                        Sniper_Instruction (Team, State, Machines);
                     when UT_ENGINEER_SS | UT_ENGINEER_FS =>
-                        Engineer_Instruction (Me.Op, Team, Unit, Me.Immediate,
-                        State, A, B, C, Machines);
+                        Engineer_Instruction (Team, Unit, State, Machines);
                     when UT_MACHINEGUNNER_SS | UT_MACHINEGUNNER_FS =>
-                        Machinegunner_Instruction (Me.Op, Team, Unit,
-                        Me.Immediate, State, A, B, C, Machines);
-                    when UT_SCOUT_SS | UT_SCOUT_FS => Scout_Instruction (
-                        Me.Op, Team, Unit, Me.Immediate, State,
-                        A, B, C, Machines);
+                        Machinegunner_Instruction (Team, Unit, State, Machines);
+                    when UT_SCOUT_SS | UT_SCOUT_FS =>
+                        Scout_Instruction (Team, Unit, State, Machines);
                     when UT_RIFLEMAN_SS | UT_RIFLEMAN_FS =>
-                        Rifleman_Instruction (Me.Op, Team, Unit, Me.Immediate,
-                        State, A, B, C, Machines);
+                        Rifleman_Instruction (Team, Unit, State, Machines);
                 end case;
         end case;
 

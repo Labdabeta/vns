@@ -99,49 +99,52 @@ package body Processors.Engineers is
     end Engineer_Time;
 
     procedure Engineer_Instruction (
-        Op : in Instruction_ID;
         Team : in Boards.Player_ID;
         Unit : in Boards.Unit_Type;
-        Immediate : in Address_Type;
         State : in out Boards.Board;
-        A : in out Register_Type;
-        B : in out Register_Type;
-        C : in out Register_Type;
         Machines : in out Processor_Array) is
+        Me : Unit_Processor renames Machines (Team, Unit);
+        A : Register_Type renames Me.Registers (Me.RA);
+        B : Register_Type renames Me.Registers (Me.RB);
+        C : Register_Type renames Me.Registers (Me.RC);
         Enemy : Player_ID := Enemy_Of (Team);
     begin
-        if Is_Float_Op (Op) then
-            Float_Instruction (Op, A, B, C, Immediate);
+        if Is_Float_Op (Me.Op) then
+            Float_Instruction (Me);
         end if;
 
-        case Op is
+        case Me.Op is
             when ENGINEER_WIR =>
-                Plant_Wire (State, Team, Unit, To_Direction (A));
+                Plant_Wire (State, Team, Unit, To_Direction (Me.A));
                 B := Register_Type (Count_Wire (State));
                 C := Register_Type (Count_Cover (State));
             when ENGINEER_CUT =>
-                Plant_Wire (State, Team, Unit, To_Direction (A), True);
+                Plant_Wire (State, Team, Unit, To_Direction (Me.A), True);
                 B := Register_Type (Count_Wire (State));
                 C := Register_Type (Count_Cover (State));
             when ENGINEER_SND =>
-                Plant_Cover (State, Team, Unit, To_Direction (A));
+                Plant_Cover (State, Team, Unit, To_Direction (Me.A));
                 B := Register_Type (Count_Wire (State));
                 C := Register_Type (Count_Cover (State));
             when ENGINEER_DIG =>
-                Plant_Cover (State, Team, Unit, To_Direction (A), True);
+                Plant_Cover (State, Team, Unit, To_Direction (Me.A), True);
                 B := Register_Type (Count_Wire (State));
                 C := Register_Type (Count_Cover (State));
             when ENGINEER_QSU =>
-                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Setup);
-                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Setup);
+                B := From_Boolean (
+                    Get_Unit (State, To_Unit (Me.A), Team).Setup);
+                C := From_Boolean (
+                    Get_Unit (State, To_Unit (Me.A), Enemy).Setup);
             when ENGINEER_QMV =>
-                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Moving);
-                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Moving);
+                B := From_Boolean (
+                    Get_Unit (State, To_Unit (Me.A), Team).Moving);
+                C := From_Boolean (
+                    Get_Unit (State, To_Unit (Me.A), Enemy).Moving);
             when ENGINEER_LIE => Set_Prone (State, Team, Unit, True);
             when ENGINEER_GUP => Set_Prone (State, Team, Unit, False);
             when ENGINEER_CSS | ENGINEER_CFS | ENGINEER_WSS | ENGINEER_WFS |
                 ENGINEER_BOM | ENGINEER_AIR | ENGINEER_MOR | ENGINEER_SUP =>
-                Ask_Instruction (Op, Team, B, C, Immediate, State, A, Machines);
+                Ask_Instruction (Team, Unit, State, Machines);
             when others => null;
         end case;
     end Engineer_Instruction;

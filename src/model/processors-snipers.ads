@@ -13,12 +13,7 @@ private package Processors.Snipers is
         State : in out Boards.Board)
         return Natural;
     procedure Sniper_Instruction (
-        Op : in Instruction_ID;
         Team : in Boards.Player_ID;
-        Immediate : in Address_Type;
         State : in out Boards.Board;
-        A : in out Register_Type;
-        B : in out Register_Type;
-        C : in out Register_Type;
         Machines : in out Processor_Array);
 end Processors.Snipers;

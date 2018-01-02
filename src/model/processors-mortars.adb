@@ -87,51 +87,58 @@ package body Processors.Mortars is
     end Mortar_Time;
 
     procedure Mortar_Instruction (
-        Op : in Instruction_ID;
         Team : in Boards.Player_ID;
-        Immediate : in Address_Type;
         State : in out Boards.Board;
-        A : in out Register_Type;
-        B : in out Register_Type;
-        C : in out Register_Type;
         Machines : in out Processor_Array) is
+        Me : Unit_Processor renames Machines (Team, UT_MORTAR);
+        A : Register_Type renames Me.Registers (Me.RA);
+        B : Register_Type renames Me.Registers (Me.RB);
+        C : Register_Type renames Me.Registers (Me.RC);
         Enemy : Player_ID := Enemy_Of (Team);
     begin
-        if Is_Float_Op (Op) then
-            Float_Instruction (Op, A, B, C, Immediate);
+        if Is_Float_Op (Me.Op) then
+            Float_Instruction (Me);
         end if;
 
-        case Op is
+        case Me.Op is
             when MORTAR_QSU =>
-                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Setup);
-                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Setup);
+                B := From_Boolean (
+                    Get_Unit (State, To_Unit (Me.A), Team).Setup);
+                C := From_Boolean (
+                    Get_Unit (State, To_Unit (Me.A), Enemy).Setup);
             when MORTAR_QMV =>
-                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Moving);
-                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Moving);
+                B := From_Boolean (
+                    Get_Unit (State, To_Unit (Me.A), Team).Moving);
+                C := From_Boolean (
+                    Get_Unit (State, To_Unit (Me.A), Enemy).Moving);
             when MORTAR_QSH =>
                 B := From_Boolean (
-                    Get_Unit (State, To_Unit (A), Team).Shooting);
+                    Get_Unit (State, To_Unit (Me.A), Team).Shooting);
                 C := From_Boolean (
-                    Get_Unit (State, To_Unit (A), Enemy).Shooting);
+                    Get_Unit (State, To_Unit (Me.A), Enemy).Shooting);
             when MORTAR_QPR =>
-                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Prone);
-                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Prone);
+                B := From_Boolean (
+                    Get_Unit (State, To_Unit (Me.A), Team).Prone);
+                C := From_Boolean (
+                    Get_Unit (State, To_Unit (Me.A), Enemy).Prone);
             when MORTAR_QHI =>
-                B := From_Boolean (Get_Unit (State, To_Unit (A), Team).Hidden);
-                C := From_Boolean (Get_Unit (State, To_Unit (A), Enemy).Hidden);
+                B := From_Boolean (
+                    Get_Unit (State, To_Unit (Me.A), Team).Hidden);
+                C := From_Boolean (
+                    Get_Unit (State, To_Unit (Me.A), Enemy).Hidden);
             when MORTAR_QRS =>
                 B := From_Boolean (
-                    Get_Unit (State, To_Unit (A), Team).Summoned or
-                    Get_Unit (State, To_Unit (A), Team).Retreating);
+                    Get_Unit (State, To_Unit (Me.A), Team).Summoned or
+                    Get_Unit (State, To_Unit (Me.A), Team).Retreating);
                 C := From_Boolean (
-                    Get_Unit (State, To_Unit (A), Enemy).Summoned or
-                    Get_Unit (State, To_Unit (A), Enemy).Retreating);
+                    Get_Unit (State, To_Unit (Me.A), Enemy).Summoned or
+                    Get_Unit (State, To_Unit (Me.A), Enemy).Retreating);
             when MORTAR_MLE => Do_Melee (State, Team, UT_MORTAR);
             when MORTAR_SET => Set_Setup (State, Team, UT_MORTAR, True);
             when MORTAR_GUP => Set_Setup (State, Team, UT_MORTAR, False);
             when MORTAR_CSS | MORTAR_CFS | MORTAR_WSS | MORTAR_WFS |
                 MORTAR_BOM | MORTAR_AIR | MORTAR_SUP =>
-                Ask_Instruction (Op, Team, B, C, Immediate, State, A, Machines);
+                Ask_Instruction (Team, UT_MORTAR, State, Machines);
             when others => null;
         end case;
     end Mortar_Instruction;

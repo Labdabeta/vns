@@ -109,7 +109,6 @@ package body Processors.Captains is
     end Captain_Time;
 
     procedure Captain_Instruction (
-        Op : in Instruction_ID;
         Team : in Boards.Player_ID;
         Me : in out Unit_Processor;
         State : in out Boards.Board;
@@ -117,7 +116,7 @@ package body Processors.Captains is
         Radios : in out Communications) is
         A : Register_Type renames Me.Registers (Me.RA);
     begin
-        case Op is
+        case Me.Op is
             when CAPTAIN_ASK =>
                 Increment_Points (State, Team);
             when CAPTAIN_PLZ =>

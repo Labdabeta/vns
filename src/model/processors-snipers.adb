@@ -97,25 +97,24 @@ package body Processors.Snipers is
     end Sniper_Time;
 
     procedure Sniper_Instruction (
-        Op : in Instruction_ID;
         Team : in Boards.Player_ID;
-        Immediate : in Address_Type;
         State : in out Boards.Board;
-        A : in out Register_Type;
-        B : in out Register_Type;
-        C : in out Register_Type;
         Machines : in out Processor_Array) is
+        Me : Unit_Processor renames Machines (Team, UT_SNIPER);
+        A : Register_Type renames Me.Registers (Me.RA);
+        B : Register_Type renames Me.Registers (Me.RB);
+        C : Register_Type renames Me.Registers (Me.RC);
     begin
-        if Is_Float_Op (Op) then
-            Float_Instruction (Op, A, B, C, Immediate);
+        if Is_Float_Op (Me.Op) then
+            Float_Instruction (Me);
         end if;
 
-        case Op is
+        case Me.Op is
             when SNIPER_CAM => Set_Setup (State, Team, UT_SNIPER, True);
             when SNIPER_UNC => Set_Setup (State, Team, UT_SNIPER, False);
             when SNIPER_HIP => A := From_Boolean (
                     Do_Shoot (State, Team, UT_SNIPER,
-                        To_Location (To_Coordinate (B, C), Team)));
+                        To_Location (To_Coordinate (Me.B, Me.C), Team)));
             when SNIPER_NMR =>
                 declare
                     My_Valid, You_Valid : Boolean;
@@ -191,7 +190,8 @@ package body Processors.Snipers is
                 end;
             when SNIPER_IST =>
                 declare
-                    BC : Location := To_Location (To_Coordinate (B, C), Team);
+                    BC : Location := To_Location (
+                        To_Coordinate (Me.B, Me.C), Team);
                 begin
                     if Is_Targeted (State, BC) then
                         if Targeting_Team (State, BC) = Team then
@@ -206,11 +206,11 @@ package body Processors.Snipers is
                     Pos : Location;
                     Valid : Boolean;
                 begin
-                    if A < 0 then
+                    if Me.A < 0 then
                         Pos := Target_Of (
-                            State, Enemy_Of (Team), To_Unit (-A), Valid);
+                            State, Enemy_Of (Team), To_Unit (-Me.A), Valid);
                     else
-                        Pos := Target_Of (State, Team, To_Unit (A), Valid);
+                        Pos := Target_Of (State, Team, To_Unit (Me.A), Valid);
                     end if;
 
                     if Valid then
@@ -225,7 +225,7 @@ package body Processors.Snipers is
             when SNIPER_GUP => Set_Prone (State, Team, UT_SNIPER, False);
             when SNIPER_CSS | SNIPER_CFS | SNIPER_WSS | SNIPER_WFS |
                 SNIPER_BOM | SNIPER_AIR | SNIPER_MOR | SNIPER_SUP =>
-                Ask_Instruction (Op, Team, B, C, Immediate, State, A, Machines);
+                Ask_Instruction (Team, UT_SNIPER, State, Machines);
             when others => null;
         end case;
     end Sniper_Instruction;
