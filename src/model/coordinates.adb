@@ -95,6 +95,16 @@ package body Coordinates is
                (DX = 0 and DY = 0);
     end Adjacent;
 
+    type Saved_Search_Path is
+        record
+            Path : Coordinate_Path (1 .. 511);
+            Valid : Boolean;
+        end record;
+    Saved_Search_Paths : array (X_Coordinate, Y_Coordinate) of
+        Saved_Search_Path := (
+            others => (others => (
+                Path => (others => (0, 0)),
+                Valid => False)));
     function Generate_Search_Path (From : Coordinate) return Coordinate_Path is
         Result : Coordinate_Path (1 .. 511);
         Next : Positive := 1;
@@ -103,7 +113,12 @@ package body Coordinates is
         begin
             return X >= 0 and Y >= 0 and X <= 31 and Y <= 15;
         end Is_Valid;
+
+        Cached : Saved_Search_Path := Saved_Search_Paths (From.X, From.Y);
     begin
+        if Cached.Valid then
+            return Cached.Path;
+        end if;
         for Iteration in Positive range 1 .. 33 loop
             Search_X := Integer (From.X) - Iteration;
             Search_Y := Integer (From.Y) - Iteration;
@@ -145,6 +160,7 @@ package body Coordinates is
             end loop;
         end loop;
 
+        Saved_Search_Paths (From.X, From.Y) := (Result, True);
         return Result;
     end Generate_Search_Path;
 

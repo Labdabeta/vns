@@ -1,20 +1,26 @@
 with "sdl.gpr";
 
 project Runner is
+    type Mode_Type is ("debug", "release", "profile");
+    Mode : Mode_Type := external ("mode", "release");
     for Source_Dirs use ("runner", "model", "ui", "util", ".");
     for Object_Dir use "../build";
     for Exec_Dir use "..";
 
     for Main use ("runner.adb");
 
+    Base_Switches := ("-F", "-gnatU", "-gnatVa", "-gnatef", "-gnatwe",
+                     "-gnaty4aAbCdefhiklL12mM80nprStux");
+
     package Compiler is
-        for Default_Switches ("Ada") use
-            ("-F",
-             "-gnatU",
-             "-gnatVa",
-             "-gnatef",
-             "-gnatwe",
-             "-gnaty4aAbCdefhiklL12mM80nprStux");
+        case Mode is
+            when "debug" =>
+                for Default_Switches ("Ada") use Base_Switches & ("-g");
+            when "release" =>
+                for Default_Switches ("Ada") use Base_Switches & ("-O2");
+            when "profile" =>
+                for Default_Switches ("Ada") use Base_Switches & ("-O2", "-g");
+        end case;
     end Compiler;
 
     package Builder is
