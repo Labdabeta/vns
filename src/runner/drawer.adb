@@ -207,6 +207,7 @@ package body Drawer is
                 Processors.Get_Representation (
                     Which.Machines (Active_Team, Unit), Unit);
             Target : SDL.Rectangle;
+            Blend_Colour : SDL.Colour := Team_Colour (Active_Team);
         begin
             -- Draw the unit image
             Draw_Image (Sprite, Rect (1, Unit_Y (Unit)),
@@ -220,8 +221,11 @@ package body Drawer is
                 else
                     Target := Right_Rect (Grid_X ((I / 2) + 6), Unit_Y (Unit));
                 end if;
+                if I = Repr'Last then
+                    Blend_Colour := (255, 128, 255, 0);
+                end if;
                 Draw_Image (Font, Target, Font_Clip (Repr (I)),
-                    Blend => Team_Colour (Active_Team));
+                    Blend => Blend_Colour);
             end loop;
         end Draw_State;
     begin
