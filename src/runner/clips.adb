@@ -41,6 +41,8 @@ package body Clips is
             when '?' => return (0, 192, 32, 32);
             when '+' => return (32, 192, 32, 32);
             when '-' => return (64, 192, 32, 32);
+            when ':' => return (96, 192, 32, 32);
+            when ',' => return (128, 192, 32, 32);
             when ' ' => return (160, 192, 32, 32);
             when others => return (0, 192, 32, 32);
         end case;

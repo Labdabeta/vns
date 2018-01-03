@@ -21,6 +21,8 @@ with Processors.Riflemen; use Processors.Riflemen;
 with Ada.Numerics.Generic_Elementary_Functions;
 with Ada.Unchecked_Conversion;
 with Ada.Exceptions;
+with Ada.Strings;
+with Ada.Strings.Fixed;
 
 with Logger;
 
@@ -187,92 +189,26 @@ package body Processors is
         Which : in Unit_Processor;
         Unit : in Boards.Unit_Type)
         return Processor_Representation is
-        function To_Str5 (Val : in Register_Type) return String is
-            Result : String (1 .. 5) := (others => ' ');
-            Copy : Register_Type := Val;
-        begin
-            for I in reverse Result'Range loop
-                Result (I) := Character'Val (
-                    Character'Pos ('0') + (Copy mod 10));
-                Copy := Copy / 10;
-            end loop;
-
-            if Copy > 0 then
-                Result (1) := '>';
-            end if;
-
-            for I in Result'Range loop
-                exit when I = Result'Last;
-                exit when Result (I) /= '0';
-                Result (I) := ' ';
-            end loop;
-
-            return Result;
-        end To_Str5;
-
-        function To_Str3 (Val : in Natural) return String is
-            Result : String (1 .. 3) := (others => ' ');
-            Copy : Natural := Val;
-        begin
-            for I in reverse Result'Range loop
-                Result (I) := Character'Val (
-                    Character'Pos ('0') + (Copy mod 10));
-                Copy := Copy / 10;
-            end loop;
-
-            if Copy > 0 then
-                Result (1) := '>';
-            end if;
-
-            for I in Result'Range loop
-                exit when I = Result'Last;
-                exit when Result (I) /= '0';
-                Result (I) := ' ';
-            end loop;
-
-            return Result;
-        end To_Str3;
+        Register_Names : constant array (Register_Index) of String (1 .. 2) := (
+            "R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "RA",
+            "RB", "IM", "SP", "LR", "PC", "S0", "S1", "S2", "S3", "S4", "S5",
+            "S6", "S7", "S8", "S9", "SA", "SB", "SC", "SD", "SE", "SF");
 
         Result : Processor_Representation := (others => ' ');
-        PC : Register_Type := Which.Registers (15);
-        PCVal : Unsigned_32;
-        Op : Instruction_ID;
-        RA : Register_Type;
-        RB : Register_Type;
-        RC : Register_Type;
     begin
-        -- Subtract PC by 1 because Compute_Time already incremented it!
-        PC := PC - 1;
-        if PC < Register_Type (Address_Type'First) or
-            PC > Register_Type (Address_Type'Last)
-        then
-            return "- ERROR PC OUT OF RANGE - ";
-        end if;
-
-        PCVal := To_U32 (Which.Memory (Address_Type (PC)));
-        Op := Instruction_ID (Shift_Right (PCVal, 25));
-        RA := Which.A;
-        RB := Which.B;
-        RC := Which.C;
-        Result (1 .. 3) := Memory.To_String (Op, Unit);
-        if RA < 0 then
-            Result (4) := '-';
-            RA := -RA;
-        end if;
-        Result (5 .. 9) := To_Str5 (RA);
-        if RB < 0 then
-            Result (10) := '-';
-            RB := -RB;
-        end if;
-        Result (11 .. 15) := To_Str5 (RB);
-        if RC < 0 then
-            Result (16) := '-';
-            RC := -RC;
-        end if;
-        Result (17 .. 21) := To_Str5 (RC);
-
-        Result (23 .. 25) := To_Str3 (Which.ICounter);
-        Result (26) := Character'Val (Character'Pos ('0') + Which.CCounter);
+        Ada.Strings.Fixed.Move (
+            Memory.To_String (Which.Op, Unit) & " " & -- 4 +
+            Register_Type'Image (Which.A) & ":" &     -- 11 +
+            Register_Names (Which.RA) & ", " &         -- 4 +
+            Register_Type'Image (Which.B) & ":" &     -- 11 +
+            Register_Names (Which.RB) & ", " &         -- 4 +
+            Register_Type'Image (Which.C) & ":" &     -- 11 +
+            Register_Names (Which.RC) & " ",          -- 3 = 48
+            Result (1 .. 49), Ada.Strings.Right, Ada.Strings.Left);
+        Ada.Strings.Fixed.Move (
+            Natural'Image (Which.ICounter),
+            Result (50 .. 52), Ada.Strings.Left, Ada.Strings.Right);
+        Result (53) := Character'Val (Character'Pos ('0') + Which.CCounter);
         return Result;
     end Get_Representation;
 end Processors;

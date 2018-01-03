@@ -11,6 +11,8 @@ with Processors;
 package body Drawer is
     Sprite, Font : Image;
     Active_Team : Player_ID;
+    Show_Grid : Boolean := False;
+    Show_Info : Boolean := True;
     Frame_Rate : Natural;
 
     Unit_Y : constant array (Unit_Type) of Grid_Y := (
@@ -83,6 +85,14 @@ package body Drawer is
     end Set_Frame_Rate;
 
     procedure Draw_Game (Which : in Games.Game_Access) is
+        procedure Draw_Grid is
+            Lines : Line_List := Grid_Lines (1, 32, 1, 16);
+        begin
+            for I in Lines'Range loop
+                Draw_Line ((255, 0, 0, 0), Lines (I).Start, Lines (I).Finish);
+            end loop;
+        end Draw_Grid;
+
         procedure Draw_Unit (
             State : Unit_State;
             Unit : Unit_Type;
@@ -196,6 +206,7 @@ package body Drawer is
             Repr : Processors.Processor_Representation :=
                 Processors.Get_Representation (
                     Which.Machines (Active_Team, Unit), Unit);
+            Target : SDL.Rectangle;
         begin
             -- Draw the unit image
             Draw_Image (Sprite, Rect (1, Unit_Y (Unit)),
@@ -203,12 +214,15 @@ package body Drawer is
                 Blend => Team_Colour (Active_Team));
 
             -- Draw the command representation
-            for I in Positive range 1 .. 25 loop
-                Draw_Image (Font, Rect (Grid_X (I + 6), Unit_Y (Unit)),
-                    Font_Clip (Repr (I)), Blend => Team_Colour (Active_Team));
+            for I in Repr'Range loop
+                if I mod 2 = 0 then
+                    Target := Left_Rect (Grid_X ((I / 2) + 6), Unit_Y (Unit));
+                else
+                    Target := Right_Rect (Grid_X ((I / 2) + 6), Unit_Y (Unit));
+                end if;
+                Draw_Image (Font, Target, Font_Clip (Repr (I)),
+                    Blend => Team_Colour (Active_Team));
             end loop;
-            Draw_Image (Font, Small_Rect (Grid_X (32), Unit_Y (Unit)),
-                Font_Clip (Repr (26)), Blend => Team_Colour (Active_Team));
         end Draw_State;
     begin
         -- Draw terrain
@@ -226,6 +240,11 @@ package body Drawer is
                 Draw_Unit (Get_Unit (Which.State, U, P), U, P);
             end loop;
         end loop;
+
+        -- Draw grid
+        if Show_Grid then
+            Draw_Grid;
+        end if;
 
         -- Draw CPU state
         for U in Unit_Type'Range loop
@@ -335,4 +354,20 @@ package body Drawer is
                 Blend => Team_Colour (Active_Team));
         end;
     end Draw_Game;
+
+    procedure Toggle_Grid is
+    begin
+        Show_Grid := not Show_Grid;
+    end Toggle_Grid;
+
+    procedure Toggle_Info is
+    begin
+        if Show_Info then
+            Show_Info := False;
+            Crop (32, 16);
+        else
+            Show_Info := True;
+            Crop (32, 29);
+        end if;
+    end Toggle_Info;
 end Drawer;

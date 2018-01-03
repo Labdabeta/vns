@@ -36,7 +36,7 @@ package Processors is
         Unit : in Boards.Unit_Type;
         Team : in Boards.Player_ID);
 
-    subtype Processor_Representation is String (1 .. 26);
+    subtype Processor_Representation is String (1 .. 53);
     function Get_Representation (
         Which : in Unit_Processor;
         Unit : in Boards.Unit_Type)

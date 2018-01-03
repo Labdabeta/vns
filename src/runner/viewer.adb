@@ -57,6 +57,10 @@ package body Viewer is
                             Set_Next;
                         when SDL.KEY_ENTER =>
                             Drawer.Toggle_Team;
+                        when SDL.KEY_G =>
+                            Drawer.Toggle_Grid;
+                        when SDL.KEY_I =>
+                            Drawer.Toggle_Info;
                         when others => null;
                     end case;
                 when others => null;
@@ -88,6 +92,10 @@ package body Viewer is
                             Set_Next;
                         when SDL.KEY_ENTER =>
                             Drawer.Toggle_Team;
+                        when SDL.KEY_G =>
+                            Drawer.Toggle_Grid;
+                        when SDL.KEY_I =>
+                            Drawer.Toggle_Info;
                         when others => null;
                     end case;
                 when SDL.KEY_UP_EVENT =>

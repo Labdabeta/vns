@@ -275,7 +275,6 @@ package body Processors.Instructions is
         State : Board renames Which.State;
         Machines : Processor_Array renames Which.Machines;
         Radios : Communications renames Which.Radios;
-        Shared : Shared_Memory renames Which.Shared;
         Clock : Natural renames Which.Clock;
         Us : Unit_State := Get_Unit (State, Unit, Team);
         Me : Unit_Processor renames Which.Machines (Team, Unit);
@@ -520,8 +519,8 @@ package body Processors.Instructions is
             when COMMON_HID => Set_Unit_Visibility (State, Team, Unit, True);
             when COMMON_SAY => Radios (Team, Unit, Me.Immediate) := Me.A;
             when COMMON_RAD => A := Radios (Team, Unit, Me.Immediate);
-            when COMMON_YEL => Shared (Team, Me.Immediate) := Me.A;
-            when COMMON_EAR => A := Shared (Team, Me.Immediate);
+            when COMMON_YEL => Which.Shared (Team, Me.Immediate) := Me.A;
+            when COMMON_EAR => A := Which.Shared (Team, Me.Immediate);
             when COMMON_DIE =>
                 if Debug_Mode then
                     Logger.Log (Me.A, Me.B, Me.C);
@@ -655,7 +654,8 @@ package body Processors.Instructions is
             when others =>
                 case Unit is
                     when UT_CAPTAIN =>
-                        Captain_Instruction (Team, Me, State, Shared, Radios);
+                        Captain_Instruction (Team, Me, State,
+                            Which.Shared, Radios);
                     when UT_MORTAR =>
                         Mortar_Instruction (Team, State, Machines);
                     when UT_SNIPER =>
