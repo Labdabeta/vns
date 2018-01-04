@@ -454,7 +454,8 @@ to complete when they are correctly predicted, otherwise they take 8 \RT.
 In order to efficiently branch based on values in registers a comparison
 instruction is provided. It compares b and c and puts the normalized result in
 a. Thus the value of the a register after execution will always be $1$, $-1$, or
-$0$. The exact computation of the compare instruction is:
+$0$. This operation takes just 1 \RT. The exact computation of the compare
+instruction is:
 
 \begin{displaymath}
     a = \begin{cases}

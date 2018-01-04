@@ -87,9 +87,42 @@ package body Drawer is
     procedure Draw_Game (Which : in Games.Game_Access) is
         procedure Draw_Grid is
             Lines : Line_List := Grid_Lines (1, 32, 1, 16);
+            ZVal : Integer := Character'Pos ('0');
         begin
             for I in Lines'Range loop
                 Draw_Line ((255, 0, 0, 0), Lines (I).Start, Lines (I).Finish);
+            end loop;
+
+            for X in X_Coordinate'Range loop
+                declare
+                    Tiny_Rect : Rectangle := Rect (To_X (X), 1);
+                begin
+                    Tiny_Rect.Width := Tiny_Rect.Width / 3;
+                    Tiny_Rect.Height := Tiny_Rect.Height / 2;
+                    Draw_Image (Font, Tiny_Rect, Font_Clip (
+                        Character'Val (ZVal + Integer (X / 10))),
+                        Blend => (255, 255, 0, 255));
+                    Tiny_Rect.Left := Tiny_Rect.Left + Tiny_Rect.Width;
+                    Draw_Image (Font, Tiny_Rect, Font_Clip (
+                        Character'Val (ZVal + Integer (X mod 10))),
+                        Blend => (255, 255, 0, 255));
+                end;
+            end loop;
+
+            for Y in Y_Coordinate'Range loop
+                declare
+                    Tiny_Rect : Rectangle := Rect (1, To_Y (Y));
+                begin
+                    Tiny_Rect.Width := Tiny_Rect.Width / 3;
+                    Tiny_Rect.Height := Tiny_Rect.Height / 2;
+                    Draw_Image (Font, Tiny_Rect, Font_Clip (
+                        Character'Val (ZVal + Integer (Y / 10))),
+                        Blend => (255, 255, 0, 255));
+                    Tiny_Rect.Left := Tiny_Rect.Left + Tiny_Rect.Width;
+                    Draw_Image (Font, Tiny_Rect, Font_Clip (
+                        Character'Val (ZVal + Integer (Y mod 10))),
+                        Blend => (255, 255, 0, 255));
+                end;
             end loop;
         end Draw_Grid;
 

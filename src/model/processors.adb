@@ -27,6 +27,14 @@ with Ada.Strings.Fixed;
 with Logger;
 
 package body Processors is
+    procedure Set_Seed (Seed : in Integer) is begin
+        Random_Registers.Reset (Register_Generator, Seed);
+    end Set_Seed;
+
+    procedure Initialize_Package is begin
+        Random_Registers.Reset (Register_Generator);
+    end Initialize_Package;
+
     procedure Initialize (This : out Unit_Processor) is begin
         This.Memory := (others => 0);
         This.Registers := (others => 0);

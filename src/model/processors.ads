@@ -25,6 +25,8 @@ package Processors is
 
     -- NOTE: Passing these as value is fine, it should be reference under the
     -- hood.
+    procedure Set_Seed (Seed : in Integer);
+    procedure Initialize_Package;
     procedure Initialize (This : out Unit_Processor);
     procedure Load_Code (This : in out Unit_Processor; Code : in Memory_Array);
     procedure Set_Debug_Mode (Debug : in Boolean);

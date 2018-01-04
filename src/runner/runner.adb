@@ -20,7 +20,7 @@ procedure Runner is
     Max_Frame_Rate : constant := 60;
     The_Game : Games.Game_Access := new Games.Game;
     Next_Option : Character;
-    Option_String : constant String := "hdqvw:b:x:f";
+    Option_String : constant String := "hdqvw:b:s:x:f";
     Help_Shown : Boolean := False;
 
     procedure Show_Help is
@@ -41,6 +41,8 @@ procedure Runner is
         Put_Line (ASCII.HT & "-d" & ASCII.HT & "set debug mode (DIE->LOG)");
         Put_Line (ASCII.HT & "-q" & ASCII.HT & "set quiet mode");
         Put_Line (ASCII.HT & "-v" & ASCII.HT & "set verbose mode");
+        Put_Line (ASCII.HT & "-s SEED" & ASCII.HT & "set random seed (must be" &
+            " non-zero");
         Put_Line (ASCII.HT & "-x FRAME" & ASCII.HT & "set start frame");
         Put_Line (ASCII.HT & "--version" & ASCII.HT & "print version number");
     end Show_Help;
@@ -60,6 +62,8 @@ begin
     end if;
 
     Games.Initialize (The_Game.all);
+    Processors.Initialize_Package;
+
     loop
         Next_Option := Get_Option (Option_String);
 
@@ -82,6 +86,8 @@ begin
                     Put_Line ("Starting on frame 0. Probably misparsed -x" &
                     " argument.");
                 end if;
+            when 's' =>
+                Processors.Set_Seed (Integer'Value (Option_Argument));
             when Option_Long =>
                 if Argument (Option_Index) = "--version" then
                     Show_Version;
