@@ -11,6 +11,7 @@
 \usepackage{amsmath}
 \usepackage{longtable}
 \usepackage{booktabs}
+\usepackage{courier}
 
 \lstdefinelanguage{vns}
 {keywords={add,sub,mul,div,and,orr,xor,nan,clz,cnt,lsr,lsl,abs,rnd,cmp,jiz,jnz,jgz,jlz,jge,jle,biz,bnz,bgz,blz,bge,ble,blx,ldr,str,pop,psh,
@@ -25,6 +26,7 @@
 
 \definecolor{grey}{rgb}{0,0.6,0}
 \lstset{
+    basicstyle=\ttfamily,
     keywordstyle=\color{blue},
     commentstyle=\color{grey}
 }
@@ -737,7 +739,7 @@ The combat instructions are summarized below.
     \vnscode{GUP} & Get up & Tear down weapon. & 128 & Mortar/MG \\
     \vnscode{DED a, b, c} & Dead & Set b and c if unit $a$ or $-a$ is dead respectively. & 1 & All \\
     \vnscode{QHI a, b, c} & Query Hidden & Same as \vnscode{DED} but if hidden. & 1 & Mortar/Rifle \\
-    \vnscode{QRS a, b, c} & Query Retreat/Summon & Same as \vnscode{DED} but if retreating or summoned. & 1 & Mortar/Rifle \\
+    \vnscode{QRS a, b, c} & Query Retreat & Same as \vnscode{DED} but if retreating or summoned. & 1 & Mortar/Rifle \\
     \vnscode{QSH a, b, c} & Query Shooting & Same as \vnscode{DED} but if shooting. & 1 & Mortar/MG/Scout/Rifle \\
     \vnscode{QPR a, b, c} & Query Prone & Same as \vnscode{DED} but if prone. & 1 & Mortar/MG/Scout/Rifle \\
     \vnscode{QSU a, b, c} & Query Setup & Same as \vnscode{DED} but if setup. & 1 & Mortar/Engineer/MG/Scout/Rifle \\

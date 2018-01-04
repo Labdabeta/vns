@@ -12,6 +12,7 @@ with Drawer;
 package body Viewer is
     -- 0 = paused, Natural'Last = as fast as possible
     Frame_Rate : Natural := 0;
+    Max_Frame_Rate : Natural := 60; -- Frame rate when paused
     Old_Rate : Natural := 5;
     Next : Time;
 
@@ -38,7 +39,7 @@ package body Viewer is
             if Frame_Rate > 0 then
                 Next := Clock + Milliseconds (1000 / Frame_Rate);
             else
-                Next := Clock;
+                Next := Clock + Milliseconds (1000 / Max_Frame_Rate);
             end if;
             Drawer.Set_Frame_Rate (Frame_Rate);
         end Set_Next;

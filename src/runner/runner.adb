@@ -17,7 +17,6 @@ with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Real_Time; use Ada.Real_Time;
 
 procedure Runner is
-    Max_Frame_Rate : constant := 60;
     The_Game : Games.Game_Access := new Games.Game;
     Next_Option : Character;
     Option_String : constant String := "hdqvw:b:s:x:f";
@@ -153,8 +152,6 @@ begin
             SDL.Begin_Draw ((255, 127, 0, 255));
             Viewer.Draw_Game (The_Game);
             SDL.End_Draw;
-
-            delay To_Duration (Microseconds (1000 / Max_Frame_Rate));
         end;
     end loop;
 
